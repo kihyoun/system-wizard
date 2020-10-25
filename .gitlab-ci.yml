@@ -101,5 +101,4 @@ deploy:prod:
     - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - main
-  when: manual
 
