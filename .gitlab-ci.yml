@@ -29,7 +29,7 @@ build:
     - docker push $IMAGE_TAG
   only:
     - merge_requests
-    - main
+    - master
 
 test:cypress:
   stage: test
@@ -52,7 +52,7 @@ test:cypress:
     expire_in: 1 day
   only:
     - merge_requests
-    - main
+    - master
 
 test:review:
   stage: test
@@ -69,7 +69,7 @@ test:review:
   script:
     - docker run -itd --network systembootstrapper_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
   except:
-    - main
+    - master
   only:
     - merge_requests
 
@@ -100,5 +100,5 @@ deploy:prod:
   script:
     - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
-    - main
+    - master
 
