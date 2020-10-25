@@ -58,16 +58,16 @@ test:review:
   stage: test
   environment:
     name: review/$CI_BUILD_REF_NAME
-    url: http://$CI_BUILD_REF_SLUG.typingninjas.com
+    url: http://$CI_BUILD_REF_SLUG.system-bootstrapper.com
     on_stop: stop:review
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - set +e
-    - docker stop $CI_BUILD_REF_SLUG.typingninjas.com
-    - docker rm $CI_BUILD_REF_SLUG.typingninjas.com
+    - docker stop $CI_BUILD_REF_SLUG.system-bootstrapper.com
+    - docker rm $CI_BUILD_REF_SLUG.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network nginx-proxy_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.typingninjas.com --name $CI_BUILD_REF_SLUG.typingninjas.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
   except:
     - main
   only:
@@ -77,8 +77,8 @@ stop:review:
   stage: deploy
   allow_failure: true
   script:
-    - docker stop $CI_BUILD_REF_SLUG.typingninjas.com
-    - docker rm $CI_BUILD_REF_SLUG.typingninjas.com
+    - docker stop $CI_BUILD_REF_SLUG.system-bootstrapper.com
+    - docker rm $CI_BUILD_REF_SLUG.system-bootstrapper.com
   environment:
     name: review/$CI_BUILD_REF_NAME
     action: stop
@@ -86,35 +86,19 @@ stop:review:
   only:
     - merge_requests
 
-deploy:beta:
-  stage: deploy
-  environment:
-    name: production/beta
-    url: https://beta.typingninjas.com
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - set +e
-    - docker stop beta.typingninjas.com
-    - docker rm beta.typingninjas.com
-    - set -e
-  script:
-    - docker run -itd --network nginx-proxy_beta -e VIRTUAL_HOST=beta.typingninjas.com --name beta.typingninjas.com $IMAGE_TAG
-  only:
-    - main
-
 deploy:prod:
   stage: deploy
   environment:
     name: production/www
-    url: https://www.typingninjas.com
+    url: https://www.system-bootstrapper.com
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - set +e
-    - docker stop www.typingninjas.com
-    - docker rm www.typingninjas.com
+    - docker stop www.system-bootstrapper.com
+    - docker rm www.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network nginx-proxy_prod -e VIRTUAL_HOST=www.typingninjas.com --name www.typingninjas.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - main
   when: manual
