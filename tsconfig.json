@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "noFallthroughCasesInSwitch": true,
+    "experimentalDecorators": true,
     "target": "es5",
     "lib": [
       "dom",
