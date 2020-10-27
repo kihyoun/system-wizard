@@ -1,3 +1,4 @@
+import FileSaver from 'file-saver';
 import { action, makeAutoObservable, runInAction } from 'mobx';
 
 /**
@@ -82,6 +83,47 @@ export default class MainConfig {
       this.gitlabRegistrySSLKey = `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/privkey.pem`;
       this.gitlabRegistryUpstream = 'registry';
     });
+  }
+
+  public get content() : string {
+    const ret = `
+# This file was auto-generated using the system-bootstrapper
+# https://www.system-bootstrapper.com
+
+# -- BACKUP
+BACKUPDIR=${this.backupDir}
+LIVEDIR=${this.liveDir}
+
+# -- GITLAB
+export GITLAB_HOME=${this.gitlabHome}
+GITLAB_EXTERNAL_URL=${this.gitlabExternalUrl}
+GITLAB_REGISTRY_URL=${this.gitlabExternalUrl}
+
+# -- NGINX
+export GITLAB_HOST=${this.gitlabHost}
+GITLAB_PORT=${this.gitlabPort}
+GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
+GITLAB_SSL=${this.gitlabSSL}
+GITLAB_SSL_KEY=${this.gitlabSSLKey}
+GITLAB_UPSTREAM=${this.gitlabUpstream}
+
+GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
+GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
+GITLAB_REGISTRY_PORT=${this.gitlabRegistryPort}
+GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
+GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
+GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
+
+export NGINX_TEMPLATE_DIR=${this.nginxTemplateDir}
+export SSL_BASEDIR=${this.sslBaseDir}
+`;
+    return ret;
+  }
+
+  public exportConfig() {
+    const file = new Blob([this.content],
+      { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(file);
   }
 
   // Backup Settings
