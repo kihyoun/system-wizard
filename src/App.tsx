@@ -55,7 +55,7 @@ const App = observer(() => {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Paper elevation={0} className={classes.paper}>
-              <h1>System Bootstrapper Starter</h1>
+              <h1>System Bootstrapper Wizard (Beta)</h1>
               This Project was built with the <Link href="https://github.com/kihyoun/system">System Bootstrapper</Link>
             </Paper>
           </Grid>
