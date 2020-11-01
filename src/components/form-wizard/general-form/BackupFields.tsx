@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 
-const BackupForm = (props: any) => {
+const BackupFields = (props: any) => {
   const main = props.main;
+
+  useEffect(() => {
+    if (!props.hidden && props.init) {
+      props.main.config.generateMainConfig();
+    }
+  }, [props.hidden, props.init]);
+
+  if (props.hidden) return null;
+
   return (
     <>
       <TextField
@@ -15,9 +24,7 @@ const BackupForm = (props: any) => {
           Must be read/writable by the Docker User"
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.liveDir = event.target.value));
         }}
@@ -30,9 +37,7 @@ const BackupForm = (props: any) => {
         helperText="Location for persistent Data, will be synced with rsync"
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.backupDir = event.target.value));
         }}
@@ -41,4 +46,4 @@ const BackupForm = (props: any) => {
   );
 };
 
-export default BackupForm;
+export default BackupFields;
