@@ -1,12 +1,12 @@
-import FileSaver from 'file-saver';
 import {
-  action, makeAutoObservable, runInAction
+  action, computed, makeAutoObservable, runInAction
 } from 'mobx';
-
+import Helper from './Helper';
+import JSZip from 'jszip';
 /**
  * General Configuration Object
  */
-export default class MainConfig {
+export default class MainConfig implements MainConfigInterface {
   /**
    * Set Config
    * @param {MainConfig} config MainConfig
@@ -73,27 +73,7 @@ export default class MainConfig {
   }
 
    public get content() : string {
-     const ret = `
-#-------------------------------------------------------------
-# This file was auto-generated using the system-bootstrapper
-#-------------------------------------------------------------
-#                +------------------+
-#               /|                 /|
-#              / |                / |
-#             *--+---------------*  |
-#             |  |               |  |
-#             |  |  System       |  |
-#             |  |  Bootstrapper |  |
-#             |  +---------------+--+
-#             | /                | /
-#             |/                 |/
-#             *------------------*
-#    +------+ https://www.system-bootstrapper.com
-#   /      /|
-#  +------+ |
-#  |      | +
-#  |      |/
-#  +------+
+     const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- BACKUP
 BACKUPDIR=${this.backupDir}
@@ -106,19 +86,26 @@ GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 
 # -- NGINX
 export GITLAB_HOST=${this.gitlabHost}
+GITLAB_UPSTREAM=${this.gitlabUpstream}
 GITLAB_PORT=${this.gitlabPort}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
+`;
+     const gitlabSSL = `
 GITLAB_SSL=${this.gitlabSSL}
 GITLAB_SSL_KEY=${this.gitlabSSLKey}
-GITLAB_UPSTREAM=${this.gitlabUpstream}
+`;
+     const registry = `
+GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
 
 GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 GITLAB_REGISTRY_PORT=${this.gitlabRegistryPort}
+`;
+     const registrySSL = `
 GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
 GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
-GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
-
+`;
+     const nginx = `
 export NGINX_TEMPLATE_DIR=${this.nginxTemplateDir}
 export SSL_BASEDIR=${this.sslBaseDir}
 
@@ -126,31 +113,36 @@ export SSL_BASEDIR=${this.sslBaseDir}
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
 export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
-# EOF
-
+# created on ${new Date()}
 `;
-     return ret;
+     return ret
+     + (this.gitlabDomainMode > 1 && gitlabSSL || '')
+     + registry
+     + (this.gitlabRegistryDomainMode > 1 && registrySSL || '')
+     + nginx
    }
 
    public exportConfig() {
-     const file = new Blob([this.content],
-       { type: 'text/plain;charset=utf-8' });
-     FileSaver.saveAs(file, '.docker.env');
+     const zip = new JSZip();
+     zip.file('.docker.env', this.content);
+     zip.generateAsync({ type: 'blob' }).then(function(content) {
+       saveAs(content, 'docker.env.zip');
+     });
    }
 
   // Backup Settings
-  liveDir = '/srv';
+  liveDir!:string;
 
-  backupDir = '';
+  backupDir!:string;
 
   // Gitlab
-  gitlabHome = '';
-  gitlabExternalUrl = '';
-  gitlabRegistryUrl = '';
+  gitlabHome!:string;
+  gitlabExternalUrl!:string;
+  gitlabRegistryUrl!:string;
 
   // Basic NGINX/SSL settings
-  nginxTemplateDir = '';
-  sslBaseDir = '';
+  nginxTemplateDir!:string;
+  sslBaseDir!:string;
 
   // Pruxy
   gitlabHost = '';
@@ -169,9 +161,9 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
     return this._gitlabDomainMode;
   }
 
-  gitlabSSL = '';
-  gitlabSSLKey = '';
-  gitlabUpstream = '';
+  gitlabSSL!:string;
+  gitlabSSLKey!:string;
+  gitlabUpstream!:string;
 
   gitlabRegistryHost = '';
   gitlabRegistryPort = 80;
@@ -195,4 +187,77 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
   gitlabRunnerDockerScale!:number;
   gitlabRunnerToken!:string;
+
+  @computed public get asJson() : any {
+    let ret = {
+      liveDir          : this.liveDir,
+      backupDir        : this.backupDir,
+      gitlabHome       : this.gitlabHome,
+      gitlabExternalUrl: this.gitlabExternalUrl,
+      gitlabRegistryUrl: this.gitlabRegistryUrl,
+      nginxTemplateDir : this.nginxTemplateDir,
+      sslBaseDir       : this.sslBaseDir,
+      gitlabUpstream   : this.gitlabUpstream,
+      gitlabHost       : this.gitlabHost,
+      gitlabPort       : this.gitlabPort,
+      gitlabDomainMode : this.gitlabDomainMode
+    };
+
+    if (this.gitlabDomainMode > 1) {
+      ret = Object.assign(ret, {
+        gitlabSSL   : this.gitlabSSL,
+        gitlabSSLKey: this.gitlabSSLKey
+      });
+    }
+
+    ret = Object.assign(ret, {
+      gitlabRegistryHost      : this.gitlabRegistryHost,
+      gitlabRegistryPort      : this.gitlabRegistryPort,
+      gitlabRegistryDomainMode: this.gitlabRegistryDomainMode
+    });
+
+    if (this.gitlabRegistryDomainMode > 1) {
+      ret = Object.assign(ret, {
+        gitlabRegistrySSL   : this.gitlabRegistrySSL,
+        gitlabRegistrySSLKey: this.gitlabRegistrySSLKey
+      });
+    }
+
+    return Object.assign(ret, {
+      gitlabRunnerDockerScale: this.gitlabRunnerDockerScale,
+      gitlabRunnerToken      : this.gitlabRunnerToken
+    });
+  }
+}
+
+export interface MainConfigInterface {
+  liveDir:string;
+  backupDir:string;
+
+  // Gitlab
+
+  gitlabHome:string;
+  gitlabExternalUrl:string;
+  gitlabRegistryUrl:string;
+
+  nginxTemplateDir:string;
+
+  sslBaseDir:string;
+
+  gitlabUpstream:string;
+  gitlabHost:string;
+  gitlabPort:number;
+  gitlabDomainMode:number;
+  gitlabSSL?:string;
+  gitlabSSLKey?:string;
+
+  gitlabRegistryHost:string;
+  gitlabRegistryUpstream:string;
+  gitlabRegistryPort:number;
+  gitlabRegistryDomainMode:number;
+  gitlabRegistrySSL?:string;
+  gitlabRegistrySSLKey?:string;
+
+  gitlabRunnerDockerScale:number;
+  gitlabRunnerToken:string;
 }

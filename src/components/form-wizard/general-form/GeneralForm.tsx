@@ -6,13 +6,15 @@ import {
   Paper,
   Step, StepButton, StepContent, Stepper
 } from '@material-ui/core';
-import BackupFields from './BackupFields';
-import GitlabSettingsFields from './GitlabSettingsFields';
-import NginxSettingsFields from './NginxSettingsFields';
-import ProxySettingsFields from './ProxySettingsFields';
+
+import BackupFields from './fields/BackupFields';
+import GitlabSettingsFields from './fields/GitlabSettingsFields';
+import NginxSettingsFields from './fields/NginxSettingsFields';
+import ProxySettingsFields from './fields/ProxySettingsFields';
+import GitlabRunnerFields from './fields/GitlabRunnerFields';
+
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
-import GitlabRunnerFields from './GitlabRunnerFields';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -76,7 +78,7 @@ const GeneralForm = observer((props: any) => {
   return (
     <Paper className={classes.paper}>
       <Grid container>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
             {steps.map((step, index) => (
               <Step key={step.label}>
@@ -107,11 +109,11 @@ const GeneralForm = observer((props: any) => {
           </Stepper>
         </Grid>
         <Grid item xs={6}>
-          <BackupFields init={false} hidden={activeStep !== 0} main={main} />
-          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
-          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 2} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
-          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 4} main={main} />
+          <BackupFields init={true} hidden={activeStep !== 0} main={main} />
+          <GitlabSettingsFields init={true} hidden={activeStep !== 1} main={main} />
+          <NginxSettingsFields init={true} hidden={activeStep !== 2} main={main} />
+          <ProxySettingsFields init={true} hidden={activeStep !== 3} main={main} />
+          <GitlabRunnerFields init={true} hidden={activeStep !== 4} main={main} />
         </Grid>
       </Grid>
     </Paper>

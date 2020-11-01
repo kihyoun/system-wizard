@@ -19,13 +19,14 @@ const useStyles = makeStyles(theme => ({
 
 const ProdFields = observer((props: any) => {
   const classes = useStyles();
-  const [initialize, setInitialize] = useState(props.initialize);
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
-    if (initialize && !props.hidden) {
+    if (init && !props.hidden) {
       runInAction(() => props.config.generateProdProxyConfig());
+      setInit(false);
     }
-  }, [initialize, props.hidden]);
+  }, [props.init, props.hidden]);
 
   if (props.hidden) return null;
 
@@ -38,7 +39,6 @@ const ProdFields = observer((props: any) => {
             onChange={event => {
               runInAction(() => props.config.useProdHost
                   = event.target.checked ? 'true' : 'false')
-              setInitialize(false);
             }}
             name="prodCfg"
             color="primary"

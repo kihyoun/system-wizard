@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 
 const GitlabSettingsFields = observer((props: any) => {
-  const main = props.main;
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
-    if (!props.hidden && props.init) {
-      props.main.config.generateGitlabConfig();
+    if (!props.hidden && init) {
+      runInAction(() => props.main.config.generateGitlabConfig());
+      setInit(false);
     }
   }, [props.hidden, props.init]);
 
@@ -18,38 +19,38 @@ const GitlabSettingsFields = observer((props: any) => {
     <>
       <TextField
         label="GITLAB_HOME"
-        defaultValue={main.config.gitlabHome}
+        value={props.main.config.gitlabHome}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabHome}
+        placeholder={props.main.placeholder.gitlabHome}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (main.config.gitlabHome = event.target.value));
+          runInAction(() => (props.main.config.gitlabHome = event.target.value));
         }}
       />
       <TextField
         label="GITLAB_HOST"
-        defaultValue={main.config.gitlabHost}
+        value={props.main.config.gitlabHost}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabHost}
+        placeholder={props.main.placeholder.gitlabHost}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (main.config.gitlabHost = event.target.value));
+          runInAction(() => (props.main.config.gitlabHost = event.target.value));
         }}
       />
       <TextField
         label="GITLAB_REGISTRY_HOST"
-        defaultValue={main.config.gitlabRegistryHost}
+        value={props.main.config.gitlabRegistryHost}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabRegistryHost}
+        placeholder={props.main.placeholder.gitlabRegistryHost}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (main.config.gitlabRegistryHost = event.target.value));
+          runInAction(() => (props.main.config.gitlabRegistryHost = event.target.value));
         }}
       />
     </>

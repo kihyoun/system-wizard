@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {
-  createStyles, makeStyles, Theme, useTheme 
+  createStyles, makeStyles, Theme, useTheme
 } from '@material-ui/core/styles';
 import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -79,8 +79,8 @@ export default function DownloadDockerDialog(props:any) {
       color    : 'primary' as const,
       className: classes.fab,
       icon     : <FileCopyIcon />,
-      label    : 'Copy contents to Clipboard',
-      tooltip  : 'Copy contents to Clipboard'
+      label    : 'Copy .docker.env to Clipboard',
+      tooltip  : 'Copy .docker.env to Clipboard'
     },
     {
       color    : 'secondary' as const,
@@ -121,9 +121,12 @@ export default function DownloadDockerDialog(props:any) {
             </Tooltip>
           </Zoom>
         ))}
-        <DialogTitle id="responsive-dialog-title">/.docker.env</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Export Configuration</DialogTitle>
         <DialogContent>
           <DialogContentText>
+            <SyntaxHighlighter language="bash" style={duotoneLight}>
+              {'$ cat ./.docker.env'}
+            </SyntaxHighlighter>
             <SyntaxHighlighter language="bash" style={duotoneLight}>
               {props.main.config.content}
             </SyntaxHighlighter>

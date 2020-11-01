@@ -19,7 +19,7 @@ import {
   Snackbar
 } from '@material-ui/core';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
-import ProjectForm from './ProjectForm';
+import ProjectFormDialog from './ProjectFormDialog';
 import ProjectConfig from 'src/api/ProjectConfig';
 import { observer } from 'mobx-react';
 import ProjectCard from './ProjectCard';
@@ -163,9 +163,10 @@ const ProjectsOverview = observer((props:any) => {
         className={classes.button}
         startIcon={<PlaylistAddIcon />}
       >
-        Add Project
+        Add Proxy
       </Button>
-      <ProjectForm open={open} activeProject={activeProject} main={props.main} handleClose={() => setOpen(false)} />
+      <ProjectFormDialog open={open} activeProject={activeProject}
+        main={props.main} handleClose={() => setOpen(false)} />
     </>
   );
 });

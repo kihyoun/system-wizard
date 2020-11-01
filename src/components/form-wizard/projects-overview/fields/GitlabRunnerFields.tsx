@@ -18,27 +18,27 @@ const useStyles = makeStyles(theme => ({
 
 const GitlabRunnerFields = observer((props: any) => {
   const classes = useStyles();
-  const [initialize, setInitialize] = useState(props.initialize);
+  const [init, setInit] = useState(props.init);
 
   const handleInputChange = (event: any) => {
     runInAction(() => {
-      props.main.config.gitlabRunnerDockerScale =
+      props.config.gitlabRunnerDockerScale =
       event.target.value === '' ? 0 : Number(event.target.value)
     });
-    setInitialize(false);
   };
 
   useEffect(() => {
-    if (initialize && !props.hidden) {
-      runInAction(() => props.main.config.generateRunnerConfig());
+    if (init && !props.hidden) {
+      runInAction(() => props.config.generateRunnerConfig());
+      setInit(false);
     }
-  }, [initialize, props.hidden]);
+  }, [props.init, props.hidden]);
 
   const handleBlur = () => {
-    if ( props.main.config.gitlabRunnerDockerScale < 0) {
-      runInAction(() => props.main.config.gitlabRunnerDockerScale = 0);
-    } else if (props.main.config.gitlabRunnerDockerScale > 50) {
-      runInAction(() => props.main.config.gitlabRunnerDockerScale = 50);
+    if ( props.config.gitlabRunnerDockerScale < 0) {
+      runInAction(() => props.config.gitlabRunnerDockerScale = 0);
+    } else if (props.config.gitlabRunnerDockerScale > 50) {
+      runInAction(() => props.config.gitlabRunnerDockerScale = 50);
     }
   };
 
@@ -49,7 +49,7 @@ const GitlabRunnerFields = observer((props: any) => {
       <FormLabel component="legend">Number of Gitlab Runners</FormLabel>
       <Input
         className={classes.input}
-        defaultValue={props.main.config.gitlabRunnerDockerScale}
+        value={props.config.gitlabRunnerDockerScale}
         margin="dense"
         onChange={e => handleInputChange(e)}
         onBlur={()=> handleBlur()}
@@ -64,12 +64,12 @@ const GitlabRunnerFields = observer((props: any) => {
       <TextField
         label="GITLAB_RUNNER_TOKEN"
         style={{ margin: 8 }}
-        value={props.main.config.gitlabRunnerToken}
+        value={props.config.gitlabRunnerToken}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (props.main.config.gitlabRunnerToken = event.target.value));
+          runInAction(() => (props.config.gitlabRunnerToken = event.target.value));
         }}
       />
     </>
