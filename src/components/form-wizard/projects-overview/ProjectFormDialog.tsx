@@ -6,13 +6,13 @@ import {
   Step, StepButton, StepContent, Stepper
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
-import MainFields from './MainFields';
+import MainFields from './fields/MainFields';
 import ProjectConfig from 'src/api/ProjectConfig';
-import ProdFields from './ProdFields';
-import BetaFields from './BetaFields';
-import ReviewFields from './ReviewFields';
+import ProdFields from './fields/ProdFields';
+import BetaFields from './fields/BetaFields';
+import ReviewFields from './fields/ReviewFields';
 import { runInAction } from 'mobx';
-import GitlabRunnerFields from './GitlabRunnerFields';
+import GitlabRunnerFields from './fields/GitlabRunnerFields';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ProjectForm = observer((props: any) => {
+const ProjectFormDialog = observer((props: any) => {
   const classes = useStyles();
   const [projectConfig, setProjectConfig] = useState(new ProjectConfig(props.main));
   const [projectPlaceholderConfig, setProjectPlaceholderConfig] = useState(new ProjectConfig(props.main));
@@ -45,7 +45,9 @@ const ProjectForm = observer((props: any) => {
     setProjectConfig(typeof config !== 'undefined'
       ? new ProjectConfig(props.main, config)
       : new ProjectConfig(props.main));
-    setProjectPlaceholderConfig(config);
+    setProjectPlaceholderConfig(typeof config !== 'undefined'
+      ? new ProjectConfig(props.main, config)
+      : new ProjectConfig(props.main));
   }, [props.activeProject, props.open]);
 
   const steps = [{
@@ -107,7 +109,8 @@ const ProjectForm = observer((props: any) => {
         fullWidth={true}
         maxWidth={'lg'}
         open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+        {props.activeProject === '' && <DialogTitle id="form-dialog-title">Create Proxy Configuration</DialogTitle>
+        || <DialogTitle id="form-dialog-title">Edit {projectPlaceholderConfig.projectKey}</DialogTitle>}
         <DialogContent>
           <DialogContentText>
           </DialogContentText>
@@ -149,11 +152,26 @@ const ProjectForm = observer((props: any) => {
               }
               hidden={activeStep !== 0} config={projectConfig}
               placeholder={projectPlaceholderConfig} />
-              <ProdFields hidden={activeStep !== 1} config={projectConfig} placeholder={projectPlaceholderConfig} />
-              <BetaFields hidden={activeStep !== 2} config={projectConfig} placeholder={projectPlaceholderConfig} />
-              <ReviewFields hidden={activeStep !== 3} config={projectConfig} placeholder={projectPlaceholderConfig} />
-              <GitlabRunnerFields hidden={activeStep !== 4}
-                config={projectConfig} placeholder={projectPlaceholderConfig} />
+              <ProdFields
+                init={props.activeProject === ''}
+                hidden={activeStep !== 1}
+                config={projectConfig}
+                placeholder={projectPlaceholderConfig} />
+              <BetaFields
+                init={props.activeProject === ''}
+                hidden={activeStep !== 2}
+                config={projectConfig}
+                placeholder={projectPlaceholderConfig} />
+              <ReviewFields
+                init={props.activeProject === ''}
+                hidden={activeStep !== 3}
+                config={projectConfig}
+                placeholder={projectPlaceholderConfig} />
+              <GitlabRunnerFields
+                init={props.activeProject === ''}
+                hidden={activeStep !== 4}
+                config={projectConfig}
+                placeholder={projectPlaceholderConfig} />
             </Grid>
           </Grid>
         </DialogContent>
@@ -170,4 +188,4 @@ const ProjectForm = observer((props: any) => {
   );
 });
 
-export default ProjectForm;
+export default ProjectFormDialog;

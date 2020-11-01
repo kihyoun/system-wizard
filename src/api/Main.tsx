@@ -1,3 +1,4 @@
+import FileSaver from 'file-saver';
 import {
   action,
   computed,
@@ -5,15 +6,17 @@ import {
   observable,
   runInAction
 } from 'mobx';
+import Helper from './Helper';
 import MainConfig from './MainConfig';
-import ProjectConfig from './ProjectConfig';
+import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
+import JSZip from 'jszip';
 
 /**
  * General Configuration Object
  */
 export default class Main {
     @observable private _placeHolder!: MainConfig;
-    @observable private _config!: MainConfig | undefined;
+    @observable private _config!: MainConfig;
     @observable private _projects: Map<string, ProjectConfig>;
     /**
      * Set Config
@@ -60,4 +63,48 @@ export default class Main {
     @computed get projects(): Map<string, ProjectConfig> {
       return this._projects;
     }
+
+    @computed public get asJson() {
+      const proxies:ProjectConfigInterface[] = [];
+      this._projects.forEach(config => proxies.push(config.asJson));
+
+      return {
+        main   : this._config.asJson,
+        proxies: proxies
+      }
+    }
+
+    public exportJson() {
+      const file = new Blob([Helper.jsonLogo + JSON.stringify(this.asJson, null, 4)],
+        { type: 'text/plain;charset=utf-8' });
+      FileSaver.saveAs(file, 'bootstrapper.json');
+    }
+
+    public exportZip() {
+      const zip = new JSZip();
+      zip.file('bootstrapper.json', Helper.jsonLogo+this.asJson);
+      zip.file('.docker.env', this._config.content);
+      const projects = zip.folder('.projects.env');
+      this._projects.forEach(projectConfig => {
+        projects?.file(`.${projectConfig.projectKey}.env`, projectConfig.content);
+      });
+
+      zip.generateAsync({ type: 'blob' }).then(function(content:any) {
+        saveAs(content, 'bootstrapper.zip');
+      });
+    }
+
+    public exportProjectConfigs() {
+      const zip = new JSZip();
+      const projects = zip.folder('.projects.env');
+      this._projects.forEach(projectConfig => {
+        projects?.file(`.${projectConfig.projectKey}.env`, projectConfig.content);
+      });
+
+      zip.generateAsync({ type: 'blob' }).then(function(content:any) {
+        saveAs(content, 'projects.env.zip');
+      });
+
+    }
+
 }

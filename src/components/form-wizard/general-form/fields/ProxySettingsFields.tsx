@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import {
   FormControl, InputLabel, makeStyles, NativeSelect
@@ -30,11 +30,12 @@ const useStyles = makeStyles(theme => ({
 
 const ProxySettingsFields = observer((props: any) => {
   const classes = useStyles();
-  const main = props.main;
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
-    if (!props.hidden && props.init) {
-      props.main.config.generateProxyConfig();
+    if (!props.hidden && init) {
+      runInAction(() => props.main.config.generateProxyConfig());
+      setInit(false)
     }
   }, [props.hidden, props.init]);
 
@@ -46,7 +47,7 @@ const ProxySettingsFields = observer((props: any) => {
 
       <TextField
         label="GITLAB_EXTERNAL_URL"
-        value={main.config.gitlabExternalUrl}
+        value={props.main.config.gitlabExternalUrl}
         disabled={true}
         style={{ margin: 8 }}
         fullWidth
@@ -55,15 +56,15 @@ const ProxySettingsFields = observer((props: any) => {
       />
       <TextField
         label="GITLAB_PORT"
-        defaultValue={main.config.gitlabPort}
+        value={props.main.config.gitlabPort}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabPort?.toString()}
+        placeholder={props.main.placeholder.gitlabPort?.toString()}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         helperText="Internal Port"
         onChange={event => {
-          runInAction(() => (main.config.gitlabPort = event.target.value));
+          runInAction(() => (props.main.config.gitlabPort = event.target.value));
         }}
       />
       <FormControl className={classes.formControl}>
@@ -71,9 +72,9 @@ const ProxySettingsFields = observer((props: any) => {
               GITLAB_DOMAIN_MODE
         </InputLabel>
         <NativeSelect
-          defaultValue={main.config.gitlabDomainMode}
+          value={props.main.config.gitlabDomainMode}
           onChange={(event: any) => {
-            runInAction(() => (main.config.gitlabDomainMode = event.target.value));
+            runInAction(() => (props.main.config.gitlabDomainMode = event.target.value));
           }}
           inputProps={{
             name: 'domainmode',
@@ -90,43 +91,44 @@ const ProxySettingsFields = observer((props: any) => {
       </FormControl>
       <TextField
         label="GITLAB_SSL"
-        disabled={main.config.gitlabDomainMode < 2}
-        defaultValue={main.config.gitlabSSL}
+        disabled={props.main.config.gitlabDomainMode < 2}
+        value={props.main.config.gitlabSSL}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabSSL}
+        placeholder={props.main.placeholder.gitlabSSL}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         helperText="Path to SSL Certificate"
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabSSL = event.target.value));
+          runInAction(() => (props.main.config.gitlabSSL = event.target.value));
         }}
       />
       <TextField
         label="GITLAB_SSL_KEY"
-        defaultValue={main.config.gitlabSSLKey}
+        disabled={props.main.config.gitlabDomainMode < 2}
+        value={props.main.config.gitlabSSLKey}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabSSLKey}
+        placeholder={props.main.placeholder.gitlabSSLKey}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         helperText="Path to SSL Key"
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabSSLKey = event.target.value));
+          runInAction(() => (props.main.config.gitlabSSLKey = event.target.value));
         }}
       />
       <TextField
         label="GITLAB_UPSTREAM"
-        defaultValue={main.config.gitlabUpstream}
+        value={props.main.config.gitlabUpstream}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabUpstream}
+        placeholder={props.main.placeholder.gitlabUpstream}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         helperText="The Name of the upstream
               inside the NGINX Main configuration"
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabUpstream = event.target.value));
+          runInAction(() => (props.main.config.gitlabUpstream = event.target.value));
         }}
       />
 
@@ -134,7 +136,7 @@ const ProxySettingsFields = observer((props: any) => {
 
       <TextField
         label="GITLAB_REGISTRY_URL"
-        value={main.config.gitlabRegistryUrl}
+        value={props.main.config.gitlabRegistryUrl}
         style={{ margin: 8 }}
         disabled={true}
         fullWidth
@@ -144,14 +146,14 @@ const ProxySettingsFields = observer((props: any) => {
       <TextField
         label="GITLAB_REGISTRY_PORT"
         style={{ margin: 8 }}
-        defaultValue={main.config.gitlabRegistryPort}
-        placeholder={main.placeholder.gitlabRegistryPort.toString()}
+        value={props.main.config.gitlabRegistryPort}
+        placeholder={props.main.placeholder.gitlabRegistryPort.toString()}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         helperText="Internal Port"
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabRegistryPort = event.target.value));
+          runInAction(() => (props.main.config.gitlabRegistryPort = event.target.value));
         }}
       />
       <FormControl className={classes.formControl}>
@@ -159,9 +161,9 @@ const ProxySettingsFields = observer((props: any) => {
               GITLAB_REGISTRY_DOMAIN_MODE
         </InputLabel>
         <NativeSelect
-          value={main.config.gitlabRegistryDomainMode}
+          value={props.main.config.gitlabRegistryDomainMode}
           onChange={(event: any) => {
-            runInAction(() => (main.config.gitlabRegistryDomainMode = event.target.value));
+            runInAction(() => (props.main.config.gitlabRegistryDomainMode = event.target.value));
           }}
           inputProps={{
             name: 'regdomainmode',
@@ -178,42 +180,42 @@ const ProxySettingsFields = observer((props: any) => {
       </FormControl>
       <TextField
         label="GITLAB_REGISTRY_SSL"
-        value={main.config.gitlabRegistrySSL}
-        disabled={main.config.gitlabRegistryDomainMode < 2}
+        value={props.main.config.gitlabRegistrySSL}
+        disabled={props.main.config.gitlabRegistryDomainMode < 2}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabRegistrySSL}
+        placeholder={props.main.placeholder.gitlabRegistrySSL}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabRegistrySSL = event.target.value));
+          runInAction(() => (props.main.config.gitlabRegistrySSL = event.target.value));
         }}
         helperText="Path to Registry SSL Certificate"
       />
       <TextField
         label="GITLAB_REGISTRY_SSL_KEY"
-        disabled={main.config.gitlabRegistryDomainMode < 2}
-        defaultValue={main.config.gitlabRegistrySSLKey}
+        disabled={props.main.config.gitlabRegistryDomainMode < 2}
+        value={props.main.config.gitlabRegistrySSLKey}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabRegistrySSLKey}
+        placeholder={props.main.placeholder.gitlabRegistrySSLKey}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabRegistrySSLKey = event.target.value));
+          runInAction(() => (props.main.config.gitlabRegistrySSLKey = event.target.value));
         }}
         helperText="Path to Registry SSL Key"
       />
       <TextField
         label="GITLAB_REGISTRY_UPSTREAM"
-        defaultValue={main.config.gitlabRegistryUpstream}
+        value={props.main.config.gitlabRegistryUpstream}
         style={{ margin: 8 }}
-        placeholder={main.placeholder.gitlabRegistryUpstream}
+        placeholder={props.main.placeholder.gitlabRegistryUpstream}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
-          runInAction(() => (main.config.gitlabRegistryUpstream = event.target.value));
+          runInAction(() => (props.main.config.gitlabRegistryUpstream = event.target.value));
         }}
       />
     </>

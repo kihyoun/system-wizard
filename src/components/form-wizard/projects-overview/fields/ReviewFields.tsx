@@ -17,15 +17,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const BetaFields = observer((props: any) => {
+const ReviewFields = observer((props: any) => {
   const classes = useStyles();
-  const [initialize, setInitialize] = useState(props.initialize);
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
-    if (initialize && !props.hidden) {
-      runInAction(() => props.config.generateBetaProxyConfig());
+    if (init && !props.hidden) {
+      runInAction(() => props.config.generateReviewProxyConfig());
+      setInit(false);
     }
-  }, [initialize, props.hidden]);
+  }, [props.init, props.hidden]);
 
   if (props.hidden) return null;
 
@@ -34,58 +35,54 @@ const BetaFields = observer((props: any) => {
       <FormControlLabel
         control={
           <Switch
-            checked={props.config.useBetaHost === 'true'}
+            checked={props.config.useReviewHost === 'true'}
             onChange={event => {
-              runInAction(() =>
-                props.config.useBetaHost = event.target.checked ? 'true' : 'false'
-              );
-              setInitialize(false);
+              runInAction(() => props.config.useReviewHost = event.target.checked ? 'true' : 'false' )
             }}
-            name="betaCfg"
+            name="reviewCfg"
             color="primary"
           />
         }
-        label="Enable Beta Environment"
+        label="Enable Review Environment"
       />
       <TextField
-        disabled={props.config.useBetaHost==='false'}
-        label="BETA_HOST"
+        disabled={props.config.useReviewHost === 'false'}
+        label="REVIEW_HOST"
         style={{ margin: 8 }}
-        value={props.config.betaHost}
+        value={props.config.reviewHost}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (props.config.betaHost = event.target.value));
+          runInAction(() => (props.config.reviewHost = event.target.value));
         }}
       />
       <TextField
-        label="BETA_PORT"
-        disabled={props.config.useBetaHost==='false'}
-
+        label="REVIEW_PORT"
+        disabled={props.config.useReviewHost === 'false'}
         style={{ margin: 8 }}
-        value={props.config.betaPort}
+        value={props.config.reviewPort}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (props.config.betaPort = event.target.value));
+          runInAction(() => (props.config.reviewPort = event.target.value));
         }}
       />
       <FormControl className={classes.formControl}
-        disabled={props.config.useBetaHost==='false'}
+        disabled={props.config.useReviewHost === 'false'}
       >
         <InputLabel htmlFor="regdomainmode-native-helper">
-              BETA_DOMAIN_MODE
+              REVIEW_DOMAIN_MODE
         </InputLabel>
         <NativeSelect
-          value={props.config.betaDomainMode}
+          value={props.config.reviewDomainMode}
           onChange={(event: any) => {
-            runInAction(() => (props.config.betaDomainMode = event.target.value));
+            runInAction(() => (props.config.reviewDomainMode = event.target.value));
           }}
           inputProps={{
-            name: 'betaDomainMode',
-            id  : 'betaDomainMode-native-helper'
+            name: 'reviewDomainMode',
+            id  : 'reviewDomainMode-native-helper'
           }}
         >
           <option aria-label="Default (unencrypted)" value={0}>
@@ -97,29 +94,28 @@ const BetaFields = observer((props: any) => {
         </NativeSelect>
       </FormControl>
       <TextField
-        label="BETA_SSL"
-        disabled={props.config.useBetaHost === 'false'
-          || props.config.betaDomainMode < 2}
-        value={props.config.betaSSL}
+        label="REVIEW_SSL"
+        disabled={props.config.useReviewHost === 'false' || props.config.reviewDomainMode < 2}
+        value={props.config.reviewSSL}
         style={{ margin: 8 }}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
-          runInAction(() => (props.config.betaSSL = event.target.value));
+          runInAction(() => (props.config.reviewSSL = event.target.value));
         }}
         helperText="Path to Registry SSL Certificate"
       />
       <TextField
-        label="BETA_SSL_KEY"
-        disabled={props.config.useBetaHost === 'false' || props.config.betaDomainMode < 2}
-        value={props.config.betaSSLKey}
+        label="REVIEW_SSL_KEY"
+        disabled={props.config.useReviewHost === 'false' || props.config.reviewDomainMode < 2}
+        value={props.config.reviewSSLKey}
         style={{ margin: 8 }}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
-          runInAction(() => (props.config.betaSSLKey = event.target.value));
+          runInAction(() => (props.config.reviewSSLKey = event.target.value));
         }}
         helperText="Path to SSL Key"
       />
@@ -127,4 +123,4 @@ const BetaFields = observer((props: any) => {
   );
 });
 
-export default BetaFields;
+export default ReviewFields;

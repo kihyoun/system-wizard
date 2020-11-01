@@ -31,7 +31,6 @@ const useCardStyles = makeStyles({
 const useListSyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      maxWidth       : 360,
       backgroundColor: theme.palette.background.paper,
       overflow       : 'hidden'
     }
