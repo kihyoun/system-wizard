@@ -1,20 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 
-const GitlabSettingsForm = observer((props: any) => {
+const GitlabSettingsFields = observer((props: any) => {
   const main = props.main;
-  const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (props.gitlabSettings.visible && props.gitlabSettings.initialize) {
+    if (!props.hidden && props.init) {
       props.main.config.generateGitlabConfig();
-      setInit(true);
     }
-  }, [props.gitlabSettings.visible, props.gitlabSettings.initialize]);
+  }, [props.hidden, props.init]);
 
-  if (!init || !props.gitlabSettings.visible) return null;
+  if (props.hidden) return null;
 
   return (
     <>
@@ -25,9 +23,7 @@ const GitlabSettingsForm = observer((props: any) => {
         placeholder={main.placeholder.gitlabHome}
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.gitlabHome = event.target.value));
         }}
@@ -39,9 +35,7 @@ const GitlabSettingsForm = observer((props: any) => {
         placeholder={main.placeholder.gitlabHost}
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.gitlabHost = event.target.value));
         }}
@@ -53,9 +47,7 @@ const GitlabSettingsForm = observer((props: any) => {
         placeholder={main.placeholder.gitlabRegistryHost}
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.gitlabRegistryHost = event.target.value));
         }}
@@ -64,4 +56,4 @@ const GitlabSettingsForm = observer((props: any) => {
   );
 });
 
-export default GitlabSettingsForm;
+export default GitlabSettingsFields;

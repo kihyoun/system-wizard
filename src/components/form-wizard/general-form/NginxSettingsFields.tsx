@@ -1,33 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 
-const NginxSettingsForm = observer((props: any) => {
+const NginxSettingsFields = observer((props: any) => {
   const main = props.main;
-  const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (props.nginxSettings.visible && props.nginxSettings.initialize) {
+    if (!props.hidden && props.init) {
       props.main.config.generateNginxConfig();
-      setInit(true);
     }
-  }, [props.nginxSettings.visible,props.nginxSettings.initialize ])
+  }, [props.hidden, props.init]);
 
-  if (!init || !props.nginxSettings.visible) return null;
+  if (props.hidden) return null;
 
   return (
     <>
       <TextField
+        size="small"
         label="NGINX_TEMPLATE_DIR"
         defaultValue={main.config.nginxTemplateDir}
         placeholder={main.placeholder.nginxTemplateDir}
         style={{ margin: 8 }}
         fullWidth
+        helperText="This Location contains the generated config for NGINX during runtime"
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.nginxTemplateDir = event.target.value));
         }}
@@ -39,9 +37,7 @@ const NginxSettingsForm = observer((props: any) => {
         style={{ margin: 8 }}
         fullWidth
         margin="normal"
-        InputLabelProps={{
-          shrink: true
-        }}
+        InputLabelProps={{ shrink: true }}
         onChange={event => {
           runInAction(() => (main.config.sslBaseDir = event.target.value));
         }}
@@ -50,4 +46,4 @@ const NginxSettingsForm = observer((props: any) => {
   );
 });
 
-export default NginxSettingsForm;
+export default NginxSettingsFields;

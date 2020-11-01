@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { createMuiTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
+import {
+  createMuiTheme, makeStyles, ThemeProvider
+} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { Link } from '@material-ui/core';
 import DarkModeSwitch from './DarkModeSwitch';
-import FormWizard from './components/FormWizard';
+import FormWizard from './components/form-wizard/FormWizard';
 import Main from './api/Main';
 import { observer } from 'mobx-react';
+import blue from '@material-ui/core/colors/blue';
+import grey from '@material-ui/core/colors/grey';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,7 +44,8 @@ const App = observer(() => {
 
   const theme = createMuiTheme({
     palette: {
-      type: dark ? 'dark' : 'light'
+      primary: dark ? grey : blue,
+      type   : dark ? 'dark' : 'light'
     }
   });
 

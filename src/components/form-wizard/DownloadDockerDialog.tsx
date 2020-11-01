@@ -5,7 +5,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { createStyles, makeStyles, Theme, useTheme } from '@material-ui/core/styles';
+import {
+  createStyles, makeStyles, Theme, useTheme 
+} from '@material-ui/core/styles';
 import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -45,7 +47,7 @@ export default function DownloadDockerDialog(props:any) {
     // e.clipboardData is initially empty, but we can set it to the
     // data that we want copied onto the clipboard.
     e?.clipboardData?.setData('text/plain', props.main.config.content);
-    e?.clipboardData?.setData('text/html',  props.main.config.content);
+    e?.clipboardData?.setData('text/html', props.main.config.content);
 
     // This is necessary to prevent the current document selection from
     // being written to the clipboard.
@@ -101,16 +103,14 @@ export default function DownloadDockerDialog(props:any) {
         {fabs.map((fab, index) => (
           <Zoom
             key={fab.color}
-            in={clipboard  === Boolean(index)}
+            in={clipboard === Boolean(index)}
             timeout={transitionDuration}
-            style={{
-              transitionDelay: `${clipboard === Boolean(index) ? transitionDuration.exit : 0}ms`
-            }}
+            style={{ transitionDelay: `${clipboard === Boolean(index) ? transitionDuration.exit : 0}ms` }}
             unmountOnExit
           >
             <Tooltip title={fab.tooltip}
               aria-label={fab.tooltip}>
-              <Button  onClick={() => {
+              <Button onClick={() => {
                 /* Copy the text inside the text field */
                 document.execCommand('copy');
                 setClipboard(true)
