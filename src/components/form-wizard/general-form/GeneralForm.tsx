@@ -90,7 +90,7 @@ const GeneralForm = observer((props: any) => {
   };
 
   return (
-    <Paper className={classes.paper}>
+    <Paper className={classes.paper} elevation={0}>
       <Grid container>
         <Grid item xs={2}>
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
