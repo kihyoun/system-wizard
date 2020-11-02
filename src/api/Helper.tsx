@@ -4,9 +4,14 @@
  */
 export default class Helper {
 
-  public static get textLogo() {
+  public static get textLogoBash() {
     return `#-------------------------------------------------------------
 # This file was auto-generated using the system-bootstrapper |
+` + this.textLogo;
+  }
+
+  public static get textLogo() {
+    return `
 #-------------------------------------------------------------
 #                +------------------+                        |
 #               /|                 /|                        |
@@ -29,7 +34,6 @@ export default class Helper {
 
 `;
   }
-
   public static get jsonLogo() {
     return `//-------------------------------------------------------------
 // This file was auto-generated using the system-bootstrapper |

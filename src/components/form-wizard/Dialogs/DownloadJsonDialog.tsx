@@ -136,7 +136,7 @@ export default function DownloadJsonDialog(props:any) {
             </div>
             <DialogContentText>
               <SyntaxHighlighter language="json" style={duotoneLight}>
-                {Helper.jsonLogo + JSON.stringify(props.main.asJson, null, 4)}
+                {JSON.stringify(props.main.asJson, null, 4)}
               </SyntaxHighlighter>
             </DialogContentText>
           </React.Fragment>

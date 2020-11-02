@@ -55,14 +55,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
    * @param {ProjectConfig} config ProjectConfig
    */
     constructor(main: Main,
-      _config: ProjectConfig | undefined = undefined
+      _config: ProjectConfigInterface | undefined = undefined
     ) {
       makeAutoObservable(this);
       this._main = main;
       this.generateConfig(_config);
     }
 
-  @action generateConfig(_config: ProjectConfig | undefined = undefined) {
+  @action generateConfig(_config: ProjectConfigInterface | undefined = undefined) {
       this.generateMainConfig(_config);
       this.generateProdProxyConfig(_config);
       this.generateBetaProxyConfig(_config);
@@ -70,13 +70,13 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.generateRunnerConfig(_config);
     }
 
-  @action generateMainConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateMainConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this._projectKey = _config?.projectKey || 'systembootstrapper';
     });
   }
 
-  @action generateProdProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateProdProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
@@ -99,7 +99,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
-  @action generateBetaProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateBetaProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
@@ -122,7 +122,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
- @action generateReviewProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+ @action generateReviewProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useReviewHost = _config?.useReviewHost || 'false';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
@@ -145,7 +145,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
    }
  }
 
-   @action generateRunnerConfig(_config: ProjectConfig | undefined = undefined): void {
+   @action generateRunnerConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.gitlabRunnerDockerScale = _config?.gitlabRunnerDockerScale || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
