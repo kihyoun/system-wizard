@@ -3,18 +3,20 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  Button, Tabs, Toolbar
+  Button, createStyles, Snackbar, Tabs, Toolbar
 } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab/Tab';
 import GeneralForm from './general-form/GeneralForm';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import DownloadDockerDialog from './DownloadDockerDialog';
-import DownloadProjectsDialog from './DownloadProjectsDialog';
+import DownloadDockerDialog from './Dialogs/DownloadDockerDialog';
+import DownloadProjectsDialog from './Dialogs/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import DownloadJsonDialog from './DownloadJsonDialog';
+import DownloadJsonDialog from './Dialogs/DownloadJsonDialog';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import ImportFileDialog from './Dialogs/ImportFileDialog';
 
 const TabPanel = (props: any) => {
   const {
@@ -41,24 +43,41 @@ const a11yProps = (index: any) => {
   };
 };
 
-const useStyles = makeStyles(theme => ({
-  paper: {
-    padding     : theme.spacing(2),
-    margin      : 'auto',
-    maxWidth    : 1900,
-    marginBottom: '1ch'
-  },
-  divider: { flexGrow: 1 }
-}));
+const useStyles = makeStyles(theme =>
+  createStyles({
+    paper: {
+      padding     : theme.spacing(2),
+      margin      : 'auto',
+      maxWidth    : 1900,
+      marginBottom: '1ch'
+    },
+    divider      : { flexGrow: 1 },
+    buttonDivider: { width: '1ch' },
+    input        : { display: 'none' },
+    progressBar  : {
+      width: (props:any) => {
+        if (props.progress === 100) return 0;
+        return `${props.progress}%`
+      },
+      backgroundColor: theme.palette.primary.main,
+      height         : '1ch'
+    }
+  })
+);
 
 const FormWizard = (props: any) => {
-  const classes = useStyles();
   const main = props.main;
   const [tab, setTab] = useState(0);
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
+  const [importFile, setImportFile] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [progress, setProgress] = useState(100);
+  const classes = useStyles({ progress: progress });
+
+  const [openAlert, setOpenAlert] = useState('');
+  const [openSuccess, setOpenSuccess] = useState('');
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -72,12 +91,66 @@ const FormWizard = (props: any) => {
     setTab(newTab);
   };
 
+  const onChangeHandler=(event:any)=>{
+
+    if (event.target.files.length < 1) {
+      return;
+    }
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsText(event.target.files[0], 'UTF-8');
+    reader.onprogress = function (evt:any) {
+      setProgress(100 * (evt.loaded / evt.total));
+    }
+    reader.onload = function (evt:any) {
+      try {
+        if (tab === 0) {
+          props.main.importFile(file, evt.target.result);
+        }
+        if (tab === 1) {
+          props.main.importProjectFile(file, evt.target.result);
+        }
+        setOpenSuccess('Import finished: ' + file.name);
+      } catch (e) {
+        setOpenAlert('error reading file: ' + e.toString());
+      }
+    }
+    reader.onerror = function () {
+      setOpenAlert('error reading file')
+    }
+  };
+
   return (
-    <>
+    <React.Fragment>
+      <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')}
+        message={openAlert} />
+      <Snackbar open={openSuccess.length > 0} autoHideDuration={6000} onClose={() => setOpenSuccess('')}
+        message={openSuccess} />
       {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
       {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
-      <Grid container direction="row" justify="center" spacing={2} alignItems="center">
+      {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
+        setOpenAlert={setOpenAlert}
+        setProgress={setProgress}
+        main={main}
+        tab={tab}
+        files={importFile}
+        setClose={() => setImportFile(false)} />}
+      <Grid item xs={12}>
+        <div className={classes.progressBar}></div>
+      </Grid>
+      <Grid container direction="row" justify="center" spacing={2} alignItems="center"
+        onDragOver={ev => {
+          ev.preventDefault();
+        }}
+        onDrop={(ev:any) => {
+          if (ev.dataTransfer.files.length > 0
+            && (ev.dataTransfer.files[0].name.substr(-4) === '.env'
+            || ev.dataTransfer.files[0].name.substr(-4) === 'json')) {
+            setImportFile(ev.dataTransfer.files);
+            ev.preventDefault();
+          }}}
+      >
         <Grid item xs={12}>
           <Paper className={classes.paper}>
             <Toolbar>
@@ -89,7 +162,29 @@ const FormWizard = (props: any) => {
                 <Tab label="General Settings" {...a11yProps(0)} />
                 <Tab label="Proxy Configurations" {...a11yProps(1)} />
               </Tabs>
+
               <div className={classes.divider} />
+              <input
+                accept="application/json, .env"
+                className={classes.input}
+                id="contained-button-file"
+                multiple
+                type="file"
+                onChange={onChangeHandler}
+              />
+
+              <label htmlFor="contained-button-file">
+                <Button
+                  aria-haspopup="true"
+                  variant="contained"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  color="primary">
+                Load Configuration
+                </Button>
+              </label>
+
+              <div className={classes.buttonDivider} />
 
               <Button aria-controls="simple-menu"
                 aria-haspopup="true"
@@ -124,7 +219,7 @@ const FormWizard = (props: any) => {
           </TabPanel>
         </Grid>
       </Grid>
-    </>
+    </React.Fragment>
   );
 };
 

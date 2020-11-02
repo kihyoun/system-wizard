@@ -18,6 +18,9 @@ export default class Main {
     @observable private _placeHolder!: MainConfig;
     @observable private _config!: MainConfig;
     @observable private _projects: Map<string, ProjectConfig>;
+    init = true;
+    uploadProgress = false;
+
     /**
      * Set Config
      * @param {MainConfig|undefined} config MainConfig
@@ -75,9 +78,89 @@ export default class Main {
     }
 
     public exportJson() {
-      const file = new Blob([Helper.jsonLogo + JSON.stringify(this.asJson, null, 4)],
+      const file = new Blob([JSON.stringify(this.asJson, null, 4)],
         { type: 'text/plain;charset=utf-8' });
       FileSaver.saveAs(file, 'bootstrapper.json');
+    }
+
+    public importFile(file: File, result:string) {
+      if (file.name.substr(-4) === 'json') {
+        this.importJson(file, result);
+      } else if (file.name.substr(-3) === 'env') {
+        this.importEnv(file, result);
+      }
+    }
+
+    public importProjectFile(file: File, result:string) {
+      if (file.name.substr(-3) === 'env') {
+        this.importProjectEnv(file, result);
+      }
+    }
+
+    public importJson(file:File, result:string) {
+      const config = JSON.parse(result);
+      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        this.generateConfig(config.main);
+        this._projects = observable(new Map<string, ProjectConfig>());
+        config.proxies.forEach((pConfig:ProjectConfigInterface) => {
+          this._projects.set(pConfig.projectKey, new ProjectConfig(this, pConfig));
+        });
+        this.init = false;
+        this.uploadProgress = false;
+        console.group('JSON File import');
+        console.log(`Filename: ${file.name}`)
+        console.log('Raw data:', `\n${result}`);
+        console.groupEnd();
+      });
+    }
+
+    public importEnv(file:File, result:string) {
+      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        const lines = result.split('\n');
+        lines.forEach(line => {
+        // Skip comments
+          if (line.substr(0, 1) === '#' || line.length < 3) {
+            return;
+          }
+          const parts = line.split('=');
+          const value = parts[1];
+          const key = parts[0].split(' ').reverse()[0];
+          this._config.setProperty(key, value);
+        });
+        this.init = false;
+        this.uploadProgress = false;
+        console.group('Env File import');
+        console.log(`Filename: ${file.name}`)
+        console.log('Raw data:', `\n${result}`);
+        console.groupEnd();
+      });
+    }
+
+    public importProjectEnv(file:File, result:string) {
+      const config = new ProjectConfig(this);
+      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        const lines = result.split('\n');
+        lines.forEach(line => {
+        // Skip comments
+          if (line.substr(0, 1) === '#' || line.length < 3) {
+            return;
+          }
+          const parts = line.split('=');
+          const value = parts[1];
+          const key = parts[0].split(' ').reverse()[0];
+          config.setProperty(key, value);
+        });
+        this.addProject(config)
+        this.init = false;
+        this.uploadProgress = false;
+        console.group('Env File import');
+        console.log(`Filename: ${file.name}`)
+        console.log('Raw data:', `\n${result}`);
+        console.groupEnd();
+      });
     }
 
     public exportZip() {

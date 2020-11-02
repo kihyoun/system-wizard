@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
+import { observer } from 'mobx-react';
 
-const BackupFields = (props: any) => {
+const BackupFields = observer((props: any) => {
   const [init, setInit] = useState(props.init);
 
   useEffect(() => {
     if (!props.hidden && init) {
       runInAction(() => props.main.config.generateMainConfig());
       setInit(false);
-
     }
   }, [props.hidden, props.init]);
 
@@ -20,8 +20,7 @@ const BackupFields = (props: any) => {
       <TextField
         label="LIVEDIR"
         style={{ margin: 8 }}
-        defaultValue={props.main.config.liveDir}
-        placeholder={props.main.placeholder.liveDir}
+        value={props.main.config.liveDir}
         helperText="Persistent/temporary Storage Folder.
           Must be read/writable by the Docker User"
         fullWidth
@@ -33,9 +32,8 @@ const BackupFields = (props: any) => {
       />
       <TextField
         label="BACKUPDIR"
-        defaultValue={props.main.config.backupDir}
+        value={props.main.config.backupDir}
         style={{ margin: 8 }}
-        placeholder={props.main.placeholder.backupDir}
         helperText="Location for persistent Data, will be synced with rsync"
         fullWidth
         margin="normal"
@@ -46,6 +44,6 @@ const BackupFields = (props: any) => {
       />
     </>
   );
-};
+});
 
 export default BackupFields;

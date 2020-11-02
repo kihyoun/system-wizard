@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Button,
@@ -34,16 +34,29 @@ const useStyles = makeStyles(theme => ({
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
   const main = props.main;
-  const [gitlabInit, setGitlabInit] = useState(true);
-  const [nginxInit, setNginxInit] = useState(true);
-  const [proxyInit, setProxyInit] = useState(true);
-  const [runnerInit, setRunnerInit] = useState(true);
+  const [backupInit, setBackupInit] = useState(props.main.init);
+  const [gitlabInit, setGitlabInit] = useState(props.main.init);
+  const [nginxInit, setNginxInit] = useState(props.main.init);
+  const [proxyInit, setProxyInit] = useState(props.main.init);
+  const [runnerInit, setRunnerInit] = useState(props.main.init);
+
+  useEffect(() => {
+    if (!props.main.init) {
+      runInAction(() => {
+        setBackupInit(false);
+        setGitlabInit(false);
+        setNginxInit(false);
+        setProxyInit(false);
+        setRunnerInit(false);
+      });
+    }
+  },[props.main.init]);
 
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [{
     label  : 'Backup',
-    enabled: true
+    enabled: !backupInit
   }, {
     label  : 'Gitlab',
     enabled: !gitlabInit
@@ -61,6 +74,7 @@ const GeneralForm = observer((props: any) => {
   const handleStep = (step: number) => () => {
     runInAction(() => {
       switch (step) {
+      case 0: setBackupInit(false); break;
       case 1: setGitlabInit(false); break;
       case 2: setNginxInit(false); break;
       case 3: setProxyInit(false); break;
@@ -109,7 +123,7 @@ const GeneralForm = observer((props: any) => {
           </Stepper>
         </Grid>
         <Grid item xs={6}>
-          <BackupFields init={true} hidden={activeStep !== 0} main={main} />
+          <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
           <GitlabSettingsFields init={true} hidden={activeStep !== 1} main={main} />
           <NginxSettingsFields init={true} hidden={activeStep !== 2} main={main} />
           <ProxySettingsFields init={true} hidden={activeStep !== 3} main={main} />

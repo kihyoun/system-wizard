@@ -55,14 +55,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
    * @param {ProjectConfig} config ProjectConfig
    */
     constructor(main: Main,
-      _config: ProjectConfig | undefined = undefined
+      _config: ProjectConfigInterface | undefined = undefined
     ) {
       makeAutoObservable(this);
       this._main = main;
       this.generateConfig(_config);
     }
 
-  @action generateConfig(_config: ProjectConfig | undefined = undefined) {
+  @action generateConfig(_config: ProjectConfigInterface | undefined = undefined) {
       this.generateMainConfig(_config);
       this.generateProdProxyConfig(_config);
       this.generateBetaProxyConfig(_config);
@@ -70,13 +70,13 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.generateRunnerConfig(_config);
     }
 
-  @action generateMainConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateMainConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this._projectKey = _config?.projectKey || 'systembootstrapper';
     });
   }
 
-  @action generateProdProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateProdProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
@@ -99,7 +99,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
-  @action generateBetaProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+  @action generateBetaProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
@@ -122,7 +122,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
- @action generateReviewProxyConfig(_config: ProjectConfig | undefined = undefined): void {
+ @action generateReviewProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.useReviewHost = _config?.useReviewHost || 'false';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
@@ -145,12 +145,36 @@ export default class ProjectConfig implements ProjectConfigInterface {
    }
  }
 
-   @action generateRunnerConfig(_config: ProjectConfig | undefined = undefined): void {
+   @action generateRunnerConfig(_config: ProjectConfigInterface | undefined = undefined): void {
     runInAction(() => {
       this.gitlabRunnerDockerScale = _config?.gitlabRunnerDockerScale || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
+   public setProperty(propertyKey: any, value: any){
+     switch (propertyKey) {
+     case 'PROJECT_NAME': this.projectKey = value; break;
+     case 'USE_PROD_HOST': this.useProdHost = value; break;
+     case 'PROD_HOST': this.prodHost = value; break;
+     case 'PROD_PORT': this.prodPort = value; break;
+     case 'PROD_DOMAIN_MODE': this.prodDomainMode = value; break;
+     case 'PROD_SSL': this.prodSSL = value; break;
+     case 'PROD_SSL_KEY': this.prodSSLKey = value; break;
+     case 'USE_BETA_HOST': this.useBetaHost = value; break;
+     case 'BETA_HOST': this.betaHost = value; break;
+     case 'BETA_PORT': this.betaPort = value; break;
+     case 'BETA_DOMAIN_MODE': this.betaDomainMode = value; break;
+     case 'BETA_SSL': this.betaSSL = value; break;
+     case 'BETA_SSL_KEY': this.betaSSLKey = value; break;
+     case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
+     case 'REVIEW_HOST': this.reviewHost = value; break;
+     case 'REVIEW_PORT': this.reviewPort = value; break;
+     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = value; break;
+     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
+     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+     }
+   }
+
 
    public get content() : string {
      const ret = Helper.textLogo + `# Filepath: ./.projects.env/.${this.projectKey}.env

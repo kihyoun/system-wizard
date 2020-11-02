@@ -12,6 +12,7 @@ import Main from './api/Main';
 import { observer } from 'mobx-react';
 import blue from '@material-ui/core/colors/blue';
 import grey from '@material-ui/core/colors/grey';
+import Helper from './api/Helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,6 +41,7 @@ const App = observer(() => {
 
   useEffect(() => {
     setMain(new Main());
+    console.log(Helper.textLogo);
   }, []);
 
   const theme = createMuiTheme({
@@ -57,7 +59,7 @@ const App = observer(() => {
         <DarkModeSwitch handleChange={handleDarkMode} />
       </Grid>
       <div className={classes.root}>
-        <Grid container spacing={3}>
+        <Grid container spacing={0}>
           <Grid item xs={12}>
             <Paper elevation={0} className={classes.paper}>
               <h1>System Bootstrapper Wizard (Beta)</h1>

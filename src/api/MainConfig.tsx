@@ -228,14 +228,39 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
       gitlabRunnerToken      : this.gitlabRunnerToken
     });
   }
+
+  public setProperty(propertyKey : any, value : any) {
+    switch (propertyKey) {
+    case 'BACKUPDIR': this.backupDir = value; break;
+    case 'LIVEDIR': this.liveDir = value; break;
+    case 'GITLAB_HOME': this.gitlabHome = value; break;
+    case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
+    case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
+    case 'GITLAB_HOST': this.gitlabHost = value; break;
+    case 'GITLAB_PORT': this.gitlabPort = value; break;
+    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = value; break;
+    case 'GITLAB_SSL': this.gitlabSSL = value; break;
+    case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value; break;
+    case 'GITLAB_UPSTREAM': this.gitlabUpstream = value; break;
+    case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
+    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = value; break;
+    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = value; break;
+    case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value; break;
+    case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value; break;
+    case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
+    case 'NGINX_TEMPLATE_DIR': this.nginxTemplateDir = value; break;
+    case 'SSL_BASEDIR': this.sslBaseDir = value; break;
+    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
+    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+    }
+  }
 }
+
 
 export interface MainConfigInterface {
   liveDir:string;
   backupDir:string;
-
   // Gitlab
-
   gitlabHome:string;
   gitlabExternalUrl:string;
   gitlabRegistryUrl:string;
