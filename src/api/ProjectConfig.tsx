@@ -151,6 +151,30 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
+   public setProperty(propertyKey: any, value: any){
+     switch (propertyKey) {
+     case 'PROJECT_NAME': this.projectKey = value; break;
+     case 'USE_PROD_HOST': this.useProdHost = value; break;
+     case 'PROD_HOST': this.prodHost = value; break;
+     case 'PROD_PORT': this.prodPort = value; break;
+     case 'PROD_DOMAIN_MODE': this.prodDomainMode = value; break;
+     case 'PROD_SSL': this.prodSSL = value; break;
+     case 'PROD_SSL_KEY': this.prodSSLKey = value; break;
+     case 'USE_BETA_HOST': this.useBetaHost = value; break;
+     case 'BETA_HOST': this.betaHost = value; break;
+     case 'BETA_PORT': this.betaPort = value; break;
+     case 'BETA_DOMAIN_MODE': this.betaDomainMode = value; break;
+     case 'BETA_SSL': this.betaSSL = value; break;
+     case 'BETA_SSL_KEY': this.betaSSLKey = value; break;
+     case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
+     case 'REVIEW_HOST': this.reviewHost = value; break;
+     case 'REVIEW_PORT': this.reviewPort = value; break;
+     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = value; break;
+     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
+     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+     }
+   }
+
 
    public get content() : string {
      const ret = Helper.textLogo + `# Filepath: ./.projects.env/.${this.projectKey}.env

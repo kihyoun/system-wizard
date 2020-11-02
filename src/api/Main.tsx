@@ -91,6 +91,12 @@ export default class Main {
       }
     }
 
+    public importProjectFile(file: File, result:string) {
+      if (file.name.substr(-3) === 'env') {
+        this.importProjectEnv(file, result);
+      }
+    }
+
     public importJson(file:File, result:string) {
       const config = JSON.parse(result);
       runInAction(() => this.uploadProgress = true);
@@ -123,7 +129,31 @@ export default class Main {
           const key = parts[0].split(' ').reverse()[0];
           this._config.setProperty(key, value);
         });
-        this.generateConfig(this._config);
+        this.init = false;
+        this.uploadProgress = false;
+        console.group('Env File import');
+        console.log(`Filename: ${file.name}`)
+        console.log('Raw data:', `\n${result}`);
+        console.groupEnd();
+      });
+    }
+
+    public importProjectEnv(file:File, result:string) {
+      const config = new ProjectConfig(this);
+      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        const lines = result.split('\n');
+        lines.forEach(line => {
+        // Skip comments
+          if (line.substr(0, 1) === '#' || line.length < 3) {
+            return;
+          }
+          const parts = line.split('=');
+          const value = parts[1];
+          const key = parts[0].split(' ').reverse()[0];
+          config.setProperty(key, value);
+        });
+        this.addProject(config)
         this.init = false;
         this.uploadProgress = false;
         console.group('Env File import');

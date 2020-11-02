@@ -16,6 +16,7 @@ import ProjectsOverview from './projects-overview/ProjectsOverview';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import DownloadJsonDialog from './Dialogs/DownloadJsonDialog';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import ImportFileDialog from './Dialogs/ImportFileDialog';
 
 const TabPanel = (props: any) => {
   const {
@@ -70,6 +71,7 @@ const FormWizard = (props: any) => {
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
+  const [importFile, setImportFile] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
   const classes = useStyles({ progress: progress });
@@ -102,7 +104,12 @@ const FormWizard = (props: any) => {
     }
     reader.onload = function (evt:any) {
       try {
-        props.main.importFile(file, evt.target.result);
+        if (tab === 0) {
+          props.main.importFile(file, evt.target.result);
+        }
+        if (tab === 1) {
+          props.main.importProjectFile(file, evt.target.result);
+        }
         setOpenSuccess('Import finished: ' + file.name);
       } catch (e) {
         setOpenAlert('error reading file: ' + e.toString());
@@ -114,7 +121,7 @@ const FormWizard = (props: any) => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')}
         message={openAlert} />
       <Snackbar open={openSuccess.length > 0} autoHideDuration={6000} onClose={() => setOpenSuccess('')}
@@ -122,10 +129,28 @@ const FormWizard = (props: any) => {
       {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
       {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
+      {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
+        setOpenAlert={setOpenAlert}
+        setProgress={setProgress}
+        main={main}
+        tab={tab}
+        files={importFile}
+        setClose={() => setImportFile(false)} />}
       <Grid item xs={12}>
         <div className={classes.progressBar}></div>
       </Grid>
-      <Grid container direction="row" justify="center" spacing={2} alignItems="center">
+      <Grid container direction="row" justify="center" spacing={2} alignItems="center"
+        onDragOver={ev => {
+          ev.preventDefault();
+        }}
+        onDrop={(ev:any) => {
+          if (ev.dataTransfer.files.length > 0
+            && (ev.dataTransfer.files[0].name.substr(-4) === '.env'
+            || ev.dataTransfer.files[0].name.substr(-4) === 'json')) {
+            setImportFile(ev.dataTransfer.files);
+            ev.preventDefault();
+          }}}
+      >
         <Grid item xs={12}>
           <Paper className={classes.paper}>
             <Toolbar>
@@ -194,7 +219,7 @@ const FormWizard = (props: any) => {
           </TabPanel>
         </Grid>
       </Grid>
-    </>
+    </React.Fragment>
   );
 };
 
