@@ -152,7 +152,7 @@ const FormWizard = (props: any) => {
           }}}
       >
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
+          <Paper className={classes.paper} elevation={0}>
             <Toolbar>
               <Tabs
                 indicatorColor="primary"
