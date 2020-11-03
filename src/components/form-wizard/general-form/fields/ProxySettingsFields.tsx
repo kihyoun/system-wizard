@@ -30,14 +30,19 @@ const useStyles = makeStyles(theme => ({
 
 const ProxySettingsFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(true);
 
   useEffect(() => {
     if (!props.hidden && init) {
-      runInAction(() => props.main.config.generateProxyConfig());
-      setInit(false)
+      runInAction(() => {
+        props.main.config.generateProxyConfig()
+        setInit(false)
+      });
     }
-  }, [props.hidden, props.init]);
+    if (!props.main.init && init) {
+      setInit(false);
+    }
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

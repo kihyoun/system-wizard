@@ -115,7 +115,10 @@ export default class Main {
     }
 
     public importEnv(file:File, result:string) {
-      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        this.uploadProgress = true;
+        this.init=false;
+      });
       runInAction(() => {
         const lines = result.split('\n');
         lines.forEach(line => {
@@ -128,7 +131,6 @@ export default class Main {
           const key = parts[0].split(' ').reverse()[0];
           this._config.setProperty(key, value);
         });
-        this.init = false;
         this.uploadProgress = false;
         console.group('Env File import');
         console.log(`Filename: ${file.name}`)
@@ -152,7 +154,7 @@ export default class Main {
           const key = parts[0].split(' ').reverse()[0];
           config.setProperty(key, value);
         });
-        this.addProject(config)
+        this.addProject(config);
         this.init = false;
         this.uploadProgress = false;
         console.group('Env File import');
