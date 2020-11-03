@@ -6,7 +6,6 @@ import {
   observable,
   runInAction
 } from 'mobx';
-import Helper from './Helper';
 import MainConfig from './MainConfig';
 import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
 import JSZip from 'jszip';
@@ -165,7 +164,7 @@ export default class Main {
 
     public exportZip() {
       const zip = new JSZip();
-      zip.file('bootstrapper.json', Helper.jsonLogo+this.asJson);
+      zip.file('bootstrapper.json', JSON.stringify(this.asJson, null, 4));
       zip.file('.docker.env', this._config.content);
       const projects = zip.folder('.projects.env');
       this._projects.forEach(projectConfig => {
