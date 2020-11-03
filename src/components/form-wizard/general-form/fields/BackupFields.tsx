@@ -4,14 +4,20 @@ import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 const BackupFields = observer((props: any) => {
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(true);
 
   useEffect(() => {
     if (!props.hidden && init) {
-      runInAction(() => props.main.config.generateMainConfig());
+      runInAction(() => {
+        props.main.config.generateMainConfig();
+        setInit(false);
+      });
+    }
+
+    if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 
