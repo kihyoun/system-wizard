@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
 
 const ProxySettingsFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(true);
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
     if (!props.hidden && init) {

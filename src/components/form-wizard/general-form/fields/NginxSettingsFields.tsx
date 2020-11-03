@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 
 const NginxSettingsFields = observer((props: any) => {
-  const [init, setInit] = useState(true);
+  const [init, setInit] = useState(props.init);
 
   useEffect(() => {
     if (!props.hidden && init) {
