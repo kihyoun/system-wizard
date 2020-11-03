@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 
 const GitlabRunnerFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(true);
+  const [init, setInit] = useState(props.init);
 
   const handleInputChange = (event: any) => {
     runInAction(() => {

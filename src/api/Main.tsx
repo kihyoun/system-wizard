@@ -141,7 +141,10 @@ export default class Main {
 
     public importProjectEnv(file:File, result:string) {
       const config = new ProjectConfig(this);
-      runInAction(() => this.uploadProgress = true);
+      runInAction(() => {
+        this.uploadProgress = true;
+        this.init = false;
+      });
       runInAction(() => {
         const lines = result.split('\n');
         lines.forEach(line => {
@@ -155,7 +158,6 @@ export default class Main {
           config.setProperty(key, value);
         });
         this.addProject(config);
-        this.init = false;
         this.uploadProgress = false;
         console.group('Env File import');
         console.log(`Filename: ${file.name}`)
