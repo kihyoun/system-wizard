@@ -97,7 +97,7 @@ GITLAB_SSL_KEY=${this.gitlabSSLKey}
      const registry = `
 GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
 
-GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
+export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 GITLAB_REGISTRY_PORT=${this.gitlabRegistryPort}
 `;
