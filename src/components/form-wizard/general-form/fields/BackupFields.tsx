@@ -8,10 +8,16 @@ const BackupFields = observer((props: any) => {
 
   useEffect(() => {
     if (!props.hidden && init) {
-      runInAction(() => props.main.config.generateMainConfig());
+      runInAction(() => {
+        props.main.config.generateMainConfig();
+        setInit(false);
+      });
+    }
+
+    if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

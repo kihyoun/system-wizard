@@ -8,10 +8,16 @@ const GitlabSettingsFields = observer((props: any) => {
 
   useEffect(() => {
     if (!props.hidden && init) {
-      runInAction(() => props.main.config.generateGitlabConfig());
+      runInAction(() => {
+        setInit(false);
+        props.main.config.generateGitlabConfig()
+      });
+    }
+
+    if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

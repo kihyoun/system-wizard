@@ -29,10 +29,15 @@ const GitlabRunnerFields = observer((props: any) => {
 
   useEffect(() => {
     if (init && !props.hidden) {
-      runInAction(() => props.main.config.generateRunnerConfig());
+      runInAction(() => {
+        props.main.config.generateRunnerConfig()
+        setInit(false);
+      });
+    }
+    if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.init, props.hidden]);
+  }, [props.hidden, props.main.init]);
 
   const handleBlur = () => {
     if ( props.main.config.gitlabRunnerDockerScale < 0) {

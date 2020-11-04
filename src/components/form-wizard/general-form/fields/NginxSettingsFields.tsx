@@ -8,10 +8,15 @@ const NginxSettingsFields = observer((props: any) => {
 
   useEffect(() => {
     if (!props.hidden && init) {
-      runInAction(() => props.main.config.generateNginxConfig());
+      runInAction(() => {
+        props.main.config.generateNginxConfig()
+        setInit(false);
+      });
+    }
+    if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

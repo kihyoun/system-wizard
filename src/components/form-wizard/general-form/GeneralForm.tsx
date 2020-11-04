@@ -41,22 +41,20 @@ const GeneralForm = observer((props: any) => {
   const [runnerInit, setRunnerInit] = useState(props.main.init);
 
   useEffect(() => {
-    if (!props.main.init) {
-      runInAction(() => {
-        setBackupInit(false);
-        setGitlabInit(false);
-        setNginxInit(false);
-        setProxyInit(false);
-        setRunnerInit(false);
-      });
-    }
+    runInAction(() => {
+      setBackupInit(props.main.init);
+      setGitlabInit(props.main.init);
+      setNginxInit(props.main.init);
+      setProxyInit(props.main.init);
+      setRunnerInit(props.main.init);
+    });
   },[props.main.init]);
 
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [{
     label  : 'Backup',
-    enabled: !backupInit
+    enabled: true
   }, {
     label  : 'Gitlab',
     enabled: !gitlabInit
@@ -124,10 +122,10 @@ const GeneralForm = observer((props: any) => {
         </Grid>
         <Grid item xs={6}>
           <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
-          <GitlabSettingsFields init={true} hidden={activeStep !== 1} main={main} />
-          <NginxSettingsFields init={true} hidden={activeStep !== 2} main={main} />
-          <ProxySettingsFields init={true} hidden={activeStep !== 3} main={main} />
-          <GitlabRunnerFields init={true} hidden={activeStep !== 4} main={main} />
+          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
+          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 2} main={main} />
+          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
+          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 4} main={main} />
         </Grid>
       </Grid>
     </Paper>
