@@ -237,21 +237,21 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
     case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
     case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
     case 'GITLAB_HOST': this.gitlabHost = value; break;
-    case 'GITLAB_PORT': this.gitlabPort = value; break;
-    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = value; break;
+    case 'GITLAB_PORT': this.gitlabPort = parseInt(value, 10); break;
+    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(value, 10); break;
     case 'GITLAB_SSL': this.gitlabSSL = value.replace(/;/g, ''); break;
     case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_UPSTREAM': this.gitlabUpstream = value; break;
     case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
-    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = value; break;
-    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = value; break;
+    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
+    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = parseInt(value, 10); break;
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
     case 'NGINX_TEMPLATE_DIR': this.nginxTemplateDir = value; break;
     case 'SSL_BASEDIR': this.sslBaseDir = value; break;
-    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
-    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
+    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
     }
   }
 }
