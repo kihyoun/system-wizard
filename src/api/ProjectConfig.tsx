@@ -158,14 +158,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'PROD_HOST': this.prodHost = value; break;
      case 'PROD_PORT': this.prodPort = value; break;
      case 'PROD_DOMAIN_MODE': this.prodDomainMode = value; break;
-     case 'PROD_SSL': this.prodSSL = value; break;
-     case 'PROD_SSL_KEY': this.prodSSLKey = value; break;
+     case 'PROD_SSL': this.prodSSL = value.replace(/;/g, ''); break;
+     case 'PROD_SSL_KEY': this.prodSSLKey = value.replace(/;/g, ''); break;
      case 'USE_BETA_HOST': this.useBetaHost = value; break;
      case 'BETA_HOST': this.betaHost = value; break;
      case 'BETA_PORT': this.betaPort = value; break;
      case 'BETA_DOMAIN_MODE': this.betaDomainMode = value; break;
-     case 'BETA_SSL': this.betaSSL = value; break;
-     case 'BETA_SSL_KEY': this.betaSSLKey = value; break;
+     case 'BETA_SSL': this.betaSSL = value.replace(/;/g, ''); break;
+     case 'BETA_SSL_KEY': this.betaSSLKey = value.replace(/;/g, ''); break;
      case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
      case 'REVIEW_HOST': this.reviewHost = value; break;
      case 'REVIEW_PORT': this.reviewPort = value; break;
@@ -188,8 +188,8 @@ PROD_PORT=${this.prodPort}
 PROD_DOMAIN_MODE=${this.prodDomainMode}
 `;
      const prodSSL = `
-PROD_SSL=${this.prodSSL};
-PROD_SSL_KEY=${this.prodSSLKey};
+PROD_SSL=${this.prodSSL}
+PROD_SSL_KEY=${this.prodSSLKey}
 `;
      const betaUse = `
 # Set false if not using a Beta Deployment
@@ -201,8 +201,8 @@ BETA_PORT=${this.betaPort}
 BETA_DOMAIN_MODE=${this.betaDomainMode}
 `;
      const betaSSL = `
-BETA_SSL=${this.betaSSL};
-BETA_SSL_KEY=${this.betaSSLKey};
+BETA_SSL=${this.betaSSL}
+BETA_SSL_KEY=${this.betaSSLKey}
 `;
      const reviewUse = `
 # Set false if not using the Review
