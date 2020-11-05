@@ -28,10 +28,9 @@ export default function ImportFileDialog(props:any) {
       }
       reader.onload = function (evt:any) {
         try {
-          if (props.tab === 0) {
+          if (props.tab === 0 || file.name.substr(-4,4) === 'json') {
             props.main.importFile(file, evt.target.result);
-          }
-          if (props.tab === 1) {
+          } else if (props.tab === 1) {
             props.main.importProjectFile(file, evt.target.result);
           }
           props.setOpenSuccess('Import finished: ' + file.name);

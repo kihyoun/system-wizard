@@ -39,7 +39,6 @@ const useListSyles = makeStyles((theme: Theme) =>
 const ProjectCard = observer((props: any) => {
   const cardClasses = useCardStyles();
   const listClasses = useListSyles();
-
   return (
     <Grid item xs={4}>
       <Card color="primary.main" className={cardClasses.root}>
@@ -48,34 +47,34 @@ const ProjectCard = observer((props: any) => {
             <FormControlLabel
               control={
                 <Switch
-                  checked={props.useHost === 'true'}
+                  checked={props.hostInfo.useHost === 'true'}
                   onChange={ev => props.handleChange(ev.target.checked)}
                   name="prodCfg"
                   color="primary"
                 />
               }
-              label={props.context}
+              label={props.hostInfo.context}
             />
           </Toolbar>
 
-          {props.useHost === 'true' &&
+          {props.hostInfo.useHost === 'true' &&
           <List className={listClasses.root}>
             <ListItem>
               <ListItemText primary="Host"
-                secondary={(props.domainMode < 2 && 'http' || 'https') + `://${props.host}`} />
+                secondary={(props.hostInfo.domainMode < 2 ? 'http' : 'https') + `://${props.hostInfo.host}`} />
             </ListItem>
             <ListItem>
               <ListItemText primary="Internal Port"
-                secondary={props.port} />
+                secondary={props.hostInfo.port} />
             </ListItem>
-            {props.domainMode > 1 && (
+            {props.hostInfo.domainMode > 1 && (
               <>
                 <ListItem>
                   <ListItemText primary="SSL Certificate Path"
-                    secondary={props.ssl} />
+                    secondary={props.hostInfo.ssl} />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary="SSL Certificate Key" secondary={props.sslKey} />
+                  <ListItemText primary="SSL Certificate Key" secondary={props.hostInfo.sslKey} />
                 </ListItem>
               </> )}
           </List>

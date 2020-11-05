@@ -26,6 +26,9 @@ import ProjectCard from './ProjectCard';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { runInAction } from 'mobx';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import DownloadReactCiDialog from '../Dialogs/DownloadReactCiDialog';
+import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles({
   table: {
@@ -50,6 +53,7 @@ const ProjectsOverview = observer((props:any) => {
   const [openDelete, setOpenDelete] = useState(false);
   const [activeProject, setActiveProject] = useState('');
   const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
+  const [downloadReactCi, setDownloadReactCi] = useState(false);
 
 
   const handleDelete = () => {
@@ -63,8 +67,11 @@ const ProjectsOverview = observer((props:any) => {
 
   return (
     <>
-      <Snackbar open={openDeleteSuccess} autoHideDuration={6000} onClose={() => setOpenDeleteSuccess(false)}
+      <Snackbar open={openDeleteSuccess} autoHideDuration={6000}
+        onClose={() => setOpenDeleteSuccess(false)}
         message={'Project successfully deleted.'} />
+      {downloadReactCi && <DownloadReactCiDialog main={props.main} project={activeProject}
+        setClose={() => setDownloadReactCi(false)} />}
       <TableContainer component={Paper} >
         <Table className={classes.table}
           size="small" aria-label="a dense table">
@@ -85,45 +92,60 @@ const ProjectsOverview = observer((props:any) => {
                   className={rowClasses.root}
                   onClick={() => setCellOpen(cellOpen !== projectConfig.projectKey ? projectConfig.projectKey : '')}>
                   <TableCell>
-                    <IconButton aria-label="edit"
-                      onClick={event => {
-                        setActiveProject(projectConfig.projectKey);
-                        setOpen(true);
-                        event.stopPropagation();
-                        event.preventDefault();
-                      }}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton aria-label="delete"
-                      onClick={event => {
-                        setActiveProject(projectConfig.projectKey);
-                        setOpenDelete(true);
-                        event.stopPropagation();
-                        event.preventDefault();
-                      }}>
-                      <DeleteIcon />
-                    </IconButton>
+                    <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
+
+                      <IconButton aria-label="edit"
+                        onClick={event => {
+                          setActiveProject(projectConfig.projectKey);
+                          setOpen(true);
+                          event.stopPropagation();
+                          event.preventDefault();
+                        }}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton aria-label="delete"
+                        onClick={event => {
+                          setActiveProject(projectConfig.projectKey);
+                          setOpenDelete(true);
+                          event.stopPropagation();
+                          event.preventDefault();
+                        }}>
+                        <DeleteIcon />
+                      </IconButton>
+                      <IconButton aria-label="export"
+                        onClick={event => {
+                          runInAction(() => {
+                            setActiveProject(projectConfig.projectKey);
+                            setDownloadReactCi(true);
+                          });
+                          event.stopPropagation();
+                          event.preventDefault();
+                        }}>
+                        <SaveAltIcon />
+                      </IconButton>
+                    </ButtonGroup>
+
                   </TableCell>
 
                   <TableCell component="th" scope="row" >
                     {projectConfig.projectKey}
                   </TableCell>
-                  <TableCell>{projectConfig.prodHost}</TableCell>
-                  <TableCell>{projectConfig.betaHost}</TableCell>
-                  <TableCell>{projectConfig.reviewHost}</TableCell>
+                  <TableCell>{projectConfig.prodHostInfo.host}</TableCell>
+                  <TableCell>{projectConfig.betaHostInfo.host}</TableCell>
+                  <TableCell>{projectConfig.reviewHostInfo.host}</TableCell>
                   <TableCell>{projectConfig.gitlabRunnerDockerScale}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell colSpan={6}>
                     <Collapse in={cellOpen === projectConfig.projectKey} timeout="auto" unmountOnExit>
                       <Grid container spacing={3}>
-                        <ProjectCard {...projectConfig.prodHostInfo}
+                        <ProjectCard hostInfo={projectConfig.prodHostInfo}
                           handleChange={(checked:boolean) => runInAction(() =>
                             projectConfig.useProdHost = checked.toString())} />
-                        <ProjectCard {...projectConfig.betaHostInfo}
+                        <ProjectCard hostInfo={projectConfig.betaHostInfo}
                           handleChange={(checked:boolean) => runInAction(() =>
                             projectConfig.useBetaHost = checked.toString())} />
-                        <ProjectCard {...projectConfig.reviewHostInfo}
+                        <ProjectCard hostInfo={projectConfig.reviewHostInfo}
                           handleChange={(checked:boolean) => runInAction(() =>
                             projectConfig.useReviewHost = checked.toString())} />
                       </Grid>

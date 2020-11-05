@@ -42,13 +42,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function DownloadJsonDialog(props:any) {
+export default function DownloadReactCiDialog(props:any) {
   const [open, setOpen] = useState(true);
   const theme = useTheme();
   const [clipboard, setClipboard ] = useState(false);
-
   const classes = useStyles();
-
+  const project = props.main.projects.get(props.project);
   const handleClose = () => {
     setOpen(false);
     props.setClose();
@@ -87,9 +86,8 @@ export default function DownloadJsonDialog(props:any) {
         aria-labelledby="responsive-dialog-title"
       >
 
-        <DialogTitle id="responsive-dialog-title">Export settings as JSON</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Export .gitlab-ci.yml for React Projects</DialogTitle>
         <DialogContent>
-        The JSON File can be imported using the import Dialog
           <React.Fragment >
             <div className={classes.toolbarWrapper}>
               <Toolbar>
@@ -112,9 +110,9 @@ export default function DownloadJsonDialog(props:any) {
                         <Button size="small" onClick={() => {
                           const copyListener = (e:any) => {
                             e?.clipboardData?.setData('text/plain',
-                              JSON.stringify(props.main.asJson, null, 4));
+                              project.gitlabCi);
                             e?.clipboardData?.setData('text/html',
-                              JSON.stringify(props.main.asJson, null, 4));
+                              project.gitlabCi);
                             e?.preventDefault();
                           }
 
@@ -134,14 +132,14 @@ export default function DownloadJsonDialog(props:any) {
               </Toolbar>
             </div>
             <DialogContentText>
-              <SyntaxHighlighter language="json" style={duotoneLight}>
-                {JSON.stringify(props.main.asJson, null, 4)}
+              <SyntaxHighlighter language="yaml" style={duotoneLight}>
+                {project.gitlabCi}
               </SyntaxHighlighter>
             </DialogContentText>
           </React.Fragment>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={() => props.main.exportJson()}
+          <Button autoFocus onClick={() => project.exportGitlabCi()}
             color="primary" startIcon={<SaveIcon />}>
             Save
           </Button>
