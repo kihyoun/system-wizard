@@ -1,3 +1,4 @@
+import FileSaver from 'file-saver';
 import {
   action, computed, makeAutoObservable, runInAction
 } from 'mobx';
@@ -26,22 +27,58 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     prodHost!: string;
     useProdHost!:string;
-    prodPort!:number;
-    prodDomainMode!:number;
+    _prodPort!:number;
+    set prodPort(port:any) {
+      this._prodPort = parseInt(port, 10);
+    }
+    get prodPort() {
+      return this._prodPort;
+    }
+    _prodDomainMode!:number;
+    get prodDomainMode() {
+      return this._prodDomainMode;
+    }
+    set prodDomainMode(mode:any) {
+      this._prodDomainMode = parseInt(mode, 10);
+    }
     prodSSL!:string;
     prodSSLKey!:string;
 
     useBetaHost!:string;
     betaHost!:string;
-    betaPort!:number;
-    betaDomainMode!:number;
+    _betaPort!:number;
+    set betaPort(port:any) {
+      this._betaPort = parseInt(port, 10);
+    }
+    get betaPort() {
+      return this._betaPort;
+    }
+    _betaDomainMode!:number;
+    get betaDomainMode() {
+      return this._betaDomainMode;
+    }
+    set betaDomainMode(mode:any) {
+      this._betaDomainMode = parseInt(mode, 10);
+    }
     betaSSL!:string;
     betaSSLKey!:string;
 
     useReviewHost!:string;
     reviewHost!:string;
-    reviewPort!:number;
-    reviewDomainMode!:number;
+    _reviewPort!:number;
+    _reviewDomainMode!:number;
+    set reviewPort(port:any) {
+      this._reviewPort = parseInt(port, 10);
+    }
+    get reviewPort() {
+      return this._reviewPort;
+    }
+    get reviewDomainMode() {
+      return this._reviewDomainMode;
+    }
+    set reviewDomainMode(mode:any) {
+      this._reviewDomainMode = parseInt(mode, 10);
+    }
     reviewSSL!:string;
     reviewSSLKey!:string;
 
@@ -91,9 +128,10 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
   @computed get prodHostInfo(): HostInfo {
     return {
-      context   : 'Production',
-      useHost   : this.useProdHost,
-      host      : this.prodHost,
+      context: 'Production',
+      useHost: this.useProdHost,
+      host   : (this.prodDomainMode === 1 || this.prodDomainMode === 3 ? '*.' : '')
+        + this.prodHost,
       port      : this.prodPort,
       domainMode: this.prodDomainMode,
       ssl       : this.prodSSL,
@@ -114,9 +152,10 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
   @computed get betaHostInfo() : HostInfo {
     return {
-      context   : 'Beta',
-      useHost   : this.useBetaHost,
-      host      : this.betaHost,
+      context: 'Beta',
+      useHost: this.useBetaHost,
+      host   : (this.betaDomainMode === 1 || this.betaDomainMode === 3 ? '*.' : '')
+        + this.betaHost,
       port      : this.betaPort,
       domainMode: this.betaDomainMode,
       ssl       : this.betaSSL,
@@ -137,9 +176,10 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
   @computed get reviewHostInfo() : HostInfo{
    return {
-     context   : 'Review',
-     useHost   : this.useReviewHost,
-     host      : this.reviewHost,
+     context: 'Review',
+     useHost: this.useReviewHost,
+     host   : (this.reviewDomainMode === 1 || this.reviewDomainMode === 3 ? '*.' : '')
+     + this.reviewHost,
      port      : this.reviewPort,
      domainMode: this.reviewDomainMode,
      ssl       : this.reviewSSL,
@@ -234,6 +274,144 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
      + (this.reviewDomainMode > 1 && reviewSSL || '')
      + gitlabRunner
      + createdOn;
+   }
+
+   public get gitlabCi() : string {
+     const ret = Helper.textLogo + `# Gitlab CI Definition
+# ProjectID: ${this.projectKey}
+# Production: ${this.prodHost}
+# Beta: ${this.betaHost}
+# Beta: ${this.betaHost}
+# Filepath: ./gitlab-ci.yml
+image: docker:latest
+services:
+  - docker:dind
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+stages:
+  - build
+  - test
+  - deploy
+cache:
+  key: \${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm
+    - cache/Cypress
+    - node_modules
+build:
+  stage: build
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  only:
+    - merge_requests
+    - master
+test:cypress:
+  stage: test
+  services:
+    - name: $IMAGE_TAG
+      alias: alpha-host
+  image: cypress/base:10
+  script:
+    - npm ci
+    # check Cypress binary path and cached versions
+    # useful to make sure we are not carrying around old versions
+    - npx cypress cache path
+    - npx cypress cache list
+    - npx cypress run --config baseUrl=http://alpha-host:80
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/**/*.mp4
+      - cypress/screenshots/**/*.png
+    expire_in: 1 day
+  only:
+    - merge_requests
+    - master
+test:review:
+  stage: test
+  environment:
+    name: review/$CI_BUILD_REF_NAME
+    url: http://$CI_BUILD_REF_SLUG.${this.reviewHost}
+    on_stop: stop:review
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - set -e
+  script:
+    - docker run -itd --network ${this.projectKey}_review \\
+      -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} \\
+      --name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
+  except:
+    - master
+  only:
+    - merge_requests
+stop:review:
+  stage: deploy
+  allow_failure: true
+  script:
+    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+  environment:
+    name: review/$CI_BUILD_REF_NAME
+    action: stop
+  when: manual
+  only:
+    - merge_requests
+`;
+     const beta = `
+deploy:beta:
+  stage: deploy
+  environment:
+    name: production/beta
+    url: ${this.betaDomainMode < 2 ? 'http://' : 'https://'}${this.betaHost}
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop ${this.betaHost}
+    - docker rm ${this.betaHost}
+    - set -e
+  script:
+    - docker run -itd --network ${this.projectKey}_beta \\
+      -e VIRTUAL_HOST=${this.betaHost} \\
+      --name ${this.betaHost} $IMAGE_TAG
+  only:
+    - master
+`;
+     const prod = `
+deploy:prod:
+  stage: deploy
+  environment:
+    name: production/www
+    url: ${this.prodDomainMode < 2 ? 'http://' : 'https://'}${this.prodHost}
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop ${this.prodHost}
+    - docker rm ${this.prodHost}
+    - set -e
+  script:
+    - docker run -itd --network ${this.projectKey}_prod \\
+      -e VIRTUAL_HOST=${this.prodHost} \\
+      --name ${this.prodHost} $IMAGE_TAG
+  only:
+    - master
+`;
+     return ret
+     + (this.useBetaHost === 'true' && beta || '')
+     + (this.useProdHost === 'true' && prod || '');
+   }
+
+   public exportGitlabCi() {
+     const file = new File([this.gitlabCi],
+       'gitlab-ci.yml', { type: 'text/plain;charset=utf-8' });
+     FileSaver.saveAs(file);
    }
 
   @computed public get asJson() : any {

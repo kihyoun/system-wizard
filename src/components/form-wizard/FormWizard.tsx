@@ -104,7 +104,7 @@ const FormWizard = (props: any) => {
     }
     reader.onload = function (evt:any) {
       try {
-        if (tab === 0) {
+        if (tab === 0 || file.name.substr(-4,4) === 'json') {
           props.main.importFile(file, evt.target.result);
         }
         if (tab === 1) {
