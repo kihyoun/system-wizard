@@ -76,14 +76,16 @@ export default class ProjectConfig implements ProjectConfigInterface {
     });
   }
 
-  @action generateProdProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
+  @action generateProdProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
-      this.prodPort = _config?.prodPort || 80;
-      this.prodDomainMode = _config?.prodDomainMode || 2;
-      this.prodSSL = _config?.prodSSL || `${this._main.config?.sslBaseDir}/${this.prodHost}/fullchain.pem`;
-      this.prodSSLKey = _config?.prodSSLKey || `${this._main.config?.sslBaseDir}/${this.prodHost}/privkey.pem`;
+      this.prodPort = parseInt(_config?.prodPort, 10) || 80;
+      this.prodDomainMode = parseInt(_config?.prodDomainMode, 10) || 2;
+      this.prodSSL = _config?.prodSSL.replace(/;/g, '')
+        || `${this._main.config?.sslBaseDir}/${this.prodHost}/fullchain.pem`;
+      this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
+        || `${this._main.config?.sslBaseDir}/${this.prodHost}/privkey.pem`;
     });
   }
 
@@ -99,12 +101,12 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
-  @action generateBetaProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
+  @action generateBetaProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
-      this.betaPort = _config?.betaPort || 80;
-      this.betaDomainMode = _config?.betaDomainMode || 2;
+      this.betaPort = parseInt(_config?.betaPort, 10) || 80;
+      this.betaDomainMode = parseInt(_config?.betaDomainMode, 10) || 2;
       this.betaSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.betaHost}/fullchain.pem`;
       this.betaSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.betaHost}/privkey.pem`;
     });
@@ -122,12 +124,12 @@ export default class ProjectConfig implements ProjectConfigInterface {
     }
   }
 
- @action generateReviewProxyConfig(_config: ProjectConfigInterface | undefined = undefined): void {
+ @action generateReviewProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.useReviewHost = _config?.useReviewHost || 'false';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
-      this.reviewPort = _config?.betaPort || 80;
-      this.reviewDomainMode = _config?.reviewDomainMode || 1;
+      this.reviewPort = parseInt(_config?.betaPort, 10) || 80;
+      this.reviewDomainMode = parseInt(_config?.reviewDomainMode, 10) || 1;
       this.reviewSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.reviewHost}/fullchain.pem`;
       this.reviewSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.reviewHost}/privkey.pem`;
     });
@@ -145,9 +147,9 @@ export default class ProjectConfig implements ProjectConfigInterface {
    }
  }
 
-   @action generateRunnerConfig(_config: ProjectConfigInterface | undefined = undefined): void {
+   @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = _config?.gitlabRunnerDockerScale || 0;
+      this.gitlabRunnerDockerScale = parseInt(_config?.gitlabRunnerDockerScale, 10) || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
@@ -156,22 +158,22 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'PROJECT_NAME': this.projectKey = value; break;
      case 'USE_PROD_HOST': this.useProdHost = value; break;
      case 'PROD_HOST': this.prodHost = value; break;
-     case 'PROD_PORT': this.prodPort = value; break;
-     case 'PROD_DOMAIN_MODE': this.prodDomainMode = value; break;
+     case 'PROD_PORT': this.prodPort = parseInt(value, 10); break;
+     case 'PROD_DOMAIN_MODE': this.prodDomainMode = parseInt(value, 10); break;
      case 'PROD_SSL': this.prodSSL = value.replace(/;/g, ''); break;
      case 'PROD_SSL_KEY': this.prodSSLKey = value.replace(/;/g, ''); break;
      case 'USE_BETA_HOST': this.useBetaHost = value; break;
      case 'BETA_HOST': this.betaHost = value; break;
-     case 'BETA_PORT': this.betaPort = value; break;
-     case 'BETA_DOMAIN_MODE': this.betaDomainMode = value; break;
+     case 'BETA_PORT': this.betaPort = parseInt(value, 10); break;
+     case 'BETA_DOMAIN_MODE': this.betaDomainMode = parseInt(value, 10); break;
      case 'BETA_SSL': this.betaSSL = value.replace(/;/g, ''); break;
      case 'BETA_SSL_KEY': this.betaSSLKey = value.replace(/;/g, ''); break;
      case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
      case 'REVIEW_HOST': this.reviewHost = value; break;
-     case 'REVIEW_PORT': this.reviewPort = value; break;
-     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = value; break;
-     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
-     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+     case 'REVIEW_PORT': this.reviewPort = parseInt(value, 10); break;
+     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
+     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
+     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
      }
    }
 
@@ -214,8 +216,8 @@ REVIEW_PORT=${this.reviewPort}
 REVIEW_DOMAIN_MODE=${this.reviewDomainMode}
 `;
      const reviewSSL = `
-REVIEW_SSL=${this.reviewSSL};
-REVIEW_SSL_KEY=${this.reviewSSLKey};
+REVIEW_SSL=${this.reviewSSL}
+REVIEW_SSL_KEY=${this.reviewSSLKey}
   `;
      const gitlabRunner = `
 # -- GITLAB RUNNER for Project

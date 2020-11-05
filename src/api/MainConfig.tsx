@@ -11,12 +11,12 @@ export default class MainConfig implements MainConfigInterface {
    * Set Config
    * @param {MainConfig} config MainConfig
    */
-  constructor(_config: MainConfig | undefined = undefined) {
+  constructor(_config: any | undefined = undefined) {
     makeAutoObservable(this);
     this.generateConfig(_config);
   }
 
-  @action generateConfig(_config: MainConfig | undefined = undefined) {
+  @action generateConfig(_config: any | undefined = undefined) {
     this.generateMainConfig(_config);
     this.generateGitlabConfig(_config);
     this.generateNginxConfig(_config);
@@ -24,14 +24,14 @@ export default class MainConfig implements MainConfigInterface {
     this.generateRunnerConfig(_config);
   }
 
-  @action generateMainConfig(_config: MainConfig | undefined = undefined): void {
+  @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.liveDir = _config?.liveDir || '/srv';
       this.backupDir = _config?.backupDir || '/mnt/backup';
     });
   }
 
-  @action generateGitlabConfig(_config: MainConfig | undefined = undefined): void {
+  @action generateGitlabConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.gitlabHome = _config?.gitlabHome || `${this.liveDir}/gitlab`;
       this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
@@ -39,35 +39,37 @@ export default class MainConfig implements MainConfigInterface {
     });
   }
 
-  @action generateNginxConfig(_config: MainConfig | undefined = undefined): void {
+  @action generateNginxConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.nginxTemplateDir = _config?.nginxTemplateDir || `${this.liveDir}/nginx/templates`;
       this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
     });
   }
 
-  @action generateProxyConfig(_config: MainConfig | undefined = undefined): void {
+  @action generateProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.gitlabExternalUrl = _config?.gitlabExternalUrl || `https://${this.gitlabHost}`;
       this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
-      this.gitlabPort = _config?.gitlabPort || 80;
-      this.gitlabDomainMode = _config?.gitlabDomainMode || 2;
-      this.gitlabSSL = _config?.gitlabSSL || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
-      this.gitlabSSLKey = _config?.gitlabSSLKey || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
+      this.gitlabPort = parseInt(_config?.gitlabPort, 10) || 80;
+      this.gitlabDomainMode = parseInt(_config?.gitlabDomainMode) || 2;
+      this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
+      this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
       this.gitlabUpstream = _config?.gitlabUpstream || 'gitlab';
-      this.gitlabRegistryPort = _config?.gitlabRegistryPort || 5050;
-      this.gitlabRegistryDomainMode = _config?.gitlabRegistryDomainMode || 2;
-      this.gitlabRegistrySSL = _config?.gitlabRegistrySSL
+      this.gitlabRegistryPort = parseInt(_config?.gitlabRegistryPort, 10) || 5050;
+      this.gitlabRegistryDomainMode = parseInt(_config?.gitlabRegistryDomainMode, 10) || 2;
+      this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/fullchain.pem`;
-      this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey
+      this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/privkey.pem`;
       this.gitlabRegistryUpstream = _config?.gitlabRegistryUpstream || 'registry';
     });
   }
 
-   @action generateRunnerConfig(_config: MainConfig | undefined = undefined): void {
+   @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = _config?.gitlabRunnerDockerScale || 0;
+      this.gitlabRunnerDockerScale = parseInt(_config?.gitlabRunnerDockerScale, 10) || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
@@ -237,21 +239,21 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
     case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
     case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
     case 'GITLAB_HOST': this.gitlabHost = value; break;
-    case 'GITLAB_PORT': this.gitlabPort = value; break;
-    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = value; break;
+    case 'GITLAB_PORT': this.gitlabPort = parseInt(value, 10); break;
+    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(value, 10); break;
     case 'GITLAB_SSL': this.gitlabSSL = value.replace(/;/g, ''); break;
     case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_UPSTREAM': this.gitlabUpstream = value; break;
     case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
-    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = value; break;
-    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = value; break;
+    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
+    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = parseInt(value, 10); break;
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
     case 'NGINX_TEMPLATE_DIR': this.nginxTemplateDir = value; break;
     case 'SSL_BASEDIR': this.sslBaseDir = value; break;
-    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value; break;
-    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = value; break;
+    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
+    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
     }
   }
 }

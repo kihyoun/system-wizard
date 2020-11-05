@@ -34,7 +34,7 @@ export default class Main {
       this._projects = _projects || observable(new Map<string, ProjectConfig>());
     }
 
-    @action public generateConfig(_config: MainConfig | undefined): void {
+    @action public generateConfig(_config: any | undefined): void {
       this._config = new MainConfig(_config);
       this._placeHolder = new MainConfig(_config);
     }
