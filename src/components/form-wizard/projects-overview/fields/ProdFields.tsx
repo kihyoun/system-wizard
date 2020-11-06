@@ -58,6 +58,26 @@ const ProdFields = observer((props: any) => {
           runInAction(() => (props.config.prodHost = event.target.value));
         }}
       />
+      <FormControl className={classes.formControl}
+        disabled={props.config.useProdHost==='false'}
+      >
+        <InputLabel htmlFor="proddeploymode-native-helper">
+              Deployment
+        </InputLabel>
+        <NativeSelect
+          value={parseInt(props.config.prodDeployMode)}
+          onChange={(event: any) => {
+            runInAction(() => (props.config.prodDeployMode = event.target.value));
+          }}
+          inputProps={{
+            name: 'prodDeployMode',
+            id  : 'prodDeployMode-native-helper'
+          }}
+        >
+          <option value={0} aria-label="Manual" >Manual</option>
+          <option value={1}>Auto</option>
+        </NativeSelect>
+      </FormControl>
       <TextField
         label="PROD_PORT"
         disabled={props.config.useProdHost === 'false'}

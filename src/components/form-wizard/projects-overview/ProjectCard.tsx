@@ -64,6 +64,10 @@ const ProjectCard = observer((props: any) => {
                 secondary={(props.hostInfo.domainMode < 2 ? 'http' : 'https') + `://${props.hostInfo.host}`} />
             </ListItem>
             <ListItem>
+              <ListItemText primary="Deployment"
+                secondary={props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
+            </ListItem>
+            <ListItem>
               <ListItemText primary="Internal Port"
                 secondary={props.hostInfo.port} />
             </ListItem>

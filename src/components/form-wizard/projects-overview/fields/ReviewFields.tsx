@@ -57,6 +57,26 @@ const ReviewFields = observer((props: any) => {
           runInAction(() => (props.config.reviewHost = event.target.value));
         }}
       />
+      <FormControl className={classes.formControl}
+        disabled={props.config.useReviewHost==='false'}
+      >
+        <InputLabel htmlFor="reviewdeploymode-native-helper">
+              Deployment
+        </InputLabel>
+        <NativeSelect
+          value={props.config.reviewDeployMode}
+          onChange={(event: any) => {
+            runInAction(() => (props.config.reviewDeployMode = event.target.value));
+          }}
+          inputProps={{
+            name: 'reviewDeployMode',
+            id  : 'reviewDeployMode-native-helper'
+          }}
+        >
+          <option value={0}>Manual</option>
+          <option value={1}>Auto</option>
+        </NativeSelect>
+      </FormControl>
       <TextField
         label="REVIEW_PORT"
         disabled={props.config.useReviewHost === 'false'}

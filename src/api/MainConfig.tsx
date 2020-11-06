@@ -51,14 +51,14 @@ export default class MainConfig implements MainConfigInterface {
       this.gitlabExternalUrl = _config?.gitlabExternalUrl || `https://${this.gitlabHost}`;
       this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
       this.gitlabPort = parseInt(_config?.gitlabPort, 10) || 80;
-      this.gitlabDomainMode = parseInt(_config?.gitlabDomainMode) || 2;
+      this.gitlabDomainMode = _config ? parseInt(_config.gitlabDomainMode) || 0 : 2;
       this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
       this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
       this.gitlabUpstream = _config?.gitlabUpstream || 'gitlab';
       this.gitlabRegistryPort = parseInt(_config?.gitlabRegistryPort, 10) || 5050;
-      this.gitlabRegistryDomainMode = parseInt(_config?.gitlabRegistryDomainMode, 10) || 2;
+      this.gitlabRegistryDomainMode = _config ? parseInt(_config.gitlabRegistryDomainMode, 10) || 0 : 2;
       this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/fullchain.pem`;
       this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
@@ -69,7 +69,7 @@ export default class MainConfig implements MainConfigInterface {
 
    @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = parseInt(_config?.gitlabRunnerDockerScale, 10) || 0;
+      this.gitlabRunnerDockerScale = _config ? parseInt(_config.gitlabRunnerDockerScale, 10) : 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }

@@ -39,7 +39,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
       return this._prodDomainMode;
     }
     set prodDomainMode(mode:any) {
-      this._prodDomainMode = parseInt(mode, 10);
+      this._prodDomainMode = parseInt(mode, 10) || 0;
+    }
+    _prodDeployMode!:number;
+    get prodDeployMode() {
+      return this._prodDeployMode;
+    }
+    set prodDeployMode(mode:any) {
+      this._prodDeployMode = parseInt(mode, 10) || 0
     }
     prodSSL!:string;
     prodSSLKey!:string;
@@ -58,7 +65,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
       return this._betaDomainMode;
     }
     set betaDomainMode(mode:any) {
-      this._betaDomainMode = parseInt(mode, 10);
+      this._betaDomainMode = parseInt(mode, 10) || 0;
+    }
+    _betaDeployMode!:number;
+    get betaDeployMode() {
+      return this._betaDeployMode;
+    }
+    set betaDeployMode(mode:any) {
+      this._betaDeployMode = parseInt(mode, 10) || 0
     }
     betaSSL!:string;
     betaSSLKey!:string;
@@ -77,7 +91,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
       return this._reviewDomainMode;
     }
     set reviewDomainMode(mode:any) {
-      this._reviewDomainMode = parseInt(mode, 10);
+      this._reviewDomainMode = parseInt(mode, 10) || 0;
+    }
+    _reviewDeployMode!:number;
+    get reviewDeployMode() {
+      return this._reviewDeployMode;
+    }
+    set reviewDeployMode(mode:any) {
+      this._reviewDeployMode = parseInt(mode, 10) || 0;
     }
     reviewSSL!:string;
     reviewSSLKey!:string;
@@ -118,7 +139,8 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
       this.prodPort = parseInt(_config?.prodPort, 10) || 80;
-      this.prodDomainMode = parseInt(_config?.prodDomainMode, 10) || 2;
+      this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
+      this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
       this.prodSSL = _config?.prodSSL.replace(/;/g, '')
         || `${this._main.config?.sslBaseDir}/${this.prodHost}/fullchain.pem`;
       this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
@@ -134,6 +156,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
         + this.prodHost,
       port      : this.prodPort,
       domainMode: this.prodDomainMode,
+      deployMode: this.prodDeployMode,
       ssl       : this.prodSSL,
       sslKey    : this.prodSSLKey
     }
@@ -144,7 +167,8 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
       this.betaPort = parseInt(_config?.betaPort, 10) || 80;
-      this.betaDomainMode = parseInt(_config?.betaDomainMode, 10) || 2;
+      this.betaDomainMode = _config ? parseInt(_config.betaDomainMode, 10) || 0 : 2;
+      this.betaDeployMode = _config ? parseInt(_config.betaDeployMode, 10) || 0 : 1;
       this.betaSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.betaHost}/fullchain.pem`;
       this.betaSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.betaHost}/privkey.pem`;
     });
@@ -158,6 +182,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
         + this.betaHost,
       port      : this.betaPort,
       domainMode: this.betaDomainMode,
+      deployMode: this.betaDeployMode,
       ssl       : this.betaSSL,
       sslKey    : this.betaSSLKey
     }
@@ -165,10 +190,11 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
  @action generateReviewProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.useReviewHost = _config?.useReviewHost || 'false';
+      this.useReviewHost = _config?.useReviewHost || 'true';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
       this.reviewPort = parseInt(_config?.betaPort, 10) || 80;
-      this.reviewDomainMode = parseInt(_config?.reviewDomainMode, 10) || 1;
+      this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
+      this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
       this.reviewSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.reviewHost}/fullchain.pem`;
       this.reviewSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.reviewHost}/privkey.pem`;
     });
@@ -182,6 +208,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
      + this.reviewHost,
      port      : this.reviewPort,
      domainMode: this.reviewDomainMode,
+     deployMode: this.reviewDeployMode,
      ssl       : this.reviewSSL,
      sslKey    : this.reviewSSLKey
    }
@@ -352,6 +379,7 @@ test:review:
     - master
   only:
     - merge_requests
+  ${this.reviewDeployMode === 0 && 'when: manual' || ''}
 stop:review:
   stage: deploy
   allow_failure: true
@@ -383,6 +411,7 @@ deploy:beta:
       --name ${this.betaHost} $IMAGE_TAG
   only:
     - master
+  ${this.betaDeployMode === 0 && 'when: manual' || ''}
 `;
      const prod = `
 deploy:prod:
@@ -402,6 +431,7 @@ deploy:prod:
       --name ${this.prodHost} $IMAGE_TAG
   only:
     - master
+  ${this.prodDeployMode === 0 && 'when: manual' || ''}
 `;
      return ret
      + (this.useBetaHost === 'true' && beta || '')
@@ -424,7 +454,8 @@ deploy:prod:
        ret = Object.assign(ret, {
          prodHost      : this.prodHost,
          prodPort      : this.prodPort,
-         prodDomainMode: this.prodDomainMode
+         prodDomainMode: this.prodDomainMode,
+         prodDeployMode: this.prodDeployMode
        });
 
        if (this.prodDomainMode > 1) {
@@ -441,7 +472,8 @@ deploy:prod:
        ret = Object.assign(ret, {
          betaHost      : this.betaHost,
          betaPort      : this.betaPort,
-         betaDomainMode: this.betaDomainMode
+         betaDomainMode: this.betaDomainMode,
+         betaDeployMode: this.betaDeployMode
        });
 
        if (this.betaDomainMode > 1) {
@@ -458,7 +490,8 @@ deploy:prod:
        ret = Object.assign(ret, {
          reviewHost      : this.reviewHost,
          reviewPort      : this.reviewPort,
-         reviewDomainMode: this.reviewDomainMode
+         reviewDomainMode: this.reviewDomainMode,
+         reviewDeployMode: this.reviewDeployMode
        });
 
        if (this.reviewDomainMode > 1) {
@@ -483,6 +516,7 @@ export interface HostInfo {
   context: string;
   useHost: string;
   domainMode: number;
+  deployMode: number;
   host: string;
   port: number;
   ssl: string;
