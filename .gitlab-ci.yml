@@ -34,12 +34,14 @@ stages:
   - build
   - test
   - deploy
+  - deploy:rollout
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .npm
     - cache/Cypress
     - node_modules
+
 build:
   stage: build
   before_script:
@@ -50,6 +52,7 @@ build:
   only:
     - merge_requests
     - master
+
 test:cypress:
   stage: test
   services:
@@ -58,8 +61,6 @@ test:cypress:
   image: cypress/base:10
   script:
     - npm ci
-    # check Cypress binary path and cached versions
-    # useful to make sure we are not carrying around old versions
     - npx cypress cache path
     - npx cypress cache list
     - npx cypress run --config baseUrl=http://alpha-host:80
@@ -72,6 +73,7 @@ test:cypress:
   only:
     - merge_requests
     - master
+
 test:review:
   stage: test
   environment:
@@ -104,7 +106,7 @@ stop:review:
   only:
     - merge_requests
 
-deploy:prod:
+deploy:www:
   stage: deploy
   environment:
     name: production/www
@@ -116,9 +118,55 @@ deploy:prod:
     - docker rm www.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_prod \
-      -e VIRTUAL_HOST=www.system-bootstrapper.com \
-      --name www.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - master
 
+deploy:dockerhub:
+  stage: deploy
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker tag $IMAGE_TAG systembootstrapper/wizard:latest
+    - echo "$DOCKERHUB_PASS" | docker login --username $DOCKERHUB_USER --password-stdin
+    - docker push systembootstrapper/wizard:latest
+  only:
+    - master
+
+deploy:github:
+  stage: deploy
+  image: node:alpine
+  before_script:
+    - 'which ssh-agent || ( apk update && apk add openssh-client git)'
+    - eval $(ssh-agent -s)
+    - echo "$GITHUB_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan github.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - git remote rm origin && git remote add origin git@github.com:kihyoun/system-wizard.git
+    - git push origin HEAD:master
+  only:
+    - master
+
+deploy:system:
+  stage: deploy:rollout
+  image: node:alpine
+  before_script:
+    - 'which ssh-agent || ( apk update && apk add openssh-client git)'
+    - eval $(ssh-agent -s)
+    - echo "$SYSTEM_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.system-bootstrapper.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - git clone git@gitlab.system-bootstrapper.com:system-bootstrapper/system.git
+    - cd system/wizard
+    - git checkout master
+    - git pull -r
+    - cd ..
+    - git diff-index --quiet HEAD || git commit -am "Pulled down update to system/wizard"
+  only:
+    - master

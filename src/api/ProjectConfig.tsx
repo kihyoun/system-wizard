@@ -3,7 +3,7 @@ import {
   action, computed, makeAutoObservable, runInAction
 } from 'mobx';
 import Helper from './Helper';
-import Main from './Main';
+import Main, { HostInfo } from './Main';
 
 /**
  * General Configuration Object
@@ -27,13 +27,6 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     prodHost!: string;
     useProdHost!:string;
-    _prodPort!:number;
-    set prodPort(port:any) {
-      this._prodPort = parseInt(port, 10);
-    }
-    get prodPort() {
-      return this._prodPort;
-    }
     _prodDomainMode!:number;
     get prodDomainMode() {
       return this._prodDomainMode;
@@ -53,13 +46,6 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     useBetaHost!:string;
     betaHost!:string;
-    _betaPort!:number;
-    set betaPort(port:any) {
-      this._betaPort = parseInt(port, 10);
-    }
-    get betaPort() {
-      return this._betaPort;
-    }
     _betaDomainMode!:number;
     get betaDomainMode() {
       return this._betaDomainMode;
@@ -79,14 +65,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     useReviewHost!:string;
     reviewHost!:string;
-    _reviewPort!:number;
     _reviewDomainMode!:number;
-    set reviewPort(port:any) {
-      this._reviewPort = parseInt(port, 10);
-    }
-    get reviewPort() {
-      return this._reviewPort;
-    }
     get reviewDomainMode() {
       return this._reviewDomainMode;
     }
@@ -104,7 +83,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     reviewSSLKey!:string;
 
     gitlabRunnerToken!:string;
-    gitlabRunnerDockerScale!:number;
+    gitlabRunnerScale!:number;
 
     _main!: Main;
     saved = false;
@@ -138,13 +117,12 @@ export default class ProjectConfig implements ProjectConfigInterface {
     runInAction(() => {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
-      this.prodPort = parseInt(_config?.prodPort, 10) || 80;
       this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
       this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
       this.prodSSL = _config?.prodSSL.replace(/;/g, '')
-        || `${this._main.config?.sslBaseDir}/${this.prodHost}/fullchain.pem`;
+        || `/lilve/${this.prodHost}/fullchain.pem`;
       this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
-        || `${this._main.config?.sslBaseDir}/${this.prodHost}/privkey.pem`;
+        || `/live/${this.prodHost}/privkey.pem`;
     });
   }
 
@@ -155,7 +133,6 @@ export default class ProjectConfig implements ProjectConfigInterface {
       context   : 'Production',
       useHost   : this.useProdHost,
       host,
-      port      : this.prodPort,
       domainMode: this.prodDomainMode,
       deployMode: this.prodDeployMode,
       ssl       : this.prodSSL,
@@ -168,11 +145,10 @@ export default class ProjectConfig implements ProjectConfigInterface {
     runInAction(() => {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
-      this.betaPort = parseInt(_config?.betaPort, 10) || 80;
       this.betaDomainMode = _config ? parseInt(_config.betaDomainMode, 10) || 0 : 2;
       this.betaDeployMode = _config ? parseInt(_config.betaDeployMode, 10) || 0 : 1;
-      this.betaSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.betaHost}/fullchain.pem`;
-      this.betaSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.betaHost}/privkey.pem`;
+      this.betaSSL = _config?.betaSSL || `/live/${this.betaHost}/fullchain.pem`;
+      this.betaSSLKey = _config?.betaSSLKey || `/live/${this.betaHost}/privkey.pem`;
     });
   }
 
@@ -183,7 +159,6 @@ export default class ProjectConfig implements ProjectConfigInterface {
       context   : 'Beta',
       useHost   : this.useBetaHost,
       host,
-      port      : this.betaPort,
       domainMode: this.betaDomainMode,
       deployMode: this.betaDeployMode,
       ssl       : this.betaSSL,
@@ -196,11 +171,10 @@ export default class ProjectConfig implements ProjectConfigInterface {
     runInAction(() => {
       this.useReviewHost = _config?.useReviewHost || 'true';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
-      this.reviewPort = parseInt(_config?.betaPort, 10) || 80;
       this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
       this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
-      this.reviewSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.reviewHost}/fullchain.pem`;
-      this.reviewSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.reviewHost}/privkey.pem`;
+      this.reviewSSL = _config?.betaSSL || `/live/${this.reviewHost}/fullchain.pem`;
+      this.reviewSSLKey = _config?.betaSSLKey || `/live/${this.reviewHost}/privkey.pem`;
     });
   }
 
@@ -211,7 +185,6 @@ export default class ProjectConfig implements ProjectConfigInterface {
      context   : 'Review',
      useHost   : this.useReviewHost,
      host,
-     port      : this.reviewPort,
      domainMode: this.reviewDomainMode,
      deployMode: this.reviewDeployMode,
      ssl       : this.reviewSSL,
@@ -222,7 +195,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
    @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = parseInt(_config?.gitlabRunnerDockerScale, 10) || 0;
+      this.gitlabRunnerScale = parseInt(_config?.gitlabRunnerScale, 10) || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
@@ -231,22 +204,19 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'PROJECT_NAME': this.projectKey = value; break;
      case 'USE_PROD_HOST': this.useProdHost = value; break;
      case 'PROD_HOST': this.prodHost = value; break;
-     case 'PROD_PORT': this.prodPort = parseInt(value, 10); break;
      case 'PROD_DOMAIN_MODE': this.prodDomainMode = parseInt(value, 10); break;
      case 'PROD_SSL': this.prodSSL = value.replace(/;/g, ''); break;
      case 'PROD_SSL_KEY': this.prodSSLKey = value.replace(/;/g, ''); break;
      case 'USE_BETA_HOST': this.useBetaHost = value; break;
      case 'BETA_HOST': this.betaHost = value; break;
-     case 'BETA_PORT': this.betaPort = parseInt(value, 10); break;
      case 'BETA_DOMAIN_MODE': this.betaDomainMode = parseInt(value, 10); break;
      case 'BETA_SSL': this.betaSSL = value.replace(/;/g, ''); break;
      case 'BETA_SSL_KEY': this.betaSSLKey = value.replace(/;/g, ''); break;
      case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
      case 'REVIEW_HOST': this.reviewHost = value; break;
-     case 'REVIEW_PORT': this.reviewPort = parseInt(value, 10); break;
      case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
      case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
-     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
+     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
      }
    }
 
@@ -259,7 +229,6 @@ USE_PROD_HOST=${this.useProdHost}
      const prod = `
 PROJECT_NAME=${this.projectKey}
 PROD_HOST=${this.prodHost}
-PROD_PORT=${this.prodPort}
 PROD_DOMAIN_MODE=${this.prodDomainMode}
 `;
      const prodSSL = `
@@ -272,7 +241,6 @@ USE_BETA_HOST=${this.useBetaHost}
 `;
      const beta = `
 BETA_HOST=${this.betaHost}
-BETA_PORT=${this.betaPort}
 BETA_DOMAIN_MODE=${this.betaDomainMode}
 `;
      const betaSSL = `
@@ -285,7 +253,6 @@ USE_REVIEW_HOST=${this.useReviewHost}
 `;
      const reviewHost =`
 REVIEW_HOST=${this.reviewHost}
-REVIEW_PORT=${this.reviewPort}
 REVIEW_DOMAIN_MODE=${this.reviewDomainMode}
 `;
      const reviewSSL = `
@@ -295,7 +262,7 @@ REVIEW_SSL_KEY=${this.reviewSSLKey}
      const gitlabRunner = `
 # -- GITLAB RUNNER for Project
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
-export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
+export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
 `;
      const createdOn = `# created on ${new Date()}`;
      return ret
@@ -365,6 +332,9 @@ test:cypress:
   only:
     - merge_requests
     - master
+    `;
+
+     const review =`
 test:review:
   stage: test
   environment:
@@ -398,6 +368,8 @@ stop:review:
   when: manual
   only:
     - merge_requests
+  ${this.betaDeployMode === 0 && 'when: manual' || ''}
+
 `;
      const beta = `
 deploy:beta:
@@ -412,9 +384,9 @@ deploy:beta:
     - docker rm ${this.betaHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_beta \\
-      -e VIRTUAL_HOST=${this.betaHost} \\
-      --name ${this.betaHost} $IMAGE_TAG
+    - docker run -itd --network ${this.projectKey}_beta `
+    + `-e VIRTUAL_HOST=${this.betaHost} `
+    + `--name ${this.betaHost} $IMAGE_TAG
   only:
     - master
   ${this.betaDeployMode === 0 && 'when: manual' || ''}
@@ -432,14 +404,15 @@ deploy:prod:
     - docker rm ${this.prodHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_prod \\
-      -e VIRTUAL_HOST=${this.prodHost} \\
-      --name ${this.prodHost} $IMAGE_TAG
+    - docker run -itd --network ${this.projectKey}_prod `
+      + `-e VIRTUAL_HOST=${this.prodHost} `
+      + `--name ${this.prodHost} $IMAGE_TAG
   only:
     - master
   ${this.prodDeployMode === 0 && 'when: manual' || ''}
 `;
      return ret
+     + (this.useReviewHost === 'true' && review || '')
      + (this.useBetaHost === 'true' && beta || '')
      + (this.useProdHost === 'true' && prod || '');
    }
@@ -459,7 +432,6 @@ deploy:prod:
      if (this.useProdHost === 'true' ) {
        ret = Object.assign(ret, {
          prodHost      : this.prodHost,
-         prodPort      : this.prodPort,
          prodDomainMode: this.prodDomainMode,
          prodDeployMode: this.prodDeployMode
        });
@@ -477,7 +449,6 @@ deploy:prod:
      if (this.useBetaHost === 'true') {
        ret = Object.assign(ret, {
          betaHost      : this.betaHost,
-         betaPort      : this.betaPort,
          betaDomainMode: this.betaDomainMode,
          betaDeployMode: this.betaDeployMode
        });
@@ -495,7 +466,6 @@ deploy:prod:
      if (this.useReviewHost === 'true') {
        ret = Object.assign(ret, {
          reviewHost      : this.reviewHost,
-         reviewPort      : this.reviewPort,
          reviewDomainMode: this.reviewDomainMode,
          reviewDeployMode: this.reviewDeployMode
        });
@@ -509,8 +479,8 @@ deploy:prod:
      }
 
      const config = Object.assign(ret, {
-       gitlabRunnerToken      : this.gitlabRunnerToken,
-       gitlabRunnerDockerScale: this.gitlabRunnerDockerScale
+       gitlabRunnerToken: this.gitlabRunnerToken,
+       gitlabRunnerScale: this.gitlabRunnerScale
      });
 
      return config;
@@ -518,38 +488,25 @@ deploy:prod:
 
 }
 
-export interface HostInfo {
-  context: string;
-  useHost: string;
-  domainMode: number;
-  deployMode: number;
-  host: string;
-  port: number;
-  ssl: string;
-  sslKey: string;
-  url: string;
-}
+
 
 export interface ProjectConfigInterface {
   projectKey:string;
   prodHost?: string;
   useProdHost:string;
-  prodPort?:number;
   prodDomainMode?:number;
   prodSSL?:string;
   prodSSLKey?:string;
   useBetaHost:string;
   betaHost?:string;
-  betaPort?:number;
   betaDomainMode:number;
   betaSSL?:string;
   betaSSLKey?:string;
   useReviewHost:string;
   reviewHost?:string;
-  reviewPort?:number;
   reviewDomainMode?:number;
   reviewSSL?:string;
   reviewSSLKey?:string;
   gitlabRunnerToken:string;
-  gitlabRunnerDockerScale:number;
+  gitlabRunnerScale:number;
 }

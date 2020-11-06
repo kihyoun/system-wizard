@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import {
-  FormControl, InputLabel, makeStyles, NativeSelect
+  FormControl, FormHelperText, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -28,54 +28,28 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ProxySettingsFields = observer((props: any) => {
+const SSLSettingsFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(props.main.init);
 
   useEffect(() => {
-    if (!props.hidden && init) {
+    if (!props.hidden && init && props.main.init) {
       runInAction(() => {
         props.main.config.generateProxyConfig()
         setInit(false)
       });
     }
-    if (!props.main.init && init) {
+    if (!props.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.main.init]);
+  }, [props.hidden, props.init, props.main.init]);
 
   if (props.hidden) return null;
 
   return (
     <>
-      <h2>Gitlab Proxy Settings</h2>
-
-      <TextField
-        label="GITLAB_EXTERNAL_URL"
-        value={props.main.config.gitlabExternalUrl}
-        disabled={true}
-        style={{ margin: 8 }}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
-      <TextField
-        label="GITLAB_PORT"
-        value={props.main.config.gitlabPort}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabPort?.toString()}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="Internal Port"
-        onChange={event => {
-          runInAction(() => (props.main.config.gitlabPort = event.target.value));
-        }}
-      />
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="domainmode-native-helper">
-              GITLAB_DOMAIN_MODE
-        </InputLabel>
+        <InputLabel htmlFor="domainmode-native-helper">GITLAB_DOMAIN_MODE</InputLabel>
         <NativeSelect
           value={props.main.config.gitlabDomainMode}
           onChange={(event: any) => {
@@ -86,13 +60,10 @@ const ProxySettingsFields = observer((props: any) => {
             id  : 'domainmode-native-helper'
           }}
         >
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={1}>Wildcard HTTP</option>
+          <option value={0}>Default, HTTP</option>
           <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.main.config.gitlabExternalUrl}</FormHelperText>
       </FormControl>
       <TextField
         label="GITLAB_SSL"
@@ -122,45 +93,7 @@ const ProxySettingsFields = observer((props: any) => {
           runInAction(() => (props.main.config.gitlabSSLKey = event.target.value));
         }}
       />
-      <TextField
-        label="GITLAB_UPSTREAM"
-        value={props.main.config.gitlabUpstream}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabUpstream}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="The Name of the upstream
-              inside the NGINX Main configuration"
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabUpstream = event.target.value));
-        }}
-      />
 
-      <h2>Gitlab Registry Settings</h2>
-
-      <TextField
-        label="GITLAB_REGISTRY_URL"
-        value={props.main.config.gitlabRegistryUrl}
-        style={{ margin: 8 }}
-        disabled={true}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
-      <TextField
-        label="GITLAB_REGISTRY_PORT"
-        style={{ margin: 8 }}
-        value={props.main.config.gitlabRegistryPort}
-        placeholder={props.main.placeholder.gitlabRegistryPort.toString()}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="Internal Port"
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabRegistryPort = event.target.value));
-        }}
-      />
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="regdomainmode-native-helper">
               GITLAB_REGISTRY_DOMAIN_MODE
@@ -175,13 +108,10 @@ const ProxySettingsFields = observer((props: any) => {
             id  : 'regdomainmode-native-helper'
           }}
         >
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={1}>Wildcard HTTP</option>
+          <option value={0}>Default, HTTP</option>
           <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.main.config.gitlabRegistryUrl}</FormHelperText>
       </FormControl>
       <TextField
         label="GITLAB_REGISTRY_SSL"
@@ -211,20 +141,8 @@ const ProxySettingsFields = observer((props: any) => {
         }}
         helperText="Path to Registry SSL Key"
       />
-      <TextField
-        label="GITLAB_REGISTRY_UPSTREAM"
-        value={props.main.config.gitlabRegistryUpstream}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabRegistryUpstream}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabRegistryUpstream = event.target.value));
-        }}
-      />
     </>
   );
 });
 
-export default ProxySettingsFields;
+export default SSLSettingsFields;

@@ -8,7 +8,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   createStyles, makeStyles, Theme, useTheme
 } from '@material-ui/core/styles';
-import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Zoom from '@material-ui/core/Zoom';
@@ -17,6 +16,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Toolbar } from '@material-ui/core';
 import { runInAction } from 'mobx';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -103,7 +103,7 @@ export default function DownloadProjectsDialog(props:any) {
         aria-labelledby="responsive-dialog-title"
       >
 
-        <DialogTitle id="responsive-dialog-title">Export Proxy Configurations</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Save Proxy Configurations</DialogTitle>
         <DialogContent>
 
           {[...props.main.projects.values()].map(projectConfig => {
@@ -137,13 +137,8 @@ export default function DownloadProjectsDialog(props:any) {
                               if (conf) {
                                 runInAction(() => {
                                   const copyListener = (e:any) => {
-                                  // e.clipboardData is initially empty, but we can set it to the
-                                  // data that we want copied onto the clipboard.
                                     e?.clipboardData?.setData('text/plain', projectConfig.content);
                                     e?.clipboardData?.setData('text/html', projectConfig.content);
-
-                                    // This is necessary to prevent the current document selection from
-                                    // being written to the clipboard.
                                     e?.preventDefault();
                                   }
                                   document.addEventListener('copy', copyListener);
@@ -166,9 +161,7 @@ export default function DownloadProjectsDialog(props:any) {
                 </div>
 
                 <DialogContentText>
-                  <SyntaxHighlighter language="bash" style={duotoneLight}>
-                    {`$ cat ./.projects.env/.${projectConfig.projectKey}.env`}
-                  </SyntaxHighlighter>
+                  {`system/.projects.env/.${projectConfig.projectKey}.env`}
                   <SyntaxHighlighter language="bash" style={duotoneLight}>
                     {projectConfig.content}
                   </SyntaxHighlighter>
@@ -182,8 +175,8 @@ export default function DownloadProjectsDialog(props:any) {
 
         <DialogActions>
           <Button autoFocus onClick={() => props.main.exportProjectConfigs()}
-            color="primary" startIcon={<SaveIcon />}>
-            Save
+            color="primary" startIcon={<GetAppIcon />}>
+            Download
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
             Close

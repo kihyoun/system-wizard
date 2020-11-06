@@ -8,13 +8,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   createStyles, makeStyles, Theme, useTheme
 } from '@material-ui/core/styles';
-import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Zoom from '@material-ui/core/Zoom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -44,13 +44,8 @@ export default function DownloadDockerDialog(props:any) {
   const classes = useStyles();
 
   const copyListener = (e:any) => {
-    // e.clipboardData is initially empty, but we can set it to the
-    // data that we want copied onto the clipboard.
     e?.clipboardData?.setData('text/plain', props.main.config.content);
     e?.clipboardData?.setData('text/html', props.main.config.content);
-
-    // This is necessary to prevent the current document selection from
-    // being written to the clipboard.
     e?.preventDefault();
   }
 
@@ -121,12 +116,9 @@ export default function DownloadDockerDialog(props:any) {
             </Tooltip>
           </Zoom>
         ))}
-        <DialogTitle id="responsive-dialog-title">Export Configuration</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Save Main Configuration</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <SyntaxHighlighter language="bash" style={duotoneLight}>
-              {'$ cat ./.docker.env'}
-            </SyntaxHighlighter>
             <SyntaxHighlighter language="bash" style={duotoneLight}>
               {props.main.config.content}
             </SyntaxHighlighter>
@@ -134,8 +126,8 @@ export default function DownloadDockerDialog(props:any) {
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => props.main.config.exportConfig()}
-            color="primary" startIcon={<SaveIcon />}>
-            Save
+            color="primary" startIcon={<GetAppIcon />}>
+            Download
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
             Close

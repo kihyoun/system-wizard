@@ -28,7 +28,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { runInAction } from 'mobx';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import DownloadReactCiDialog from '../Dialogs/DownloadReactCiDialog';
+import DownloadReactCiDialog from '../dialog/DownloadReactCiDialog';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles({
@@ -77,7 +77,7 @@ const ProjectsOverview = observer((props:any) => {
         message={'Project successfully deleted.'} />
       {downloadReactCi && <DownloadReactCiDialog main={props.main} project={activeProject}
         setClose={() => setDownloadReactCi(false)} />}
-      <TableContainer component={Paper} >
+      <TableContainer component={Paper} elevation={0}>
         <Table className={classes.table}
           size="small" aria-label="a dense table">
           <TableHead>
@@ -98,9 +98,10 @@ const ProjectsOverview = observer((props:any) => {
                   <TableCell component="th" scope="row" >
                     {projectConfig.projectKey}
                   </TableCell>
-                  <TableCell>{projectConfig.prodHostInfo.url}</TableCell>
-                  <TableCell>{projectConfig.betaHostInfo.url}</TableCell>
-                  <TableCell>{projectConfig.reviewHostInfo.url}</TableCell>
+                  <TableCell>{projectConfig.useProdHost === 'true' && projectConfig.prodHostInfo.url || '-'}</TableCell>
+                  <TableCell>{projectConfig.useBetaHost === 'true' && projectConfig.betaHostInfo.url || '-'}</TableCell>
+                  <TableCell>{projectConfig.useReviewHost === 'true'
+                  && projectConfig.reviewHostInfo.url || '-'}</TableCell>
                   <TableCell>
                     <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
 

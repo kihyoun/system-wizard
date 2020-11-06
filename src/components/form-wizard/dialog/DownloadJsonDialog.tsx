@@ -8,7 +8,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   createStyles, makeStyles, Theme, useTheme
 } from '@material-ui/core/styles';
-import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Zoom from '@material-ui/core/Zoom';
@@ -16,6 +15,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Toolbar } from '@material-ui/core';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -142,8 +142,8 @@ export default function DownloadJsonDialog(props:any) {
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => props.main.exportJson()}
-            color="primary" startIcon={<SaveIcon />}>
-            Save
+            color="primary" startIcon={<GetAppIcon />}>
+            Download
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
             Close

@@ -1,16 +1,18 @@
 FROM node:13.12.0-alpine as builder
 
-# set working directory
+# Clone Wizard Repository
+WORKDIR /
+RUN apk update
+RUN apk add git
+RUN git clone https://github.com/kihyoun/system-wizard.git /app
 WORKDIR /app
-
+# Checkout
+RUN git checkout 9e29127b9af6f67df367fa9489768c3fd902ad43 -b release
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
 # install app dependencies
-COPY package.json ./
 RUN npm install -f --silent
-# add app
-COPY . ./
 RUN npm ci -f --silent
 # create production build
 RUN npm run build
