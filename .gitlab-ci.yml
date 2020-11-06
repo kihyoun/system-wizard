@@ -86,8 +86,8 @@ test:review:
     - set -e
   script:
     - docker run -itd --network systembootstrapper_review \
-      -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com \
-      --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
+        -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com \
+        --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
   except:
     - master
   only:
