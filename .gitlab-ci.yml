@@ -1,25 +1,45 @@
-image: docker:latest
+#-------------------------------------------------------------
+#                +------------------+                        |
+#               /|                 /|                        |
+#              / |                / |                        |
+#             *--+---------------*  |                        |
+#             |  |               |  |                        |
+#             |  |  System       |  |                        |
+#             |  |  Bootstrapper |  |                        |
+#             |  +---------------+--+                        |
+#             | /                | /                         |
+#             |/                 |/                          |
+#             *------------------*                           |
+#    +------+ https://www.system-bootstrapper.com
+#$  /      /|                                                |
+#  +------+ |                                                |
+#  |      | +                                                |
+#  |      |/                                                 |
+#  +------+                                                  |
+#-------------------------------------------------------------
+# Gitlab CI Definition
+# ProjectID: systembootstrapper
+# Production: https://www.system-bootstrapper.com
 
+# Review Apps: http://*.system-bootstrapper.com
+# Filepath: ./gitlab-ci.yml
+image: docker:latest
 services:
   - docker:dind
-
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
   CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
-
 stages:
   - build
   - test
   - deploy
-
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .npm
     - cache/Cypress
     - node_modules
-
 build:
   stage: build
   before_script:
@@ -30,7 +50,6 @@ build:
   only:
     - merge_requests
     - master
-
 test:cypress:
   stage: test
   services:
@@ -53,7 +72,6 @@ test:cypress:
   only:
     - merge_requests
     - master
-
 test:review:
   stage: test
   environment:
@@ -67,7 +85,9 @@ test:review:
     - docker rm $CI_BUILD_REF_SLUG.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_review \
+      -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com \
+      --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
   except:
     - master
   only:
@@ -98,7 +118,9 @@ deploy:prod:
     - docker rm www.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_prod \
+      -e VIRTUAL_HOST=www.system-bootstrapper.com \
+      --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - master
 
