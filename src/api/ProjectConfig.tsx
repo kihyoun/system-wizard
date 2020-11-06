@@ -149,16 +149,18 @@ export default class ProjectConfig implements ProjectConfigInterface {
   }
 
   @computed get prodHostInfo(): HostInfo {
+    const host = (this.prodDomainMode === 1 || this.prodDomainMode === 3 ? '*.' : '')
+        + this.prodHost;
     return {
-      context: 'Production',
-      useHost: this.useProdHost,
-      host   : (this.prodDomainMode === 1 || this.prodDomainMode === 3 ? '*.' : '')
-        + this.prodHost,
+      context   : 'Production',
+      useHost   : this.useProdHost,
+      host,
       port      : this.prodPort,
       domainMode: this.prodDomainMode,
       deployMode: this.prodDeployMode,
       ssl       : this.prodSSL,
-      sslKey    : this.prodSSLKey
+      sslKey    : this.prodSSLKey,
+      url       : (this.prodDomainMode < 2 ? 'http://' : 'https://') + host
     }
   }
 
@@ -175,16 +177,18 @@ export default class ProjectConfig implements ProjectConfigInterface {
   }
 
   @computed get betaHostInfo() : HostInfo {
+    const host = (this.betaDomainMode === 1 || this.betaDomainMode === 3 ? '*.' : '')
+        + this.betaHost;
     return {
-      context: 'Beta',
-      useHost: this.useBetaHost,
-      host   : (this.betaDomainMode === 1 || this.betaDomainMode === 3 ? '*.' : '')
-        + this.betaHost,
+      context   : 'Beta',
+      useHost   : this.useBetaHost,
+      host,
       port      : this.betaPort,
       domainMode: this.betaDomainMode,
       deployMode: this.betaDeployMode,
       ssl       : this.betaSSL,
-      sslKey    : this.betaSSLKey
+      sslKey    : this.betaSSLKey,
+      url       : (this.betaDomainMode < 2 ? 'http://' : 'https://') + host
     }
   }
 
@@ -201,16 +205,18 @@ export default class ProjectConfig implements ProjectConfigInterface {
   }
 
   @computed get reviewHostInfo() : HostInfo{
+   const host = (this.reviewDomainMode === 1 || this.reviewDomainMode === 3 ? '*.' : '')
+     + this.reviewHost;
    return {
-     context: 'Review',
-     useHost: this.useReviewHost,
-     host   : (this.reviewDomainMode === 1 || this.reviewDomainMode === 3 ? '*.' : '')
-     + this.reviewHost,
+     context   : 'Review',
+     useHost   : this.useReviewHost,
+     host,
      port      : this.reviewPort,
      domainMode: this.reviewDomainMode,
      deployMode: this.reviewDeployMode,
      ssl       : this.reviewSSL,
-     sslKey    : this.reviewSSLKey
+     sslKey    : this.reviewSSLKey,
+     url       : (this.reviewDomainMode < 2 ? 'http://' : 'https://') + host
    }
  }
 
@@ -306,9 +312,9 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
    public get gitlabCi() : string {
      const ret = Helper.textLogo + `# Gitlab CI Definition
 # ProjectID: ${this.projectKey}
-# Production: ${this.prodHost}
-# Beta: ${this.betaHost}
-# Beta: ${this.betaHost}
+${this.useProdHost === 'true' ? `# Production: ${this.prodHostInfo.url}` : ''}
+${this.useBetaHost === 'true' ? `# Beta: ${this.betaHostInfo.url}` : ''}
+${this.useReviewHost === 'true' ? `# Review Apps: ${this.reviewHostInfo.url}` : ''}
 # Filepath: ./gitlab-ci.yml
 image: docker:latest
 services:
@@ -521,6 +527,7 @@ export interface HostInfo {
   port: number;
   ssl: string;
   sslKey: string;
+  url: string;
 }
 
 export interface ProjectConfigInterface {
