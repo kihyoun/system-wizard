@@ -378,9 +378,9 @@ test:review:
     - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_review \\
-      -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} \\
-      --name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
+    - docker run -itd --network `
+    + `${this.projectKey}_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
+    + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
   except:
     - master
   only:
