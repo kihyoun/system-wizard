@@ -116,9 +116,7 @@ deploy:prod:
     - docker rm www.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_prod \
-      -e VIRTUAL_HOST=www.system-bootstrapper.com \
-      --name www.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - master
 
