@@ -16,7 +16,8 @@ import {
   DialogTitle,
   Grid,
   IconButton,
-  Snackbar
+  Snackbar,
+  Toolbar
 } from '@material-ui/core';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import ProjectFormDialog from './ProjectFormDialog';
@@ -38,6 +39,10 @@ const useStyles = makeStyles({
   button: {
     marginBottom: '1ch',
     marginTop   : '3ch'
+  },
+  divider: {
+    flexGrow: 1,
+    witdh   : '100%'
   }
 });
 
@@ -77,12 +82,11 @@ const ProjectsOverview = observer((props:any) => {
           size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell><EditIcon /></TableCell>
               <TableCell>Proxy Key</TableCell>
               <TableCell>URL</TableCell>
               <TableCell>Beta URL</TableCell>
               <TableCell>Review App Domain(s)</TableCell>
-              <TableCell># Runners</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -91,6 +95,12 @@ const ProjectsOverview = observer((props:any) => {
                 <TableRow
                   className={rowClasses.root}
                   onClick={() => setCellOpen(cellOpen !== projectConfig.projectKey ? projectConfig.projectKey : '')}>
+                  <TableCell component="th" scope="row" >
+                    {projectConfig.projectKey}
+                  </TableCell>
+                  <TableCell>{projectConfig.prodHostInfo.url}</TableCell>
+                  <TableCell>{projectConfig.betaHostInfo.url}</TableCell>
+                  <TableCell>{projectConfig.reviewHostInfo.url}</TableCell>
                   <TableCell>
                     <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
 
@@ -127,16 +137,9 @@ const ProjectsOverview = observer((props:any) => {
 
                   </TableCell>
 
-                  <TableCell component="th" scope="row" >
-                    {projectConfig.projectKey}
-                  </TableCell>
-                  <TableCell>{projectConfig.prodHostInfo.host}</TableCell>
-                  <TableCell>{projectConfig.betaHostInfo.host}</TableCell>
-                  <TableCell>{projectConfig.reviewHostInfo.host}</TableCell>
-                  <TableCell>{projectConfig.gitlabRunnerDockerScale}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={5}>
                     <Collapse in={cellOpen === projectConfig.projectKey} timeout="auto" unmountOnExit>
                       <Grid container spacing={3}>
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
@@ -178,16 +181,20 @@ const ProjectsOverview = observer((props:any) => {
         </DialogActions>
       </Dialog>
 
-      <Button variant="contained" color="primary"
-        onClick={() => {
-          setActiveProject('');
-          setOpen(true);
-        }}
-        className={classes.button}
-        startIcon={<PlaylistAddIcon />}
-      >
+      <Toolbar>
+        <div className={classes.divider} />
+        <Button variant="contained" color="primary"
+          onClick={() => {
+            setActiveProject('');
+            setOpen(true);
+          }}
+          className={classes.button}
+          startIcon={<PlaylistAddIcon />}
+        >
         Add Proxy
-      </Button>
+        </Button>
+      </Toolbar>
+
       <ProjectFormDialog open={open} activeProject={activeProject}
         main={props.main} handleClose={() => setOpen(false)} />
     </>

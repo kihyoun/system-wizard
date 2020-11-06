@@ -61,7 +61,7 @@ const ProjectCard = observer((props: any) => {
           <List className={listClasses.root}>
             <ListItem>
               <ListItemText primary="Host"
-                secondary={(props.hostInfo.domainMode < 2 ? 'http' : 'https') + `://${props.hostInfo.host}`} />
+                secondary={props.hostInfo.url} />
             </ListItem>
             <ListItem>
               <ListItemText primary="Deployment"
