@@ -59,6 +59,26 @@ const BetaFields = observer((props: any) => {
           runInAction(() => (props.config.betaHost = event.target.value));
         }}
       />
+      <FormControl className={classes.formControl}
+        disabled={props.config.useBetaHost==='false'}
+      >
+        <InputLabel htmlFor="betadeploymode-native-helper">
+              Deployment
+        </InputLabel>
+        <NativeSelect
+          value={props.config.betaDeployMode}
+          onChange={(event: any) => {
+            runInAction(() => (props.config.betaDeployMode = event.target.value));
+          }}
+          inputProps={{
+            name: 'betaDeployMode',
+            id  : 'betaDeployMode-native-helper'
+          }}
+        >
+          <option value={0}>Manual</option>
+          <option value={1}>Auto</option>
+        </NativeSelect>
+      </FormControl>
       <TextField
         label="BETA_PORT"
         disabled={props.config.useBetaHost==='false'}

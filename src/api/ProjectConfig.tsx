@@ -1,3 +1,4 @@
+import FileSaver from 'file-saver';
 import {
   action, computed, makeAutoObservable, runInAction
 } from 'mobx';
@@ -26,22 +27,79 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     prodHost!: string;
     useProdHost!:string;
-    prodPort!:number;
-    prodDomainMode!:number;
+    _prodPort!:number;
+    set prodPort(port:any) {
+      this._prodPort = parseInt(port, 10);
+    }
+    get prodPort() {
+      return this._prodPort;
+    }
+    _prodDomainMode!:number;
+    get prodDomainMode() {
+      return this._prodDomainMode;
+    }
+    set prodDomainMode(mode:any) {
+      this._prodDomainMode = parseInt(mode, 10) || 0;
+    }
+    _prodDeployMode!:number;
+    get prodDeployMode() {
+      return this._prodDeployMode;
+    }
+    set prodDeployMode(mode:any) {
+      this._prodDeployMode = parseInt(mode, 10) || 0
+    }
     prodSSL!:string;
     prodSSLKey!:string;
 
     useBetaHost!:string;
     betaHost!:string;
-    betaPort!:number;
-    betaDomainMode!:number;
+    _betaPort!:number;
+    set betaPort(port:any) {
+      this._betaPort = parseInt(port, 10);
+    }
+    get betaPort() {
+      return this._betaPort;
+    }
+    _betaDomainMode!:number;
+    get betaDomainMode() {
+      return this._betaDomainMode;
+    }
+    set betaDomainMode(mode:any) {
+      this._betaDomainMode = parseInt(mode, 10) || 0;
+    }
+    _betaDeployMode!:number;
+    get betaDeployMode() {
+      return this._betaDeployMode;
+    }
+    set betaDeployMode(mode:any) {
+      this._betaDeployMode = parseInt(mode, 10) || 0
+    }
     betaSSL!:string;
     betaSSLKey!:string;
 
     useReviewHost!:string;
     reviewHost!:string;
-    reviewPort!:number;
-    reviewDomainMode!:number;
+    _reviewPort!:number;
+    _reviewDomainMode!:number;
+    set reviewPort(port:any) {
+      this._reviewPort = parseInt(port, 10);
+    }
+    get reviewPort() {
+      return this._reviewPort;
+    }
+    get reviewDomainMode() {
+      return this._reviewDomainMode;
+    }
+    set reviewDomainMode(mode:any) {
+      this._reviewDomainMode = parseInt(mode, 10) || 0;
+    }
+    _reviewDeployMode!:number;
+    get reviewDeployMode() {
+      return this._reviewDeployMode;
+    }
+    set reviewDeployMode(mode:any) {
+      this._reviewDeployMode = parseInt(mode, 10) || 0;
+    }
     reviewSSL!:string;
     reviewSSLKey!:string;
 
@@ -81,7 +139,8 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.useProdHost = _config?.useProdHost || 'true';
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
       this.prodPort = parseInt(_config?.prodPort, 10) || 80;
-      this.prodDomainMode = parseInt(_config?.prodDomainMode, 10) || 2;
+      this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
+      this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
       this.prodSSL = _config?.prodSSL.replace(/;/g, '')
         || `${this._main.config?.sslBaseDir}/${this.prodHost}/fullchain.pem`;
       this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
@@ -90,14 +149,18 @@ export default class ProjectConfig implements ProjectConfigInterface {
   }
 
   @computed get prodHostInfo(): HostInfo {
+    const host = (this.prodDomainMode === 1 || this.prodDomainMode === 3 ? '*.' : '')
+        + this.prodHost;
     return {
       context   : 'Production',
       useHost   : this.useProdHost,
-      host      : this.prodHost,
+      host,
       port      : this.prodPort,
       domainMode: this.prodDomainMode,
+      deployMode: this.prodDeployMode,
       ssl       : this.prodSSL,
-      sslKey    : this.prodSSLKey
+      sslKey    : this.prodSSLKey,
+      url       : (this.prodDomainMode < 2 ? 'http://' : 'https://') + host
     }
   }
 
@@ -106,44 +169,54 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.useBetaHost = _config?.useBetaHost || 'false';
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
       this.betaPort = parseInt(_config?.betaPort, 10) || 80;
-      this.betaDomainMode = parseInt(_config?.betaDomainMode, 10) || 2;
+      this.betaDomainMode = _config ? parseInt(_config.betaDomainMode, 10) || 0 : 2;
+      this.betaDeployMode = _config ? parseInt(_config.betaDeployMode, 10) || 0 : 1;
       this.betaSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.betaHost}/fullchain.pem`;
       this.betaSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.betaHost}/privkey.pem`;
     });
   }
 
   @computed get betaHostInfo() : HostInfo {
+    const host = (this.betaDomainMode === 1 || this.betaDomainMode === 3 ? '*.' : '')
+        + this.betaHost;
     return {
       context   : 'Beta',
       useHost   : this.useBetaHost,
-      host      : this.betaHost,
+      host,
       port      : this.betaPort,
       domainMode: this.betaDomainMode,
+      deployMode: this.betaDeployMode,
       ssl       : this.betaSSL,
-      sslKey    : this.betaSSLKey
+      sslKey    : this.betaSSLKey,
+      url       : (this.betaDomainMode < 2 ? 'http://' : 'https://') + host
     }
   }
 
  @action generateReviewProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.useReviewHost = _config?.useReviewHost || 'false';
+      this.useReviewHost = _config?.useReviewHost || 'true';
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
       this.reviewPort = parseInt(_config?.betaPort, 10) || 80;
-      this.reviewDomainMode = parseInt(_config?.reviewDomainMode, 10) || 1;
+      this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
+      this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
       this.reviewSSL = _config?.betaSSL || `${this._main.config?.sslBaseDir}/${this.reviewHost}/fullchain.pem`;
       this.reviewSSLKey = _config?.betaSSLKey || `${this._main.config?.sslBaseDir}/${this.reviewHost}/privkey.pem`;
     });
   }
 
   @computed get reviewHostInfo() : HostInfo{
+   const host = (this.reviewDomainMode === 1 || this.reviewDomainMode === 3 ? '*.' : '')
+     + this.reviewHost;
    return {
      context   : 'Review',
      useHost   : this.useReviewHost,
-     host      : this.reviewHost,
+     host,
      port      : this.reviewPort,
      domainMode: this.reviewDomainMode,
+     deployMode: this.reviewDeployMode,
      ssl       : this.reviewSSL,
-     sslKey    : this.reviewSSLKey
+     sslKey    : this.reviewSSLKey,
+     url       : (this.reviewDomainMode < 2 ? 'http://' : 'https://') + host
    }
  }
 
@@ -236,6 +309,147 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
      + createdOn;
    }
 
+   public get gitlabCi() : string {
+     const ret = Helper.textLogo + `# Gitlab CI Definition
+# ProjectID: ${this.projectKey}
+${this.useProdHost === 'true' ? `# Production: ${this.prodHostInfo.url}` : ''}
+${this.useBetaHost === 'true' ? `# Beta: ${this.betaHostInfo.url}` : ''}
+${this.useReviewHost === 'true' ? `# Review Apps: ${this.reviewHostInfo.url}` : ''}
+# Filepath: ./gitlab-ci.yml
+image: docker:latest
+services:
+  - docker:dind
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+stages:
+  - build
+  - test
+  - deploy
+cache:
+  key: \${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm
+    - cache/Cypress
+    - node_modules
+build:
+  stage: build
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  only:
+    - merge_requests
+    - master
+test:cypress:
+  stage: test
+  services:
+    - name: $IMAGE_TAG
+      alias: alpha-host
+  image: cypress/base:10
+  script:
+    - npm ci
+    # check Cypress binary path and cached versions
+    # useful to make sure we are not carrying around old versions
+    - npx cypress cache path
+    - npx cypress cache list
+    - npx cypress run --config baseUrl=http://alpha-host:80
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/**/*.mp4
+      - cypress/screenshots/**/*.png
+    expire_in: 1 day
+  only:
+    - merge_requests
+    - master
+test:review:
+  stage: test
+  environment:
+    name: review/$CI_BUILD_REF_NAME
+    url: http://$CI_BUILD_REF_SLUG.${this.reviewHost}
+    on_stop: stop:review
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - set -e
+  script:
+    - docker run -itd --network `
+    + `${this.projectKey}_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
+    + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
+  except:
+    - master
+  only:
+    - merge_requests
+  ${this.reviewDeployMode === 0 && 'when: manual' || ''}
+stop:review:
+  stage: deploy
+  allow_failure: true
+  script:
+    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+  environment:
+    name: review/$CI_BUILD_REF_NAME
+    action: stop
+  when: manual
+  only:
+    - merge_requests
+`;
+     const beta = `
+deploy:beta:
+  stage: deploy
+  environment:
+    name: production/beta
+    url: ${this.betaDomainMode < 2 ? 'http://' : 'https://'}${this.betaHost}
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop ${this.betaHost}
+    - docker rm ${this.betaHost}
+    - set -e
+  script:
+    - docker run -itd --network ${this.projectKey}_beta \\
+      -e VIRTUAL_HOST=${this.betaHost} \\
+      --name ${this.betaHost} $IMAGE_TAG
+  only:
+    - master
+  ${this.betaDeployMode === 0 && 'when: manual' || ''}
+`;
+     const prod = `
+deploy:prod:
+  stage: deploy
+  environment:
+    name: production/www
+    url: ${this.prodDomainMode < 2 ? 'http://' : 'https://'}${this.prodHost}
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - set +e
+    - docker stop ${this.prodHost}
+    - docker rm ${this.prodHost}
+    - set -e
+  script:
+    - docker run -itd --network ${this.projectKey}_prod \\
+      -e VIRTUAL_HOST=${this.prodHost} \\
+      --name ${this.prodHost} $IMAGE_TAG
+  only:
+    - master
+  ${this.prodDeployMode === 0 && 'when: manual' || ''}
+`;
+     return ret
+     + (this.useBetaHost === 'true' && beta || '')
+     + (this.useProdHost === 'true' && prod || '');
+   }
+
+   public exportGitlabCi() {
+     const file = new File([this.gitlabCi],
+       'gitlab-ci.yml', { type: 'text/plain;charset=utf-8' });
+     FileSaver.saveAs(file);
+   }
+
   @computed public get asJson() : any {
      let ret = {
        projectKey : this.projectKey,
@@ -246,7 +460,8 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
        ret = Object.assign(ret, {
          prodHost      : this.prodHost,
          prodPort      : this.prodPort,
-         prodDomainMode: this.prodDomainMode
+         prodDomainMode: this.prodDomainMode,
+         prodDeployMode: this.prodDeployMode
        });
 
        if (this.prodDomainMode > 1) {
@@ -263,7 +478,8 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
        ret = Object.assign(ret, {
          betaHost      : this.betaHost,
          betaPort      : this.betaPort,
-         betaDomainMode: this.betaDomainMode
+         betaDomainMode: this.betaDomainMode,
+         betaDeployMode: this.betaDeployMode
        });
 
        if (this.betaDomainMode > 1) {
@@ -280,7 +496,8 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
        ret = Object.assign(ret, {
          reviewHost      : this.reviewHost,
          reviewPort      : this.reviewPort,
-         reviewDomainMode: this.reviewDomainMode
+         reviewDomainMode: this.reviewDomainMode,
+         reviewDeployMode: this.reviewDeployMode
        });
 
        if (this.reviewDomainMode > 1) {
@@ -305,10 +522,12 @@ export interface HostInfo {
   context: string;
   useHost: string;
   domainMode: number;
+  deployMode: number;
   host: string;
   port: number;
   ssl: string;
   sslKey: string;
+  url: string;
 }
 
 export interface ProjectConfigInterface {
