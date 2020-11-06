@@ -412,9 +412,9 @@ deploy:beta:
     - docker rm ${this.betaHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_beta \\
-      -e VIRTUAL_HOST=${this.betaHost} \\
-      --name ${this.betaHost} $IMAGE_TAG
+    - docker run -itd --network ${this.projectKey}_beta `
+    + `-e VIRTUAL_HOST=${this.betaHost} `
+    + `--name ${this.betaHost} $IMAGE_TAG
   only:
     - master
   ${this.betaDeployMode === 0 && 'when: manual' || ''}
@@ -432,9 +432,9 @@ deploy:prod:
     - docker rm ${this.prodHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_prod \\
-      -e VIRTUAL_HOST=${this.prodHost} \\
-      --name ${this.prodHost} $IMAGE_TAG
+    - docker run -itd --network ${this.projectKey}_prod `
+      + `-e VIRTUAL_HOST=${this.prodHost} `
+      + `--name ${this.prodHost} $IMAGE_TAG
   only:
     - master
   ${this.prodDeployMode === 0 && 'when: manual' || ''}
