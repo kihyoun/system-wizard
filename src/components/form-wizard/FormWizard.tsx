@@ -10,14 +10,18 @@ import GeneralForm from './general-form/GeneralForm';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import DownloadDockerDialog from './Dialogs/DownloadDockerDialog';
-import DownloadProjectsDialog from './Dialogs/DownloadProjectsDialog';
+import DownloadDockerDialog from './dialogs/DownloadDockerDialog';
+import DownloadProjectsDialog from './dialogs/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import DownloadJsonDialog from './Dialogs/DownloadJsonDialog';
+import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import ImportFileDialog from './Dialogs/ImportFileDialog';
+import ImportFileDialog from './dialogs/ImportFileDialog';
 import SyncIcon from '@material-ui/icons/Sync';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@material-ui/icons/Lock';
+import { green, purple } from '@material-ui/core/colors';
+import ConnectServerDialog from './dialogs/ConnectServerDialog';
 
 const TabPanel = (props: any) => {
   const {
@@ -72,6 +76,7 @@ const FormWizard = (props: any) => {
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
+  const [connectServer, setConnectServer] = useState(false);
   const [importFile, setImportFile] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
@@ -90,6 +95,10 @@ const FormWizard = (props: any) => {
 
   const handleChange = (event: any, newTab: number) => {
     setTab(newTab);
+  };
+
+  const handleConnectServer = () => {
+    setConnectServer(true)
   };
 
   const onChangeHandler=(event:any)=>{
@@ -130,6 +139,7 @@ const FormWizard = (props: any) => {
       {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
       {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
+      {connectServer && <ConnectServerDialog main={main} setClose={() => setConnectServer(false)} />}
       {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
         setOpenAlert={setOpenAlert}
         setProgress={setProgress}
@@ -177,10 +187,12 @@ const FormWizard = (props: any) => {
               <Button
                 aria-haspopup="true"
                 variant="contained"
+                color={props.main.connected ? 'secondary': 'default' }
                 component="span"
-                startIcon={<SyncIcon />}
+                startIcon={props.main.connected ? <LockIcon /> : <SyncIcon />}
+                onClick={handleConnectServer}
               >
-                Connect Server
+                {props.main.connected ? 'Connected' : 'Connect Server'}
               </Button>
               <div className={classes.buttonDivider} />
 

@@ -3,6 +3,7 @@ import {
 } from 'mobx';
 import Helper from './Helper';
 import JSZip from 'jszip';
+import { HostInfo } from './Main';
 /**
  * General Configuration Object
  */
@@ -15,12 +16,20 @@ export default class MainConfig implements MainConfigInterface {
     makeAutoObservable(this);
     this.generateConfig(_config);
   }
+  syncEnable!: string;
+  syncDomainMode!: number;
+  syncHost!:string;
+  syncUser!: string;
+  syncPass!: string;
+  syncSSL!: string;
+  syncSSLKey!: string;
 
   @action generateConfig(_config: any | undefined = undefined) {
     this.generateMainConfig(_config);
     this.generateGitlabConfig(_config);
     this.generateNginxConfig(_config);
     this.generateProxyConfig(_config);
+    this.generateSyncConfig(_config);
     this.generateRunnerConfig(_config);
   }
 
@@ -63,6 +72,19 @@ export default class MainConfig implements MainConfigInterface {
       this.gitlabRegistryUpstream = _config?.gitlabRegistryUpstream || 'registry';
     });
   }
+  @action generateSyncConfig(_config: any | undefined = undefined): void {
+    runInAction(() => {
+      this.syncEnable = _config?.syncEnable || 'false';
+      this.syncHost = _config?.syncHost || 'example.com';
+      this.syncUser = _config?.syncUser || 'admin';
+      this.syncPass = _config?.syncPass || 'admin';
+      this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
+      this.syncSSL = _config?.gitlabSSL?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.syncHost}/fullchain.pem`;
+      this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.syncHost}/privkey.pem`;
+    });
+  }
 
    @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
@@ -71,8 +93,25 @@ export default class MainConfig implements MainConfigInterface {
     });
   }
 
-   public get content() : string {
-     const ret = Helper.textLogo + `# Filepath: ./.docker.env
+    @computed get syncHostInfo(): HostInfo {
+     const host = (this.syncDomainMode === 1 || this.syncDomainMode === 3 ? '*.' : '')
+        + this.syncHost;
+     return {
+       context   : 'Sync',
+       deployMode: 1,
+       useHost   : this.syncEnable,
+       host,
+       port      : 8071,
+       domainMode: this.syncDomainMode,
+       ssl       : this.syncSSL,
+       sslKey    : this.syncSSLKey,
+       url       : (this.syncDomainMode < 2 ? 'http://' : 'https://') + host
+     }
+   }
+
+
+    public get content() : string {
+      const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- BACKUP
 export BACKUPDIR=${this.backupDir}
@@ -87,22 +126,22 @@ GITLAB_UPSTREAM=${this.gitlabUpstream}
 GITLAB_PORT=${this.gitlabPort}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
 `;
-     const gitlabSSL = `
+      const gitlabSSL = `
 GITLAB_SSL=${this.gitlabSSL}
 GITLAB_SSL_KEY=${this.gitlabSSLKey}
 `;
-     const registry = `
+      const registry = `
 GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
 
 export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 GITLAB_REGISTRY_PORT=${this.gitlabRegistryPort}
 `;
-     const registrySSL = `
+      const registrySSL = `
 GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
 GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
 `;
-     const nginx = `
+      const nginx = `
 export SSL_BASEDIR=${this.sslBaseDir}
 
 # -- GITLAB RUNNER
@@ -110,29 +149,38 @@ GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
 export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
 # --- Sync Settings
-export SYNC_ENABLE=false
-export SYNC_DOMAIN_MODE=2
+export SYNC_ENABLE=${this.syncEnable}
+`;
+      const syncSettings = `
 export SYNC_USER=admin
 export SYNC_PASS=admin
+export SYNC_DOMAIN_MODE=2
 export SYNC_HOST=sync.system-bootstrapper.com
+`;
+      const syncSSL = `
 export SYNC_SSL=/etc/letsencrypt/live/sync.system-bootstrapper.com/fullchain.pem
 export SYNC_SSL_KEY=/etc/letsencrypt/live/sync.system-bootstrapper.com/privkey.pem
+`
+      const createdOn = `
 # created on ${new Date()}
 `;
-     return ret
+      return ret
      + (this.gitlabDomainMode > 1 && gitlabSSL || '')
      + registry
      + (this.gitlabRegistryDomainMode > 1 && registrySSL || '')
      + nginx
-   }
+     + (this.syncEnable === 'true' && syncSettings || '')
+     + (this.syncEnable === 'true' && this.syncDomainMode && this.syncDomainMode > 1) ? syncSSL : ''
+     + createdOn;
+    }
 
-   public exportConfig() {
-     const zip = new JSZip();
-     zip.file('.docker.env', this.content);
-     zip.generateAsync({ type: 'blob' }).then(function(content) {
-       saveAs(content, 'docker.env.zip');
-     });
-   }
+    public exportConfig() {
+      const zip = new JSZip();
+      zip.file('.docker.env', this.content);
+      zip.generateAsync({ type: 'blob' }).then(function(content) {
+        saveAs(content, 'docker.env.zip');
+      });
+    }
 
   // Backup Settings
   backupDir!:string;
@@ -272,6 +320,14 @@ export interface MainConfigInterface {
   gitlabRegistryDomainMode:number;
   gitlabRegistrySSL?:string;
   gitlabRegistrySSLKey?:string;
+
+  syncEnable:string;
+  syncDomainMode:number;
+  syncHost:string;
+  syncUser:string;
+  syncPass:string;
+  syncSSL:string;
+  syncSSLKey:string;
 
   gitlabRunnerDockerScale:number;
   gitlabRunnerToken:string;

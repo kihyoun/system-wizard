@@ -3,7 +3,7 @@ import {
   action, computed, makeAutoObservable, runInAction
 } from 'mobx';
 import Helper from './Helper';
-import Main from './Main';
+import Main, { HostInfo } from './Main';
 
 /**
  * General Configuration Object
@@ -518,17 +518,7 @@ deploy:prod:
 
 }
 
-export interface HostInfo {
-  context: string;
-  useHost: string;
-  domainMode: number;
-  deployMode: number;
-  host: string;
-  port: number;
-  ssl: string;
-  sslKey: string;
-  url: string;
-}
+
 
 export interface ProjectConfigInterface {
   projectKey:string;

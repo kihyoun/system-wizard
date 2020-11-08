@@ -9,6 +9,7 @@ import {
 import MainConfig from './MainConfig';
 import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
 import JSZip from 'jszip';
+import SyncServer from './SyncServer';
 
 /**
  * General Configuration Object
@@ -17,8 +18,10 @@ export default class Main {
     @observable private _placeHolder!: MainConfig;
     @observable private _config!: MainConfig;
     @observable private _projects: Map<string, ProjectConfig>;
+    @observable private _syncServer!: SyncServer;
     init = true;
     uploadProgress = false;
+    connected = false;
 
     /**
      * Set Config
@@ -36,6 +39,7 @@ export default class Main {
 
     @action public generateConfig(_config: any | undefined): void {
       this._config = new MainConfig(_config);
+      this._syncServer = new SyncServer(this);
       this._placeHolder = new MainConfig(_config);
     }
 
@@ -45,6 +49,10 @@ export default class Main {
 
     @computed public get config(): MainConfig | undefined {
       return this._config;
+    }
+
+    @computed public get sync(): SyncServer {
+      return this._syncServer;
     }
 
     @action public addProject(project: ProjectConfig) {
@@ -193,4 +201,16 @@ export default class Main {
 
     }
 
+}
+
+export interface HostInfo {
+  context: string;
+  useHost: string;
+  domainMode: number;
+  deployMode: number;
+  host: string;
+  port: number;
+  ssl: string;
+  sslKey: string;
+  url: string;
 }
