@@ -23,20 +23,6 @@ const NginxSettingsFields = observer((props: any) => {
   return (
     <>
       <TextField
-        size="small"
-        label="NGINX_TEMPLATE_DIR"
-        value={props.main.config.nginxTemplateDir}
-        placeholder={props.main.placeholder.nginxTemplateDir}
-        style={{ margin: 8 }}
-        fullWidth
-        helperText="This Location contains the generated config for NGINX during runtime"
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => (props.main.config.nginxTemplateDir = event.target.value));
-        }}
-      />
-      <TextField
         label="SSL_BASEDIR"
         value={props.main.config.sslBaseDir}
         placeholder={props.main.placeholder.sslBaseDir}

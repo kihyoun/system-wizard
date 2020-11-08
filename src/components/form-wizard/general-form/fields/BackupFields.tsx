@@ -24,19 +24,6 @@ const BackupFields = observer((props: any) => {
   return (
     <>
       <TextField
-        label="LIVEDIR"
-        style={{ margin: 8 }}
-        value={props.main.config.liveDir}
-        helperText="Persistent/temporary Storage Folder.
-          Must be read/writable by the Docker User"
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => props.main.config.liveDir = event.target.value);
-        }}
-      />
-      <TextField
         label="BACKUPDIR"
         value={props.main.config.backupDir}
         style={{ margin: 8 }}

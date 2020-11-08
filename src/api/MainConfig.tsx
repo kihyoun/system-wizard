@@ -26,14 +26,12 @@ export default class MainConfig implements MainConfigInterface {
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.liveDir = _config?.liveDir || '/srv';
       this.backupDir = _config?.backupDir || '/mnt/backup';
     });
   }
 
   @action generateGitlabConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabHome = _config?.gitlabHome || `${this.liveDir}/gitlab`;
       this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
       this.gitlabRegistryHost = _config?.gitlabRegistryHost || 'registry.example.com';
     });
@@ -41,7 +39,6 @@ export default class MainConfig implements MainConfigInterface {
 
   @action generateNginxConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.nginxTemplateDir = _config?.nginxTemplateDir || `${this.liveDir}/nginx/templates`;
       this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
     });
   }
@@ -78,11 +75,9 @@ export default class MainConfig implements MainConfigInterface {
      const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- BACKUP
-BACKUPDIR=${this.backupDir}
-LIVEDIR=${this.liveDir}
+export BACKUPDIR=${this.backupDir}
 
 # -- GITLAB
-export GITLAB_HOME=${this.gitlabHome}
 GITLAB_EXTERNAL_URL=${this.gitlabExternalUrl}
 GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 
@@ -108,13 +103,20 @@ GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
 GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
 `;
      const nginx = `
-export NGINX_TEMPLATE_DIR=${this.nginxTemplateDir}
 export SSL_BASEDIR=${this.sslBaseDir}
 
 # -- GITLAB RUNNER
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
 export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
+# --- Sync Settings
+export SYNC_ENABLE=false
+export SYNC_DOMAIN_MODE=2
+export SYNC_USER=admin
+export SYNC_PASS=admin
+export SYNC_HOST=sync.system-bootstrapper.com
+export SYNC_SSL=/etc/letsencrypt/live/sync.system-bootstrapper.com/fullchain.pem
+export SYNC_SSL_KEY=/etc/letsencrypt/live/sync.system-bootstrapper.com/privkey.pem
 # created on ${new Date()}
 `;
      return ret
@@ -133,17 +135,13 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
    }
 
   // Backup Settings
-  liveDir!:string;
-
   backupDir!:string;
 
   // Gitlab
-  gitlabHome!:string;
   gitlabExternalUrl!:string;
   gitlabRegistryUrl!:string;
 
   // Basic NGINX/SSL settings
-  nginxTemplateDir!:string;
   sslBaseDir!:string;
 
   // Pruxy
@@ -192,12 +190,9 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
   @computed public get asJson() : any {
     let ret = {
-      liveDir          : this.liveDir,
       backupDir        : this.backupDir,
-      gitlabHome       : this.gitlabHome,
       gitlabExternalUrl: this.gitlabExternalUrl,
       gitlabRegistryUrl: this.gitlabRegistryUrl,
-      nginxTemplateDir : this.nginxTemplateDir,
       sslBaseDir       : this.sslBaseDir,
       gitlabUpstream   : this.gitlabUpstream,
       gitlabHost       : this.gitlabHost,
@@ -234,8 +229,6 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
   public setProperty(propertyKey : any, value : any) {
     switch (propertyKey) {
     case 'BACKUPDIR': this.backupDir = value; break;
-    case 'LIVEDIR': this.liveDir = value; break;
-    case 'GITLAB_HOME': this.gitlabHome = value; break;
     case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
     case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
     case 'GITLAB_HOST': this.gitlabHost = value; break;
@@ -250,7 +243,6 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
-    case 'NGINX_TEMPLATE_DIR': this.nginxTemplateDir = value; break;
     case 'SSL_BASEDIR': this.sslBaseDir = value; break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
@@ -260,14 +252,10 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 
 
 export interface MainConfigInterface {
-  liveDir:string;
   backupDir:string;
   // Gitlab
-  gitlabHome:string;
   gitlabExternalUrl:string;
   gitlabRegistryUrl:string;
-
-  nginxTemplateDir:string;
 
   sslBaseDir:string;
 

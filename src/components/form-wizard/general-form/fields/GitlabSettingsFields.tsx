@@ -24,18 +24,6 @@ const GitlabSettingsFields = observer((props: any) => {
   return (
     <>
       <TextField
-        label="GITLAB_HOME"
-        value={props.main.config.gitlabHome}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabHome}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => (props.main.config.gitlabHome = event.target.value));
-        }}
-      />
-      <TextField
         label="GITLAB_HOST"
         value={props.main.config.gitlabHost}
         style={{ margin: 8 }}
