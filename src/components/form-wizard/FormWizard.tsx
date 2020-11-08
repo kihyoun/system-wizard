@@ -17,6 +17,7 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import DownloadJsonDialog from './Dialogs/DownloadJsonDialog';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ImportFileDialog from './Dialogs/ImportFileDialog';
+import SyncIcon from '@material-ui/icons/Sync';
 
 const TabPanel = (props: any) => {
   const {
@@ -172,6 +173,16 @@ const FormWizard = (props: any) => {
                 type="file"
                 onChange={onChangeHandler}
               />
+
+              <Button
+                aria-haspopup="true"
+                variant="contained"
+                component="span"
+                startIcon={<SyncIcon />}
+              >
+                Connect Server
+              </Button>
+              <div className={classes.buttonDivider} />
 
               <label htmlFor="contained-button-file">
                 <Button
