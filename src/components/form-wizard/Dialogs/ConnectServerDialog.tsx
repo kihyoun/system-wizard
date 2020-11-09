@@ -10,7 +10,8 @@ import ServerCredentialFields from 'src/components/fields/ServerCredentialFields
 
 export default function ConnectServerDialog(props:any) {
   const [open, setOpen] = useState(true);
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState('');
+
   const handleClose = () => {
     setOpen(false);
     props.setClose();
@@ -45,6 +46,7 @@ export default function ConnectServerDialog(props:any) {
             <ServerCredentialFields
               setPassword={(value:string) => setPassword(value)}
               password={password}
+              init={props.main.init}
               main={props.main} />
           </DialogContentText>
         </DialogContent>

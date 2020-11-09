@@ -119,16 +119,14 @@ const App = observer(() => {
     if (server.sync?.connected &&
         server.sync?.serverAddress) {
       return server.sync.serverAddress;
-    } else if (server.config?.syncEnable === 'true' && server.config.syncHost) {
-      return server.config.syncHostInfo.url;
     } else {
       return 'New Server';
     }
   };
 
   const handleAddServer = () => {
-    const main = new Main();
     runInAction(() => {
+      const main = new Main();
       servers.push(main);
       setServers(servers);
       setActiveServer(main);
@@ -194,7 +192,8 @@ const App = observer(() => {
               <List>
                 {servers.map((server:any) => (
                   <ListItem button key={server.id}
-                    selected={activeServer.id === server.id} onClick={() => runInAction(() => setActiveServer(server))}>
+                    selected={activeServer.id === server.id}
+                    onClick={() => runInAction(() => setActiveServer(server))}>
                     <ListItemIcon>{server.sync.connected ?
                       <FiberManualRecordIcon style={{ color: green[500] }} /> : <InboxIcon />}</ListItemIcon>
                     <ListItemText primary={getServerName(server)} />

@@ -15,6 +15,7 @@ import GitlabRunnerFields from './fields/GitlabRunnerFields';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
+import SyncServerFields from './fields/SyncServerFields';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -33,22 +34,28 @@ const useStyles = makeStyles(theme => ({
 
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
-  const main = props.main;
-  const [backupInit, setBackupInit] = useState(props.main.init);
-  const [gitlabInit, setGitlabInit] = useState(props.main.init);
-  const [nginxInit, setNginxInit] = useState(props.main.init);
-  const [proxyInit, setProxyInit] = useState(props.main.init);
-  const [runnerInit, setRunnerInit] = useState(props.main.init);
+  const [main, setMain] = useState(props.main);
+  const [backupInit, setBackupInit] = useState(main.init);
+  const [syncInit, setSyncInit] = useState(main.init);
+  const [gitlabInit, setGitlabInit] = useState(main.init);
+  const [nginxInit, setNginxInit] = useState(main.init);
+  const [proxyInit, setProxyInit] = useState(main.init);
+  const [runnerInit, setRunnerInit] = useState(main.init);
 
   useEffect(() => {
     runInAction(() => {
-      setBackupInit(props.main.init);
-      setGitlabInit(props.main.init);
-      setNginxInit(props.main.init);
-      setProxyInit(props.main.init);
-      setRunnerInit(props.main.init);
+      setBackupInit(main.init);
+      setSyncInit(main.init);
+      setGitlabInit(main.init);
+      setNginxInit(main.init);
+      setProxyInit(main.init);
+      setRunnerInit(main.init);
     });
-  },[props.main.init]);
+  },[main.init]);
+
+  useEffect(() => {
+    runInAction(() => setMain(props.main));
+  }, [props.main.id]);
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -56,6 +63,9 @@ const GeneralForm = observer((props: any) => {
     label  : 'Backup',
     enabled: true
   }, {
+    label  : 'Sync',
+    enabled: !syncInit
+  },{
     label  : 'Gitlab',
     enabled: !gitlabInit
   }, {
@@ -73,10 +83,11 @@ const GeneralForm = observer((props: any) => {
     runInAction(() => {
       switch (step) {
       case 0: setBackupInit(false); break;
-      case 1: setGitlabInit(false); break;
-      case 2: setNginxInit(false); break;
-      case 3: setProxyInit(false); break;
-      case 4: setRunnerInit(false); break;
+      case 1: setSyncInit(false); break;
+      case 2: setGitlabInit(false); break;
+      case 3: setNginxInit(false); break;
+      case 4: setProxyInit(false); break;
+      case 5: setRunnerInit(false); break;
       }
 
       if (step > steps.length - 1) {
@@ -122,10 +133,11 @@ const GeneralForm = observer((props: any) => {
         </Grid>
         <Grid item xs={7}>
           <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
-          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
-          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 2} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
-          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 4} main={main} />
+          <SyncServerFields init={syncInit} hidden={activeStep !== 1} main={main} />
+          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 2} main={main} />
+          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 3} main={main} />
+          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 4} main={main} />
+          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 5} main={main} />
         </Grid>
       </Grid>
     </Paper>

@@ -152,14 +152,14 @@ export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
 export SYNC_ENABLE=${this.syncEnable}
 `;
       const syncSettings = `
-export SYNC_USER=admin
-export SYNC_PASS=admin
-export SYNC_DOMAIN_MODE=2
-export SYNC_HOST=sync.system-bootstrapper.com
+export SYNC_HOST=${this.syncHost}
+export SYNC_USER=${this.syncUser}
+export SYNC_PASS=${this.syncPass}
+export SYNC_DOMAIN_MODE=${this.syncDomainMode}
 `;
       const syncSSL = `
-export SYNC_SSL=/etc/letsencrypt/live/sync.system-bootstrapper.com/fullchain.pem
-export SYNC_SSL_KEY=/etc/letsencrypt/live/sync.system-bootstrapper.com/privkey.pem
+export SYNC_SSL=${this.syncSSL}
+export SYNC_SSL_KEY=${this.syncSSLKey}
 `
       const createdOn = `
 # created on ${new Date()}

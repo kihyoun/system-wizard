@@ -87,6 +87,7 @@ const FormWizard = observer((props: any) => {
   const [openSuccess, setOpenSuccess] = useState('');
 
   useEffect(() => {
+    console.log('new active server received')
     runInAction(() => {
       setMain(props.main);
     });
@@ -99,8 +100,8 @@ const FormWizard = observer((props: any) => {
   };
 
   useEffect(() => {
-    setConnected(props.main.sync.connected);
-  }, [props.main.sync.connected]);
+    setConnected(main.sync.connected);
+  }, [main.sync.connected]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -119,7 +120,7 @@ const FormWizard = observer((props: any) => {
       setConnectServer(true);
     } else {
       runInAction(() => {
-        props.main.sync.logout()
+        main.sync.logout()
           .then(() => {
             setConnected(false);
             setOpenSuccess('Logged out.');
@@ -145,10 +146,10 @@ const FormWizard = observer((props: any) => {
     reader.onload = function (evt:any) {
       try {
         if (tab === 0 || file.name.substr(-4,4) === 'json') {
-          props.main.importFile(file, evt.target.result);
+          main.importFile(file, evt.target.result);
         }
         if (tab === 1) {
-          props.main.importProjectFile(file, evt.target.result);
+          main.importProjectFile(file, evt.target.result);
         }
         setOpenSuccess('Import finished: ' + file.name);
       } catch (e) {
@@ -162,13 +163,18 @@ const FormWizard = observer((props: any) => {
 
   return (
     <React.Fragment>
-      <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')}
+      <Snackbar open={openAlert.length > 0} autoHideDuration={6000}
+        onClose={() => setOpenAlert('')}
         message={openAlert} />
-      <Snackbar open={openSuccess.length > 0} autoHideDuration={6000} onClose={() => setOpenSuccess('')}
+      <Snackbar open={openSuccess.length > 0} autoHideDuration={6000}
+        onClose={() => setOpenSuccess('')}
         message={openSuccess} />
-      {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
-      {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
-      {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
+      {downloadDocker && <DownloadDockerDialog main={main}
+        setClose={() => setDownloadDocker(false)} />}
+      {downloadProjects && <DownloadProjectsDialog main={main}
+        setClose={() => setDownloadProjects(false)} />}
+      {downloadJson && <DownloadJsonDialog main={main}
+        setClose={() => setDownloadJson(false)} />}
       {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
         setOpenAlert={(err:string) => setOpenAlert(err)}
         setProgress={setProgress}

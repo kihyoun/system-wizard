@@ -4,34 +4,31 @@ import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 const ServerCredentialFields = observer((props: any) => {
-  const [init, setInit] = useState(props.init);
+  const [serverAddress, setServerAddress] = useState('');
 
   useEffect(() => {
-    if (!props.hidden && init) {
-      runInAction(() => {
-        props.main.sync.generateConfig();
-        setInit(false);
-      });
-    }
-
-    if (!props.main.init && init) {
-      setInit(false);
-    }
-  }, [props.hidden, props.main.init]);
-
-  if (props.hidden) return null;
+    runInAction(() => {
+      props.main.sync.generateConfig();
+      if (props.main.config.syncEnable === 'true' && props.main.config.syncHost) {
+        setServerAddress(props.main.config.syncHostInfo.url);
+      }
+    });
+  },[]);
 
   return (
     <>
       <TextField
         label="Server Address"
-        value={props.main.sync.serverAddress}
+        value={serverAddress}
         style={{ margin: 8 }}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => props.main.sync.serverAddress = event.target.value);
+          runInAction(() =>{
+            props.main.sync.serverAddress = event.target.value;
+            setServerAddress(event.target.value);
+          });
         }}
       />
       <TextField
