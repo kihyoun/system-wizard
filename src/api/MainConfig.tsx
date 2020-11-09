@@ -75,7 +75,7 @@ export default class MainConfig implements MainConfigInterface {
   @action generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.syncEnable = _config?.syncEnable || 'false';
-      this.syncHost = _config?.syncHost || 'www.system-bootstrapper.com:8071';
+      this.syncHost = _config?.syncHost || '';
       this.syncUser = _config?.syncUser || 'admin';
       this.syncPass = _config?.syncPass || 'admin';
       this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 0;

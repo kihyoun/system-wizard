@@ -10,7 +10,7 @@ import MainConfig from './MainConfig';
 import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
 import JSZip from 'jszip';
 import SyncServer from './SyncServer';
-
+import { v4 as uuidv4 } from 'uuid';
 /**
  * General Configuration Object
  */
@@ -21,6 +21,7 @@ export default class Main {
     @observable private _syncServer!: SyncServer;
     init = true;
     uploadProgress = false;
+    id = uuidv4();
 
     /**
      * Set Config

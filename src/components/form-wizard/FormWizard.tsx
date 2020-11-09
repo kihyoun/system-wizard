@@ -22,8 +22,9 @@ import LockIcon from '@material-ui/icons/Lock';
 import ConnectServerDialog from './dialogs/ConnectServerDialog';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
-import ServerOverview from './server-overview/ServerOverview';
 import SaveIcon from '@material-ui/icons/Save';
+import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 
 const TabPanel = (props: any) => {
   const {
@@ -56,8 +57,7 @@ const useStyles = makeStyles(theme =>
       padding     : theme.spacing(2),
       margin      : 'auto',
       maxWidth    : 1900,
-      marginBottom: '1ch',
-      textAlign   : 'center'
+      marginBottom: '1ch'
     },
     divider      : { flexGrow: 1 },
     buttonDivider: { width: '1ch' },
@@ -196,8 +196,6 @@ const FormWizard = observer((props: any) => {
         <Grid item xs={12}>
           <Paper className={classes.paper} elevation={0}>
             <Toolbar>
-              <div className={classes.divider} />
-
               <Tabs
                 indicatorColor="primary"
                 textColor="primary"
@@ -205,7 +203,6 @@ const FormWizard = observer((props: any) => {
                 onChange={handleChange}>
                 <Tab label="General" {...a11yProps(0)} />
                 <Tab label="Proxy" {...a11yProps(1)} />
-                <Tab label="Server" {...a11yProps(2)} />
               </Tabs>
 
               <div className={classes.divider} />
@@ -216,9 +213,9 @@ const FormWizard = observer((props: any) => {
                   htmlFor="contained-button-file"
                   aria-haspopup="true"
                   component="label"
-                  startIcon={<CloudUploadIcon />}
+                  startIcon={<OpenInBrowserIcon />}
                   color="primary">
-                Import
+                Load
                 </Button>
                 <input
                   accept="application/json, .env"
@@ -237,12 +234,12 @@ const FormWizard = observer((props: any) => {
                 </Button>
                 <Button
                   aria-haspopup="true"
-                  color={connected ? 'secondary': 'default' }
+                  color={connected ? 'secondary': 'primary' }
                   component="span"
-                  startIcon={connected ? <LockIcon /> : <SyncIcon />}
+                  startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
                   onClick={handleConnectServer}
                 >
-                  {connected ? 'Disconnect' : 'Connect'}
+                  {connected ? 'Logout' : 'Login'}
                 </Button>
               </ButtonGroup>
 
@@ -267,9 +264,6 @@ const FormWizard = observer((props: any) => {
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <ProjectsOverview main={main} />
-          </TabPanel>
-          <TabPanel value={tab} index={2}>
-            <ServerOverview main={main} />
           </TabPanel>
         </Grid>
       </Grid>
