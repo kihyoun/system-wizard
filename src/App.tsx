@@ -20,9 +20,10 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'wrap'
   },
   paper: {
-    padding : theme.spacing(2),
-    margin  : 'auto',
-    maxWidth: 1900
+    padding  : theme.spacing(2),
+    margin   : 'auto',
+    maxWidth : 1900,
+    textAlign: 'center'
   },
   footer: {
     position: 'absolute',
@@ -59,7 +60,8 @@ const App = observer(() => {
         <DarkModeSwitch handleChange={handleDarkMode} />
       </Grid>
       <div className={classes.root}>
-        <Grid container spacing={0}>
+        <Grid container justify="center" alignItems="center"
+          spacing={0}>
           <Grid item xs={12}>
             <Paper elevation={0} className={classes.paper}>
               <h1>System Bootstrapper Wizard (Beta)</h1>

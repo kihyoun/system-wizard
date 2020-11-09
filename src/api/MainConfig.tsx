@@ -75,10 +75,10 @@ export default class MainConfig implements MainConfigInterface {
   @action generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.syncEnable = _config?.syncEnable || 'false';
-      this.syncHost = _config?.syncHost || 'example.com';
+      this.syncHost = _config?.syncHost || 'www.system-bootstrapper.com:8071';
       this.syncUser = _config?.syncUser || 'admin';
       this.syncPass = _config?.syncPass || 'admin';
-      this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
+      this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 0;
       this.syncSSL = _config?.gitlabSSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.syncHost}/fullchain.pem`;
       this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')

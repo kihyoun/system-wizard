@@ -89,8 +89,8 @@ const GeneralForm = observer((props: any) => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Grid container>
-        <Grid item xs={2}>
+      <Grid container justify="center">
+        <Grid item xs={3}>
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
             {steps.map((step, index) => (
               <Step key={step.label}>
@@ -120,7 +120,7 @@ const GeneralForm = observer((props: any) => {
             ))}
           </Stepper>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={7}>
           <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
           <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
           <NginxSettingsFields init={nginxInit} hidden={activeStep !== 2} main={main} />

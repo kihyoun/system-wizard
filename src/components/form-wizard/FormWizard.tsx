@@ -1,9 +1,9 @@
-import React, {  useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  Button, createStyles, Snackbar, Tabs, Toolbar
+  Button, ButtonGroup, createStyles, Snackbar, Tabs, Toolbar
 } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab/Tab';
 import GeneralForm from './general-form/GeneralForm';
@@ -18,10 +18,12 @@ import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ImportFileDialog from './dialogs/ImportFileDialog';
 import SyncIcon from '@material-ui/icons/Sync';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import LockIcon from '@material-ui/icons/Lock';
-import { green, purple } from '@material-ui/core/colors';
 import ConnectServerDialog from './dialogs/ConnectServerDialog';
+import { observer } from 'mobx-react';
+import { runInAction } from 'mobx';
+import ServerOverview from './server-overview/ServerOverview';
+import SaveIcon from '@material-ui/icons/Save';
 
 const TabPanel = (props: any) => {
   const {
@@ -54,7 +56,8 @@ const useStyles = makeStyles(theme =>
       padding     : theme.spacing(2),
       margin      : 'auto',
       maxWidth    : 1900,
-      marginBottom: '1ch'
+      marginBottom: '1ch',
+      textAlign   : 'center'
     },
     divider      : { flexGrow: 1 },
     buttonDivider: { width: '1ch' },
@@ -70,7 +73,7 @@ const useStyles = makeStyles(theme =>
   })
 );
 
-const FormWizard = (props: any) => {
+const FormWizard = observer((props: any) => {
   const main = props.main;
   const [tab, setTab] = useState(0);
   const [downloadDocker, setDownloadDocker] = useState(false);
@@ -81,9 +84,20 @@ const FormWizard = (props: any) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
   const classes = useStyles({ progress: progress });
+  const [connected, setConnected] = useState(props.main.sync.connected);
 
   const [openAlert, setOpenAlert] = useState('');
   const [openSuccess, setOpenSuccess] = useState('');
+
+  const onLoginSuccess = () => {
+    runInAction(() => {
+      setOpenSuccess('Login successful.');
+    });
+  };
+
+  useEffect(() => {
+    setConnected(props.main.sync.connected);
+  }, [props.main.sync.connected]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -98,7 +112,20 @@ const FormWizard = (props: any) => {
   };
 
   const handleConnectServer = () => {
-    setConnectServer(true)
+    if (!connected) {
+      setConnectServer(true);
+    } else {
+      runInAction(() => {
+        props.main.sync.logout()
+          .then(() => {
+            setConnected(false);
+            setOpenSuccess('Logged out.');
+          })
+          .catch((err:any) => {
+            props.setOpenAlert(err.response.data);
+          });
+      });
+    }
   };
 
   const onChangeHandler=(event:any)=>{
@@ -139,7 +166,10 @@ const FormWizard = (props: any) => {
       {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
       {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
-      {connectServer && <ConnectServerDialog main={main} setClose={() => setConnectServer(false)} />}
+      {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
+        setOpenAlert={(err:string) => setOpenAlert(err)}
+        setProgress={setProgress}
+        main={main} setClose={() => setConnectServer(false)} />}
       {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
         setOpenAlert={setOpenAlert}
         setProgress={setProgress}
@@ -150,7 +180,8 @@ const FormWizard = (props: any) => {
       <Grid item xs={12}>
         <div className={classes.progressBar}></div>
       </Grid>
-      <Grid container direction="row" justify="center" spacing={2} alignItems="center"
+      <Grid container direction="row" spacing={0}
+        alignItems="center" justify="center"
         onDragOver={ev => {
           ev.preventDefault();
         }}
@@ -165,58 +196,55 @@ const FormWizard = (props: any) => {
         <Grid item xs={12}>
           <Paper className={classes.paper} elevation={0}>
             <Toolbar>
+              <div className={classes.divider} />
+
               <Tabs
                 indicatorColor="primary"
                 textColor="primary"
                 value={tab}
                 onChange={handleChange}>
-                <Tab label="General Settings" {...a11yProps(0)} />
-                <Tab label="Proxy Configurations" {...a11yProps(1)} />
+                <Tab label="General" {...a11yProps(0)} />
+                <Tab label="Proxy" {...a11yProps(1)} />
+                <Tab label="Server" {...a11yProps(2)} />
               </Tabs>
 
               <div className={classes.divider} />
-              <input
-                accept="application/json, .env"
-                className={classes.input}
-                id="contained-button-file"
-                multiple
-                type="file"
-                onChange={onChangeHandler}
-              />
 
-              <Button
-                aria-haspopup="true"
-                variant="contained"
-                color={props.main.connected ? 'secondary': 'default' }
-                component="span"
-                startIcon={props.main.connected ? <LockIcon /> : <SyncIcon />}
-                onClick={handleConnectServer}
-              >
-                {props.main.connected ? 'Connected' : 'Connect Server'}
-              </Button>
-              <div className={classes.buttonDivider} />
+              <ButtonGroup disableElevation variant="contained" >
 
-              <label htmlFor="contained-button-file">
                 <Button
+                  htmlFor="contained-button-file"
                   aria-haspopup="true"
-                  variant="contained"
-                  component="span"
+                  component="label"
                   startIcon={<CloudUploadIcon />}
                   color="primary">
-                Load Configuration
+                Import
                 </Button>
-              </label>
-
-              <div className={classes.buttonDivider} />
-
-              <Button aria-controls="simple-menu"
-                aria-haspopup="true"
-                variant="contained"
-                color="primary"
-                startIcon={<CloudDownloadIcon />}
-                onClick={handleClick}>
-                Export
-              </Button>
+                <input
+                  accept="application/json, .env"
+                  className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                  onChange={onChangeHandler}
+                />
+                <Button aria-controls="simple-menu"
+                  aria-haspopup="true"
+                  color="primary"
+                  startIcon={<SaveIcon />}
+                  onClick={handleClick}>
+                Save
+                </Button>
+                <Button
+                  aria-haspopup="true"
+                  color={connected ? 'secondary': 'default' }
+                  component="span"
+                  startIcon={connected ? <LockIcon /> : <SyncIcon />}
+                  onClick={handleConnectServer}
+                >
+                  {connected ? 'Disconnect' : 'Connect'}
+                </Button>
+              </ButtonGroup>
 
               <Menu
                 anchorEl={anchorEl}
@@ -233,17 +261,20 @@ const FormWizard = (props: any) => {
             </Toolbar>
           </Paper>
         </Grid>
-        <Grid item xs={11}>
+        <Grid item xs={12}>
           <TabPanel value={tab} index={0}>
             <GeneralForm main={main} />
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <ProjectsOverview main={main} />
           </TabPanel>
+          <TabPanel value={tab} index={2}>
+            <ServerOverview main={main} />
+          </TabPanel>
         </Grid>
       </Grid>
     </React.Fragment>
   );
-};
+});
 
 export default FormWizard;

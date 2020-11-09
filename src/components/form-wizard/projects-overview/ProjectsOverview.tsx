@@ -77,7 +77,7 @@ const ProjectsOverview = observer((props:any) => {
         message={'Project successfully deleted.'} />
       {downloadReactCi && <DownloadReactCiDialog main={props.main} project={activeProject}
         setClose={() => setDownloadReactCi(false)} />}
-      <TableContainer component={Paper} >
+      <TableContainer component={Paper} elevation={0}>
         <Table className={classes.table}
           size="small" aria-label="a dense table">
           <TableHead>

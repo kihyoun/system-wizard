@@ -21,7 +21,6 @@ export default class Main {
     @observable private _syncServer!: SyncServer;
     init = true;
     uploadProgress = false;
-    connected = false;
 
     /**
      * Set Config

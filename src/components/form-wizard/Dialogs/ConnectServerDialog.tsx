@@ -16,9 +16,16 @@ export default function ConnectServerDialog(props:any) {
     props.setClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     runInAction(() => {
-      props.main.sync.login(props.main.sync.userName, password);
+      props.main.sync.login(props.main.sync.userName, password)
+        .then(() => {
+          props.onLoginSuccess();
+          handleClose();
+        })
+        .catch((err:any) => {
+          props.setOpenAlert(err.response.data);
+        });
     });
   };
 

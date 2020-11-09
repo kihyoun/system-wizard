@@ -30,23 +30,39 @@ export default class SyncServer {
     });
   }
 
-  @action async login(username:string, password:string) {
-
-    const options = {
-      params : { '': '' },
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      data   : {
-        username,
-        password
-      }
+  @action login(username:string, password:string) {
+    const data = {
+      username,
+      password
     };
 
-    axios.post(this.serverAddress + '/login', options).then(function (response) {
-      console.log(response.data);
-    }).catch(function (error) {
-      console.error(error);
+    return new Promise((resolve, reject) => {
+      axios.post(this.serverAddress + '/login', data).then(res => {
+        runInAction(() => {
+          this.accessToken = res.data.accessToken;
+          this.refreshToken = res.data.refreshToken;
+          this.connected = true;
+        });
+        resolve();
+      }).catch(err => {
+        reject(err);
+      });
     });
+  }
 
+  @action logout() {
+    return new Promise((resolve, reject) => {
+      axios.post(this.serverAddress + '/logout').then(() => {
+        runInAction(() => {
+          this.accessToken = '';
+          this.refreshToken = '';
+          this.connected = false;
+        });
+        resolve();
+      }).catch(err => {
+        reject(err);
+      });
+    });
   }
 
   serverAddress!:string;
