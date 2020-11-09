@@ -20,8 +20,8 @@ import ConnectServerDialog from './dialogs/ConnectServerDialog';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 import SaveIcon from '@material-ui/icons/Save';
-import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 const TabPanel = (props: any) => {
   const {
@@ -87,7 +87,6 @@ const FormWizard = observer((props: any) => {
   const [openSuccess, setOpenSuccess] = useState('');
 
   useEffect(() => {
-    console.log('new active server received')
     runInAction(() => {
       setMain(props.main);
     });
@@ -222,9 +221,9 @@ const FormWizard = observer((props: any) => {
                   htmlFor="contained-button-file"
                   aria-haspopup="true"
                   component="label"
-                  startIcon={<OpenInBrowserIcon />}
+                  startIcon={<InsertDriveFileIcon />}
                   color="primary">
-                Load
+                Open
                 </Button>
                 <input
                   accept="application/json, .env"

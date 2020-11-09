@@ -75,11 +75,11 @@ export default class MainConfig implements MainConfigInterface {
   @action generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.syncEnable = _config?.syncEnable || 'false';
-      this.syncHost = _config?.syncHost || '';
+      this.syncHost = _config?.syncHost || 'sync' + this.gitlabHost.substr(6);
       this.syncUser = _config?.syncUser || 'admin';
       this.syncPass = _config?.syncPass || 'admin';
-      this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 0;
-      this.syncSSL = _config?.gitlabSSL?.replace(/;/g, '')
+      this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
+      this.syncSSL = _config?.syncSSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.syncHost}/fullchain.pem`;
       this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.syncHost}/privkey.pem`;
@@ -160,7 +160,7 @@ export SYNC_DOMAIN_MODE=${this.syncDomainMode}
       const syncSSL = `
 export SYNC_SSL=${this.syncSSL}
 export SYNC_SSL_KEY=${this.syncSSLKey}
-`
+`;
       const createdOn = `
 # created on ${new Date()}
 `;
@@ -170,7 +170,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
      + (this.gitlabRegistryDomainMode > 1 && registrySSL || '')
      + nginx
      + (this.syncEnable === 'true' && syncSettings || '')
-     + (this.syncEnable === 'true' && this.syncDomainMode && this.syncDomainMode > 1) ? syncSSL : ''
+     + (this.syncEnable === 'true' && this.syncDomainMode && this.syncDomainMode > 1 && syncSSL || '')
      + createdOn;
     }
 
@@ -268,6 +268,24 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
       });
     }
 
+    ret = Object.assign(ret, { syncEnable: this.syncEnable });
+
+    if (this.syncEnable === 'true') {
+      ret = Object.assign(ret, {
+        syncHost      : this.syncHost,
+        syncUser      : this.syncUser,
+        syncPass      : this.syncPass,
+        syncDomainMode: this.syncDomainMode
+      });
+
+      if (this.syncDomainMode > 1) {
+        ret = Object.assign(ret, {
+          syncSSL   : this.syncSSL,
+          syncSSLKey: this.syncSSLKey
+        });
+      }
+    }
+
     return Object.assign(ret, {
       gitlabRunnerDockerScale: this.gitlabRunnerDockerScale,
       gitlabRunnerToken      : this.gitlabRunnerToken
@@ -292,6 +310,13 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
     case 'SSL_BASEDIR': this.sslBaseDir = value; break;
+    case 'SYNC_ENABLE': this.syncEnable = value; break;
+    case 'SYNC_HOST': this.syncHost = value; break;
+    case 'SYNC_USER': this.syncUser = value; break;
+    case 'SYNC_PASS': this.syncPass = value; break;
+    case 'SYNC_DOMAIN_MODE': this.syncDomainMode = parseInt(value, 10); break;
+    case 'SYNC_SSL': this.syncSSL = value.replace(/;/g, ''); break;
+    case 'SYNC_SSL_KEY': this.syncSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
     }

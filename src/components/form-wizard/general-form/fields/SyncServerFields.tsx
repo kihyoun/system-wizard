@@ -16,18 +16,16 @@ const SyncServerFields = observer((props: any) => {
   const classes = useStyles();
   const [init, setInit] = useState(props.init);
   useEffect(() => {
-    console.log('useEffect: something changed', init)
     if (!props.hidden && init) {
       runInAction(() => {
-        console.log('SyncFields generate config')
-        props.main.config.generateSyncConfig()
-        setInit(false)
+        props.main.config.generateSyncConfig();
+        setInit(false);
       });
     }
     if (!props.main.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.main.id]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

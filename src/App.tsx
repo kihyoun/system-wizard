@@ -120,7 +120,7 @@ const App = observer(() => {
         server.sync?.serverAddress) {
       return server.sync.serverAddress;
     } else {
-      return 'New Server';
+      return 'Server';
     }
   };
 
@@ -203,7 +203,7 @@ const App = observer(() => {
 
                 <ListItem button onClick={() => runInAction(() => handleAddServer())}>
                   <ListItemIcon>{<AddIcon />}</ListItemIcon>
-                  <ListItemText primary={'Add Server'} />
+                  <ListItemText primary={'Add'} />
                 </ListItem>
               </List>
 
