@@ -13,11 +13,8 @@ import Divider from '@material-ui/core/Divider';
 import DownloadDockerDialog from './dialogs/DownloadDockerDialog';
 import DownloadProjectsDialog from './dialogs/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import ImportFileDialog from './dialogs/ImportFileDialog';
-import SyncIcon from '@material-ui/icons/Sync';
 import LockIcon from '@material-ui/icons/Lock';
 import ConnectServerDialog from './dialogs/ConnectServerDialog';
 import { observer } from 'mobx-react';
@@ -74,7 +71,7 @@ const useStyles = makeStyles(theme =>
 );
 
 const FormWizard = observer((props: any) => {
-  const main = props.main;
+  const [main, setMain] = useState(props.main);
   const [tab, setTab] = useState(0);
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
@@ -88,6 +85,12 @@ const FormWizard = observer((props: any) => {
 
   const [openAlert, setOpenAlert] = useState('');
   const [openSuccess, setOpenSuccess] = useState('');
+
+  useEffect(() => {
+    runInAction(() => {
+      setMain(props.main);
+    });
+  }, [props.main]);
 
   const onLoginSuccess = () => {
     runInAction(() => {

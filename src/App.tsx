@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   createMuiTheme, makeStyles, ThemeProvider
 } from '@material-ui/core/styles';
@@ -14,7 +14,6 @@ import AddIcon from '@material-ui/icons/Add';
 import { observer } from 'mobx-react';
 import blue from '@material-ui/core/colors/blue';
 import grey from '@material-ui/core/colors/grey';
-import Helper from './api/Helper';
 import clsx from 'clsx';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -31,9 +30,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import { green } from '@material-ui/core/colors';
+import { runInAction } from 'mobx';
 
 const drawerWidth = 240;
 
@@ -111,14 +110,30 @@ const App = observer(() => {
     setDark(event.target.checked);
   };
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const main = new Main();
   const [servers, setServers] = useState([main]);
   const [activeServer, setActiveServer] = useState(main);
-  const [serverName, setServerName] = useState(
-    activeServer.sync?.connected
-      ? activeServer.config?.syncHostInfo.url
-      : 'New Server');
+
+  const getServerName = (server:Main) => {
+    if (server.sync?.connected &&
+        server.sync?.serverAddress) {
+      return server.sync.serverAddress;
+    } else if (server.config?.syncEnable === 'true' && server.config.syncHost) {
+      return server.config.syncHostInfo.url;
+    } else {
+      return 'New Server';
+    }
+  };
+
+  const handleAddServer = () => {
+    const main = new Main();
+    runInAction(() => {
+      servers.push(main);
+      setServers(servers);
+      setActiveServer(main);
+    });
+  };
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -177,23 +192,19 @@ const App = observer(() => {
               <Divider />
 
               <List>
-                {servers.map((server:any, index) => (
-                  <ListItem button key={server.id}>
-                    <ListItemIcon>{<InboxIcon />}</ListItemIcon>
-                    <ListItemText primary={serverName} />
+                {servers.map((server:any) => (
+                  <ListItem button key={server.id}
+                    selected={activeServer.id === server.id} onClick={() => runInAction(() => setActiveServer(server))}>
                     <ListItemIcon>{server.sync.connected ?
-                      <FiberManualRecordIcon style={{ color: green[500] }} />
-                      : ''}</ListItemIcon>
+                      <FiberManualRecordIcon style={{ color: green[500] }} /> : <InboxIcon />}</ListItemIcon>
+                    <ListItemText primary={getServerName(server)} />
                   </ListItem>
                 ))}
                 <Divider />
 
-                <ListItem button >
-                  <ListItemIcon>{<InboxIcon />}</ListItemIcon>
-                  <ListItemText primary={serverName} />
-                  <ListItemIcon>
-                    <FiberManualRecordIcon style={{ color: green[500] }} />
-                  </ListItemIcon>
+                <ListItem button onClick={() => runInAction(() => handleAddServer())}>
+                  <ListItemIcon>{<AddIcon />}</ListItemIcon>
+                  <ListItemText primary={'Add Server'} />
                 </ListItem>
               </List>
 
@@ -205,7 +216,7 @@ const App = observer(() => {
 
               <Paper elevation={0} className={classes.paper}>
                 <h1>
-                  {serverName}
+                  {getServerName(activeServer)}
                 </h1>
               </Paper>
               <FormWizard main={activeServer} />

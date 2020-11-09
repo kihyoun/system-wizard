@@ -24,7 +24,7 @@ export default function ConnectServerDialog(props:any) {
           handleClose();
         })
         .catch((err:any) => {
-          props.setOpenAlert(err.response.data);
+          props.setOpenAlert(err.response?.data || err.toString());
         });
     });
   };
