@@ -23,7 +23,7 @@ export default function ServerControlButton(props:any) {
           (res > 0 ? `(Skipped ${res} File(s)` : ''));
         handleClose();
       }).catch((err:any) => {
-        props.setOpenAlert(err);
+        props.setOpenAlert(err.toString());
         handleClose();
       });
     });
