@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  Button, ButtonGroup, createStyles, Snackbar, Tabs, Toolbar
+  Button, ButtonGroup, createStyles, Tabs, Toolbar
 } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab/Tab';
 import GeneralForm from './general-form/GeneralForm';
@@ -15,12 +15,10 @@ import DownloadProjectsDialog from './dialogs/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
 import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
 import ImportFileDialog from './dialogs/ImportFileDialog';
-import LockIcon from '@material-ui/icons/Lock';
-import ConnectServerDialog from './dialogs/ConnectServerDialog';
+
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 import SaveIcon from '@material-ui/icons/Save';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 const TabPanel = (props: any) => {
@@ -76,15 +74,10 @@ const FormWizard = observer((props: any) => {
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
-  const [connectServer, setConnectServer] = useState(false);
   const [importFile, setImportFile] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
   const classes = useStyles({ progress: progress });
-  const [connected, setConnected] = useState(props.main.sync.connected);
-
-  const [openAlert, setOpenAlert] = useState('');
-  const [openSuccess, setOpenSuccess] = useState('');
 
   useEffect(() => {
     runInAction(() => {
@@ -92,15 +85,7 @@ const FormWizard = observer((props: any) => {
     });
   }, [props.main]);
 
-  const onLoginSuccess = () => {
-    runInAction(() => {
-      setOpenSuccess('Login successful.');
-    });
-  };
 
-  useEffect(() => {
-    setConnected(main.sync.connected);
-  }, [main.sync.connected]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -112,23 +97,6 @@ const FormWizard = observer((props: any) => {
 
   const handleChange = (event: any, newTab: number) => {
     setTab(newTab);
-  };
-
-  const handleConnectServer = () => {
-    if (!connected) {
-      setConnectServer(true);
-    } else {
-      runInAction(() => {
-        main.sync.logout()
-          .then(() => {
-            setConnected(false);
-            setOpenSuccess('Logged out.');
-          })
-          .catch((err:any) => {
-            props.setOpenAlert(err.response.data);
-          });
-      });
-    }
   };
 
   const onChangeHandler=(event:any)=>{
@@ -150,36 +118,26 @@ const FormWizard = observer((props: any) => {
         if (tab === 1) {
           main.importProjectFile(file, evt.target.result);
         }
-        setOpenSuccess('Import finished: ' + file.name);
+        props.setOpenSuccess('Import finished: ' + file.name);
       } catch (e) {
-        setOpenAlert('error reading file: ' + e.toString());
+        props.setOpenAlert('error reading file: ' + e.toString());
       }
     }
     reader.onerror = function () {
-      setOpenAlert('error reading file')
+      props.setOpenAlert('error reading file')
     }
   };
 
   return (
     <React.Fragment>
-      <Snackbar open={openAlert.length > 0} autoHideDuration={6000}
-        onClose={() => setOpenAlert('')}
-        message={openAlert} />
-      <Snackbar open={openSuccess.length > 0} autoHideDuration={6000}
-        onClose={() => setOpenSuccess('')}
-        message={openSuccess} />
       {downloadDocker && <DownloadDockerDialog main={main}
         setClose={() => setDownloadDocker(false)} />}
       {downloadProjects && <DownloadProjectsDialog main={main}
         setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main}
         setClose={() => setDownloadJson(false)} />}
-      {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
-        setOpenAlert={(err:string) => setOpenAlert(err)}
-        setProgress={setProgress}
-        main={main} setClose={() => setConnectServer(false)} />}
-      {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
-        setOpenAlert={setOpenAlert}
+      {importFile && <ImportFileDialog setOpenSuccess={props.setOpenSuccess}
+        setOpenAlert={props.setOpenAlert}
         setProgress={setProgress}
         main={main}
         tab={tab}
@@ -215,7 +173,10 @@ const FormWizard = observer((props: any) => {
 
               <div className={classes.divider} />
 
-              <ButtonGroup disableElevation variant="contained" >
+              <ButtonGroup disableElevation orientation="vertical"
+                color="primary"
+                aria-label="vertical contained primary button group"
+                variant="text">
 
                 <Button
                   htmlFor="contained-button-file"
@@ -240,15 +201,7 @@ const FormWizard = observer((props: any) => {
                   onClick={handleClick}>
                 Save
                 </Button>
-                <Button
-                  aria-haspopup="true"
-                  color={connected ? 'secondary': 'primary' }
-                  component="span"
-                  startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
-                  onClick={handleConnectServer}
-                >
-                  {connected ? 'Logout' : 'Login'}
-                </Button>
+
               </ButtonGroup>
 
               <Menu

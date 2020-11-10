@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   createMuiTheme, makeStyles, ThemeProvider
 } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  createStyles, Link, Theme
+  Button,
+  createStyles, Link, Snackbar, Theme
 } from '@material-ui/core';
 import DarkModeSwitch from './DarkModeSwitch';
 import FormWizard from './components/form-wizard/FormWizard';
@@ -33,6 +34,11 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import { green } from '@material-ui/core/colors';
 import { runInAction } from 'mobx';
+import ConnectServerDialog from './components/form-wizard/dialogs/ConnectServerDialog';
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import moment from 'moment';
+import ServerControlButton from './components/ServerControlButton';
 
 const drawerWidth = 240;
 
@@ -46,10 +52,14 @@ const useStyles = makeStyles(theme => ({
     margin  : 'auto',
     maxWidth: 1900
   },
-  divider: { flexGrow: 1 },
-  footer : {
-    position: 'absolute',
-    bottom  : 0
+  divider    : { flexGrow: 1 },
+  progressBar: {
+    width: (props:any) => {
+      if (props.progress === 100) return 0;
+      return `${props.progress}%`
+    },
+    backgroundColor: (props:any) => props.theme.palette.primary.main,
+    height         : '1ch'
   }
 }));
 const useDrawerStyles = makeStyles((theme: Theme) =>
@@ -103,7 +113,6 @@ const useDrawerStyles = makeStyles((theme: Theme) =>
   })
 );
 const App = observer(() => {
-  const classes = useStyles();
   const drawerClasses = useDrawerStyles();
   const [dark, setDark] = useState(false);
   const handleDarkMode = (event: any) => {
@@ -114,6 +123,20 @@ const App = observer(() => {
   const main = new Main();
   const [servers, setServers] = useState([main]);
   const [activeServer, setActiveServer] = useState(main);
+  const [connected, setConnected] = useState(activeServer.sync.connected);
+  const [connectServer, setConnectServer] = useState(false);
+  const [lastStatusMessage, setLastStatusMessage] = useState('Not connected.')
+  const [openSuccess, setOpenSuccess] = useState('');
+  const [openAlert, setOpenAlert] = useState('');
+  const [progress, setProgress] = useState(activeServer.sync.progress);
+
+  useEffect(() => {
+    setConnected(activeServer.sync.connected);
+  }, [activeServer.sync.connected]);
+
+  useEffect(() => {
+    setProgress(activeServer.sync.progress);
+  }, [activeServer.sync.progress]);
 
   const getServerName = (server:Main) => {
     if (server.sync?.connected &&
@@ -148,10 +171,49 @@ const App = observer(() => {
     }
   });
 
+  const classes = useStyles({
+    progress: progress,
+    theme   : theme
+  });
+
+  const handleConnectServer = () => {
+    if (!connected) {
+      setConnectServer(true);
+    } else {
+      runInAction(() => {
+        activeServer.sync.logout()
+          .then((res:any) => {
+            setConnected(false);
+            setOpenSuccess('Logged out.');
+            setLastStatusMessage(res.message);
+          })
+          .catch((err:any) => {
+            setOpenAlert(err.response?.data || err.toString());
+          });
+      });
+    }
+  };
+
+  const onLoginSuccess = () => {
+    runInAction(() => {
+      setOpenSuccess('Login successful.');
+      setLastStatusMessage('Last Login: ' + moment().format());
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className={classes.root}>
+        <Snackbar open={openSuccess.length > 0} autoHideDuration={6000}
+          onClose={() => setOpenSuccess('')}
+          message={openSuccess} />
+        <Snackbar open={openAlert.length > 0} autoHideDuration={6000}
+          onClose={() => setOpenAlert('')}
+          message={openAlert} />
+        {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
+          setOpenAlert={(err:string) => setOpenAlert(err)}
+          main={activeServer} setClose={() => setConnectServer(false)} />}
         <Grid container spacing={0}>
           <div className={drawerClasses.root}>
             <AppBar
@@ -212,13 +274,44 @@ const App = observer(() => {
               className={clsx(drawerClasses.content, { [drawerClasses.contentShift]: open })}
             >
               <div className={drawerClasses.drawerHeader} />
-
               <Paper elevation={0} className={classes.paper}>
-                <h1>
-                  {getServerName(activeServer)}
-                </h1>
+                <Toolbar>
+                  <Typography variant="h6">
+                    {getServerName(activeServer)}
+                  </Typography>
+
+                  <div className={classes.divider} />
+                  {activeServer.sync.connected &&
+                    <ServerControlButton
+                      setOpenAlert={(value:string) => setOpenAlert(value)}
+                      setOpenSuccess={(value:string) => setOpenSuccess(value)}
+                      main={activeServer} />}
+                  <Button
+                    variant={'contained'}
+                    color={connected ? 'secondary': 'primary' }
+                    component="span"
+                    startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
+                    onClick={handleConnectServer}
+                  >
+                    {connected ? 'Disconnect' : 'Connect'}
+                  </Button>
+                </Toolbar>
               </Paper>
-              <FormWizard main={activeServer} />
+              {activeServer.sync.connected && (
+                <>
+                  <Grid item xs={12}>
+                    <div className={classes.progressBar}></div>
+                  </Grid>
+                  <Paper elevation={0} className={classes.paper}>
+                    <Typography>
+                      {lastStatusMessage}
+                    </Typography>
+                  </Paper>
+                </>
+              )}
+              <FormWizard main={activeServer}
+                setOpenAlert={setOpenAlert}
+                setOpenSuccess={setOpenSuccess}/>
             </main>
           </div>
         </Grid>

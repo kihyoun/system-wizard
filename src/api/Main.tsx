@@ -11,6 +11,8 @@ import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
 import JSZip from 'jszip';
 import SyncServer from './SyncServer';
 import { v4 as uuidv4 } from 'uuid';
+import md5 from 'md5';
+
 /**
  * General Configuration Object
  */
@@ -94,13 +96,13 @@ export default class Main {
       if (file.name.substr(-4) === 'json') {
         this.importJson(file, result);
       } else if (file.name.substr(-3) === 'env') {
-        this.importEnv(file, result);
+        this.importEnv(result);
       }
     }
 
-    public importProjectFile(file: File, result:string) {
+    public importProjectFile(file: File, result:any) {
       if (file.name.substr(-3) === 'env') {
-        this.importProjectEnv(file, result);
+        this.importProjectEnv(result);
       }
     }
 
@@ -122,14 +124,28 @@ export default class Main {
       });
     }
 
-    public importEnv(file:File, result:string) {
+    public importEnv(result: any) {
+      this.importEnvData(result);
+    }
+
+    public importEnvData(result: any) {
+      console.group('Env File import');
+      console.log(`Filename: ${result.filename}`)
+      console.log('Raw data:', `\n${result.data}`);
+      console.groupEnd();
+
+      if (result.data.substr(807, 1) !== '$'
+        || md5(result.data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
+        throw new Error('Invalid Configuration');
+      }
+
       runInAction(() => {
         this.uploadProgress = true;
         this.init=false;
       });
       runInAction(() => {
-        const lines = result.split('\n');
-        lines.forEach(line => {
+        const lines = result.data.split('\n');
+        lines.forEach((line:any) => {
         // Skip comments
           if (line.substr(0, 1) === '#' || line.length < 3) {
             return;
@@ -140,22 +156,32 @@ export default class Main {
           this._config.setProperty(key, value);
         });
         this.uploadProgress = false;
-        console.group('Env File import');
-        console.log(`Filename: ${file.name}`)
-        console.log('Raw data:', `\n${result}`);
-        console.groupEnd();
       });
     }
 
-    public importProjectEnv(file:File, result:string) {
+    public importProjectEnv(result:any) {
+      this.importProjectEnvData(result);
+    }
+
+    public importProjectEnvData(result:any) {
+      console.group('Env File import');
+      console.log(`Filename: ${result.filename}`)
+      console.log('Raw data:', `\n${result.data}`);
+      console.groupEnd();
+
+      if (result.data.substr(807, 1) !== '$'
+        || md5(result.data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
+        throw new Error('Invalid Configuration');
+      }
+
       const config = new ProjectConfig(this);
       runInAction(() => {
         this.uploadProgress = true;
         this.init = false;
       });
       runInAction(() => {
-        const lines = result.split('\n');
-        lines.forEach(line => {
+        const lines = result.data.split('\n');
+        lines.forEach((line:any)=> {
         // Skip comments
           if (line.substr(0, 1) === '#' || line.length < 3) {
             return;
@@ -167,10 +193,6 @@ export default class Main {
         });
         this.addProject(config);
         this.uploadProgress = false;
-        console.group('Env File import');
-        console.log(`Filename: ${file.name}`)
-        console.log('Raw data:', `\n${result}`);
-        console.groupEnd();
       });
     }
 

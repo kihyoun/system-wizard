@@ -1,5 +1,5 @@
 import {
-  action, makeAutoObservable, runInAction
+  action, computed, makeAutoObservable, runInAction
 } from 'mobx';
 import Main from './Main';
 import axios from 'axios';
@@ -8,6 +8,7 @@ import axios from 'axios';
  * General Configuration Object
  */
 export default class SyncServer {
+  progress = 100;
   /**
    * Set Config
    * @param {ServerConfig} config ServerConfig
@@ -52,17 +53,72 @@ export default class SyncServer {
 
   @action logout() {
     return new Promise((resolve, reject) => {
-      axios.post(this.serverAddress + '/logout').then(() => {
-        runInAction(() => {
-          this.accessToken = '';
-          this.refreshToken = '';
-          this.connected = false;
-        });
-        resolve();
-      }).catch(err => {
-        reject(err);
+      this.token().then(() =>
+        axios.post(this.serverAddress + '/logout', { t: this.accessToken }, this.getHeaders()).then(res => {
+          runInAction(() => {
+            this.accessToken = '';
+            this.refreshToken = '';
+            this.connected = false;
+          });
+          resolve(res);
+        }).catch(err => {
+          reject(err);
+        })
+      ).catch(err => reject(err));
+    });
+  }
+
+  @action fetch() {
+    return new Promise((resolve, reject) => {
+      this.token().then(() => {
+        axios.get(this.serverAddress + '/config/main', this.getHeaders())
+          .then((res:any) => {
+            try {
+              this.main.importEnvData(res.data);
+            } catch (err) {
+              reject('Invalid Configuration');
+            }
+          }).catch(err => reject(err));
+        axios.get(this.serverAddress + '/config/projects', this.getHeaders())
+          .then((res:any) => {
+            let skipCount = 0;
+            res.data.forEach((fileinfo:any) => {
+              try {
+                this.main.importProjectEnvData(fileinfo);
+              } catch (err) {
+                skipCount++;
+                console.log(`${fileinfo.filename} is invalid, skipped`);
+              }
+            })
+            resolve(skipCount);
+          }).catch(err => reject(err))
+      }
+      ).catch(err => {
+        reject(err)
       });
     });
+  }
+
+  @action token() {
+    return new Promise((resolve, reject) => {
+      axios.post(this.serverAddress + '/token', { token: this.refreshToken })
+        .then((res:any) => {
+          this.accessToken = res.data.accessToken;
+          resolve(res);
+        }).catch(() => {
+          reject('Login expired.');
+          this.connected = false;
+        });
+    });
+  }
+
+  @computed getHeaders() {
+    return {
+      onDownloadProgress: (progressEvent:any) => {
+        runInAction(() => this.progress = 100 * (progressEvent.loaded / progressEvent.total))
+      },
+      headers: { 'Authorization': `Bearer ${this.accessToken}` }
+    };
   }
 
   serverAddress!:string;
