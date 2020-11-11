@@ -355,7 +355,7 @@ test:cypress:
     # useful to make sure we are not carrying around old versions
     - npx cypress cache path
     - npx cypress cache list
-    - npx cypress run --config baseUrl=http://alpha-host:3000
+    - npx cypress run --config baseUrl=http://alpha-host:80
   artifacts:
     when: always
     paths:
@@ -378,8 +378,8 @@ test:review:
     - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
     - set -e
   script:
-    - docker run -itd --network=container:`
-    + `${this.projectKey}_review_1 -p 80:3000 -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
+    - docker run -itd --network `
+    + `${this.projectKey}_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
     + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
   except:
     - master
@@ -412,7 +412,7 @@ deploy:beta:
     - docker rm ${this.betaHost}
     - set -e
   script:
-    - docker run -itd --network=container:${this.projectKey}_beta_1 `
+    - docker run -itd --network ${this.projectKey}_beta `
     + `-e VIRTUAL_HOST=${this.betaHost} `
     + `--name ${this.betaHost} $IMAGE_TAG
   only:
@@ -432,8 +432,8 @@ deploy:prod:
     - docker rm ${this.prodHost}
     - set -e
   script:
-    - docker run -itd --network=container:${this.projectKey}_prod_1 `
-      + `-e VIRTUAL_HOST=${this.prodHost} -p 80:3000 `
+    - docker run -itd --network ${this.projectKey}_prod `
+      + `-e VIRTUAL_HOST=${this.prodHost} `
       + `--name ${this.prodHost} $IMAGE_TAG
   only:
     - master
