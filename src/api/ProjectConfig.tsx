@@ -378,7 +378,7 @@ test:review:
     - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
     - set -e
   script:
-    - docker run -itd --network `
+    - docker run -itd --network=container:`
     + `${this.projectKey}_review_1 -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
     + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
   except:
@@ -412,7 +412,7 @@ deploy:beta:
     - docker rm ${this.betaHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_beta_1 `
+    - docker run -itd --network=container:${this.projectKey}_beta_1 `
     + `-e VIRTUAL_HOST=${this.betaHost} `
     + `--name ${this.betaHost} $IMAGE_TAG
   only:
@@ -432,7 +432,7 @@ deploy:prod:
     - docker rm ${this.prodHost}
     - set -e
   script:
-    - docker run -itd --network ${this.projectKey}_prod_1 `
+    - docker run -itd --network=container:${this.projectKey}_prod_1 `
       + `-e VIRTUAL_HOST=${this.prodHost} `
       + `--name ${this.prodHost} $IMAGE_TAG
   only:
