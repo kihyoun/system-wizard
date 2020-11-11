@@ -69,33 +69,25 @@ export default class SyncServer {
   }
 
   @action fetch() {
-    return new Promise((resolve, reject) => {
-      this.token().then(() => {
-        axios.get(this.serverAddress + '/config/main', this.getHeaders())
-          .then((res:any) => {
-            try {
-              this.main.importEnvData(res.data);
-            } catch (err) {
-              reject('Invalid Configuration');
-            }
-          }).catch(err => reject(err));
-        axios.get(this.serverAddress + '/config/projects', this.getHeaders())
-          .then((res:any) => {
-            let skipCount = 0;
-            res.data.forEach((fileinfo:any) => {
-              try {
-                this.main.importProjectEnvData(fileinfo);
-              } catch (err) {
-                skipCount++;
-                console.log(`${fileinfo.filename} is invalid, skipped`);
-              }
-            })
-            resolve(skipCount);
-          }).catch(err => reject(err))
-      }
-      ).catch(err => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
+        this.main.importEnvData(res.data);
+        const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
+        let skipCount = 0;
+        projects.data.forEach((fileinfo:any) => {
+          try {
+            this.main.importProjectEnvData(fileinfo);
+          } catch (err) {
+            skipCount++;
+            console.log(`${fileinfo.filename} is invalid, skipped`);
+          }
+        })
+        resolve(skipCount);
+      } catch (err) {
         reject(err)
-      });
+      }
     });
   }
 
@@ -135,6 +127,61 @@ export default class SyncServer {
     });
   }
 
+  @action deleteMain() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const res = await axios.delete(this.serverAddress + '/config/main', this.getHeaders());
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
+  @action deleteProjects() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const res = await axios.delete(this.serverAddress + '/config/projects', this.getHeaders());
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
+  @action restore() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/restore'
+        });
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
+  @action hotPatch() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/system/patch'
+        });
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
   @action token() {
     return new Promise((resolve, reject) => {
       axios.post(this.serverAddress + '/token', { token: this.refreshToken })

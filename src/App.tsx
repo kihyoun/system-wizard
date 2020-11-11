@@ -193,13 +193,16 @@ const App = observer(() => {
   };
 
   const handleServerDialog = () => {
-    setConnectServer(true);
+    runInAction(() => {
+      setConnectServer(true);
+    });
   };
 
   const onLoginSuccess = () => {
     runInAction(() => {
       setOpenSuccess('Login successful.');
       setLastStatusMessage('Last Login: ' + moment().format());
+      setConnectServer(false);
     });
   };
 
@@ -231,6 +234,7 @@ const App = observer(() => {
           message={openAlert} />
         {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
           handleSubmit={(password:string) => handleSubmit(password)}
+          connectServer={connectServer}
           setOpenAlert={(err:string) => setOpenAlert(err)}
           main={activeServer} setClose={() => setConnectServer(false)} />}
         <Grid container spacing={0}>

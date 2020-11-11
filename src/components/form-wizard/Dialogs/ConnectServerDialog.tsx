@@ -6,9 +6,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import ServerCredentialFields from 'src/components/fields/ServerCredentialFields';
+import { observer } from 'mobx-react';
 
-export default function ConnectServerDialog(props:any) {
-  const [open, setOpen] = useState(true);
+const ConnectServerDialog = observer((props:any) => {
+  const [open, setOpen] = useState(props.connectServer);
   const [password, setPassword] = useState(props.main.config.syncPass);
 
   const handleClose = () => {
@@ -17,10 +18,8 @@ export default function ConnectServerDialog(props:any) {
   };
 
   useEffect(() => {
-    if (props.main.sync.connected) {
-      handleClose();
-    }
-  },[props.main.sync.connected]);
+    setOpen(props.connectServer);
+  }, [props.connectServer]);
 
   return (
     <div>
@@ -31,7 +30,6 @@ export default function ConnectServerDialog(props:any) {
         onClose={handleClose}
         aria-labelledby="responsive-dialog-title"
       >
-
         <DialogTitle id="responsive-dialog-title">Connect</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -45,7 +43,7 @@ export default function ConnectServerDialog(props:any) {
         <DialogActions>
           <Button autoFocus onClick={() => props.handleSubmit(password)}
             color="primary" variant="contained" >
-            Submit
+            {props.main.sync.connected ? 'Logout' : 'Submit'}
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
             Close
@@ -54,4 +52,6 @@ export default function ConnectServerDialog(props:any) {
       </Dialog>
     </div>
   );
-}
+});
+
+export default ConnectServerDialog;

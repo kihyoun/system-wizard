@@ -25,6 +25,7 @@ const ServerCredentialFields = observer((props: any) => {
         value={serverAddress}
         style={{ margin: 8 }}
         name="serverAddress"
+        disabled={props.main.sync.connected}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
@@ -37,6 +38,7 @@ const ServerCredentialFields = observer((props: any) => {
       />
       <TextField
         label="Username"
+        disabled={props.main.sync.connected}
         value={props.main.sync.userName}
         name="userName"
         style={{ margin: 8 }}
@@ -50,6 +52,7 @@ const ServerCredentialFields = observer((props: any) => {
       <TextField
         label="Password"
         value={props.password}
+        disabled={props.main.sync.connected}
         style={{ margin: 8 }}
         fullWidth
         type={'password'}
