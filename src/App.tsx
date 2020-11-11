@@ -45,10 +45,7 @@ import EditIcon from '@material-ui/icons/Edit';
 const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    display : 'flex',
-    flexWrap: 'wrap'
-  },
+  root : {},
   paper: {
     padding : theme.spacing(2),
     margin  : 'auto',
@@ -238,115 +235,118 @@ const App = observer(() => {
           setOpenAlert={(err:string) => setOpenAlert(err)}
           main={activeServer} setClose={() => setConnectServer(false)} />}
         <Grid container spacing={0}>
-          <div className={drawerClasses.root}>
-            <AppBar
-              position="fixed"
-              className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: open })}
-            >
-              <Toolbar>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  onClick={handleDrawerOpen}
-                  edge="start"
-                  className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Typography variant="h6" noWrap>
-            System Bootstrapper Control Panel
-                </Typography>
-                <div className={classes.divider} />
-                <DarkModeSwitch handleChange={handleDarkMode} />
-              </Toolbar>
-            </AppBar>
-            <Drawer
-              className={drawerClasses.drawer}
-              variant="persistent"
-              anchor="left"
-              open={open}
-              classes={{ paper: drawerClasses.drawerPaper }}
-            >
-              <div className={drawerClasses.drawerHeader}>
-                <IconButton onClick={handleDrawerClose}>
-                  {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                </IconButton>
-              </div>
-              <Divider />
+          <Grid item xs={12}>
 
-              <List>
-                {servers.map((server:any) => (
-                  <ListItem button key={server.id}
-                    selected={activeServer.id === server.id}
-                    onClick={() => runInAction(() => setActiveServer(server))}>
-                    <ListItemIcon>{server.sync.connected ?
-                      <FiberManualRecordIcon style={{ color: green[500] }} /> : <InboxIcon />}</ListItemIcon>
-                    <ListItemText primary={getServerName(server)} />
-                  </ListItem>
-                ))}
+            <div className={drawerClasses.root}>
+              <AppBar
+                position="fixed"
+                className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: open })}
+              >
+                <Toolbar>
+                  <IconButton
+                    color="inherit"
+                    aria-label="open drawer"
+                    onClick={handleDrawerOpen}
+                    edge="start"
+                    className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Typography variant="h6" noWrap>
+            System Bootstrapper Control Panel
+                  </Typography>
+                  <div className={classes.divider} />
+                  <DarkModeSwitch handleChange={handleDarkMode} />
+                </Toolbar>
+              </AppBar>
+              <Drawer
+                className={drawerClasses.drawer}
+                variant="persistent"
+                anchor="left"
+                open={open}
+                classes={{ paper: drawerClasses.drawerPaper }}
+              >
+                <div className={drawerClasses.drawerHeader}>
+                  <IconButton onClick={handleDrawerClose}>
+                    {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                  </IconButton>
+                </div>
                 <Divider />
 
-                <ListItem button onClick={() => runInAction(() => handleAddServer())}>
-                  <ListItemIcon>{<AddIcon />}</ListItemIcon>
-                  <ListItemText primary={'Add'} />
-                </ListItem>
-              </List>
+                <List>
+                  {servers.map((server:any) => (
+                    <ListItem button key={server.id}
+                      selected={activeServer.id === server.id}
+                      onClick={() => runInAction(() => setActiveServer(server))}>
+                      <ListItemIcon>{server.sync.connected ?
+                        <FiberManualRecordIcon style={{ color: green[500] }} /> : <InboxIcon />}</ListItemIcon>
+                      <ListItemText primary={getServerName(server)} />
+                    </ListItem>
+                  ))}
+                  <Divider />
 
-            </Drawer>
-            <main
-              className={clsx(drawerClasses.content, { [drawerClasses.contentShift]: open })}
-            >
-              <div className={drawerClasses.drawerHeader} />
-              <Paper elevation={0} className={classes.paper}>
-                <Toolbar>
-                  <Typography variant="h6">
-                    {getServerName(activeServer)}
-                  </Typography>
+                  <ListItem button onClick={() => runInAction(() => handleAddServer())}>
+                    <ListItemIcon>{<AddIcon />}</ListItemIcon>
+                    <ListItemText primary={'Add'} />
+                  </ListItem>
+                </List>
 
-                  <div className={classes.divider} />
-                  {activeServer.sync.connected &&
+              </Drawer>
+              <main
+                className={clsx(drawerClasses.content, { [drawerClasses.contentShift]: open })}
+              >
+                <div className={drawerClasses.drawerHeader} />
+                <Paper elevation={0} className={classes.paper}>
+                  <Toolbar>
+                    <Typography variant="h6">
+                      {getServerName(activeServer)}
+                    </Typography>
+
+                    <div className={classes.divider} />
+                    {activeServer.sync.connected &&
                     <ServerControlButton
                       setOpenAlert={(value:string) => setOpenAlert(value)}
                       setOpenSuccess={(value:string) => setOpenSuccess(value)}
                       main={activeServer} />}
 
-                  <ButtonGroup variant={'contained'}>
-                    <Button
-                      component="span"
-                      color={connected ? 'secondary': 'primary' }
-                      onClick={handleServerDialog}
-                    >
-                      <EditIcon />
-                    </Button>
-                    <Button
-                      color={connected ? 'secondary': 'primary' }
-                      component="span"
-                      startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
-                      onClick={() => handleSubmit(activeServer.config?.syncPass)}
-                    >
-                      {connected ? 'Disconnect' : 'Connect'}
-                    </Button>
-                  </ButtonGroup>
+                    <ButtonGroup variant={'contained'}>
+                      <Button
+                        component="span"
+                        color={connected ? 'secondary': 'primary' }
+                        onClick={handleServerDialog}
+                      >
+                        <EditIcon />
+                      </Button>
+                      <Button
+                        color={connected ? 'secondary': 'primary' }
+                        component="span"
+                        startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
+                        onClick={() => handleSubmit(activeServer.config?.syncPass)}
+                      >
+                        {connected ? 'Disconnect' : 'Connect'}
+                      </Button>
+                    </ButtonGroup>
 
-                </Toolbar>
-              </Paper>
-              {activeServer.sync.connected && (
-                <>
-                  <Grid item xs={12}>
-                    <div className={classes.progressBar}></div>
-                  </Grid>
-                  <Paper elevation={0} className={classes.paper}>
-                    <Typography>
-                      {lastStatusMessage}
-                    </Typography>
-                  </Paper>
-                </>
-              )}
-              <FormWizard main={activeServer}
-                setOpenAlert={setOpenAlert}
-                setOpenSuccess={setOpenSuccess}/>
-            </main>
-          </div>
+                  </Toolbar>
+                </Paper>
+                {activeServer.sync.connected && (
+                  <>
+                    <Grid item xs={12}>
+                      <div className={classes.progressBar}></div>
+                    </Grid>
+                    <Paper elevation={0} className={classes.paper}>
+                      <Typography>
+                        {lastStatusMessage}
+                      </Typography>
+                    </Paper>
+                  </>
+                )}
+                <FormWizard main={activeServer}
+                  setOpenAlert={setOpenAlert}
+                  setOpenSuccess={setOpenSuccess}/>
+              </main>
+            </div>
+          </Grid>
         </Grid>
       </div>
       Visit <Link href="https://github.com/kihyoun/system">System Bootstrapper on Github</Link>
