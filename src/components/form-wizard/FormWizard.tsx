@@ -114,7 +114,6 @@ const FormWizard = observer((props: any) => {
           main.importFile(file, evt.target.result);
           props.setOpenSuccess('Import finished: ' + file.name);
           if (event.target) {
-            console.log('reset event target')
             setFiles([]);
           }
         });
