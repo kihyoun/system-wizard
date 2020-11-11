@@ -85,7 +85,7 @@ test:review:
     - docker rm $CI_BUILD_REF_SLUG.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_review_1 -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.system-bootstrapper.com --name $CI_BUILD_REF_SLUG.system-bootstrapper.com $IMAGE_TAG
   except:
     - master
   only:
@@ -116,7 +116,7 @@ deploy:prod:
     - docker rm www.system-bootstrapper.com
     - set -e
   script:
-    - docker run -itd --network systembootstrapper_prod -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
+    - docker run -itd --network systembootstrapper_prod_1 -e VIRTUAL_HOST=www.system-bootstrapper.com --name www.system-bootstrapper.com $IMAGE_TAG
   only:
     - master
 
