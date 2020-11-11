@@ -379,7 +379,7 @@ test:review:
     - set -e
   script:
     - docker run -itd --network=container:`
-    + `${this.projectKey}_review_1 -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
+    + `${this.projectKey}_review_1 -p 80:3000 -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
     + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
   except:
     - master
@@ -433,7 +433,7 @@ deploy:prod:
     - set -e
   script:
     - docker run -itd --network=container:${this.projectKey}_prod_1 `
-      + `-e VIRTUAL_HOST=${this.prodHost} `
+      + `-e VIRTUAL_HOST=${this.prodHost} -p 80:3000 `
       + `--name ${this.prodHost} $IMAGE_TAG
   only:
     - master
