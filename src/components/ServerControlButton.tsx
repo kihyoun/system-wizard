@@ -21,8 +21,10 @@ export default function ServerControlButton(props:any) {
   const handleFetch = () => {
     runInAction(() => {
       props.main.sync.fetch().then((res:any) => {
-        props.setOpenSuccess('Import finished. ' +
-          (res > 0 ? `(Skipped ${res} File(s)` : ''));
+        const msg = 'Import finished. ' +
+          (res > 0 ? `(Skipped ${res} File(s)` : '');
+        props.setOpenSuccess(msg);
+        props.setLastStatusMessage(msg);
         handleClose();
       }).catch((err:any) => {
         props.setOpenAlert(err.toString());
@@ -40,7 +42,9 @@ export default function ServerControlButton(props:any) {
         handleClose();
         setPublish(false);
       } catch(err:any) {
-        props.setOpenAlert(err.response?.data || err.toString());
+        const msg = err.response?.data || err.toString();
+        props.setOpenAlert(msg);
+        props.setLastStatusMessage(msg);
         handleClose();
         setPublish(false);
       }

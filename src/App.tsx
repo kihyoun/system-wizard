@@ -307,6 +307,7 @@ const App = observer(() => {
                     <ServerControlButton
                       setOpenAlert={(value:string) => setOpenAlert(value)}
                       setOpenSuccess={(value:string) => setOpenSuccess(value)}
+                      setLastStatusMessage={(value:string) => setLastStatusMessage(value)}
                       main={activeServer} />}
 
                     <ButtonGroup variant={'contained'}>
