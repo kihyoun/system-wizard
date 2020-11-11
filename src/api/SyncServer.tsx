@@ -99,6 +99,42 @@ export default class SyncServer {
     });
   }
 
+  @action push() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.main.generateZip().then( async (bootstrapperRaw:any) => {
+          const file = new File([bootstrapperRaw], 'bootstrapper.zip');
+          const formData = new FormData();
+          formData.append('bootstrapper.zip',file);
+          await this.token();
+          const res = await axios.post(this.serverAddress + '/config/zip',
+            formData,
+            this.getFileHeaders());
+          resolve(res);
+        });
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
+  @action restart() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/restart'
+        });
+
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
   @action token() {
     return new Promise((resolve, reject) => {
       axios.post(this.serverAddress + '/token', { token: this.refreshToken })
@@ -112,12 +148,21 @@ export default class SyncServer {
     });
   }
 
+  @computed getFileHeaders() {
+    return {
+      headers: {
+        'Content-Type' : 'multipart/form-data',
+        'Authorization': `Bearer ${this.accessToken}`
+      }
+    };
+  }
+
   @computed getHeaders() {
     return {
-      onDownloadProgress: (progressEvent:any) => {
-        runInAction(() => this.progress = 100 * (progressEvent.loaded / progressEvent.total))
-      },
-      headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      headers: {
+        'Authorization': `Bearer ${this.accessToken}` ,
+        'Content-Type' : 'application/x-www-form-urlencoded'
+      }
     };
   }
 

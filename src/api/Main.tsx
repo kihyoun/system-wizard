@@ -197,6 +197,12 @@ export default class Main {
     }
 
     public exportZip() {
+      this.generateZip().then(function(content:any) {
+        saveAs(content, 'bootstrapper.zip');
+      });
+    }
+
+    public generateZip() {
       const zip = new JSZip();
       zip.file('bootstrapper.json', JSON.stringify(this.asJson, null, 4));
       zip.file('.docker.env', this._config.content);
@@ -205,9 +211,7 @@ export default class Main {
         projects?.file(`.${projectConfig.projectKey}.env`, projectConfig.content);
       });
 
-      zip.generateAsync({ type: 'blob' }).then(function(content:any) {
-        saveAs(content, 'bootstrapper.zip');
-      });
+      return zip.generateAsync({ type: 'blob' });
     }
 
     public exportProjectConfigs() {

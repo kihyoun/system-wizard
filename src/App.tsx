@@ -6,6 +6,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
   Button,
+  ButtonGroup,
   createStyles, Link, Snackbar, Theme
 } from '@material-ui/core';
 import DarkModeSwitch from './DarkModeSwitch';
@@ -39,6 +40,7 @@ import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import moment from 'moment';
 import ServerControlButton from './components/ServerControlButton';
+import EditIcon from '@material-ui/icons/Edit';
 
 const drawerWidth = 240;
 
@@ -176,22 +178,22 @@ const App = observer(() => {
     theme   : theme
   });
 
-  const handleConnectServer = () => {
-    if (!connected) {
-      setConnectServer(true);
-    } else {
-      runInAction(() => {
-        activeServer.sync.logout()
-          .then((res:any) => {
-            setConnected(false);
-            setOpenSuccess('Logged out.');
-            setLastStatusMessage(res.message);
-          })
-          .catch((err:any) => {
-            setOpenAlert(err.response?.data || err.toString());
-          });
-      });
-    }
+  const handleLogout = () => {
+    runInAction(() => {
+      activeServer.sync.logout()
+        .then((res:any) => {
+          setConnected(false);
+          setOpenSuccess('Logged out.');
+          setLastStatusMessage(res.message);
+        })
+        .catch((err:any) => {
+          setOpenAlert(err.response?.data || err.toString());
+        });
+    });
+  };
+
+  const handleServerDialog = () => {
+    setConnectServer(true);
   };
 
   const onLoginSuccess = () => {
@@ -199,6 +201,22 @@ const App = observer(() => {
       setOpenSuccess('Login successful.');
       setLastStatusMessage('Last Login: ' + moment().format());
     });
+  };
+
+  const handleSubmit = async (password:any) => {
+    if (activeServer.sync.connected) {
+      handleLogout();
+    } else {
+      runInAction(() => {
+        activeServer.sync.login(activeServer.sync.userName, password)
+          .then(() => {
+            onLoginSuccess();
+          })
+          .catch((err:any) => {
+            setOpenAlert(err.response?.data || err.toString());
+          });
+      });
+    }
   };
 
   return (
@@ -212,6 +230,7 @@ const App = observer(() => {
           onClose={() => setOpenAlert('')}
           message={openAlert} />
         {connectServer && <ConnectServerDialog onLoginSuccess={onLoginSuccess}
+          handleSubmit={(password:string) => handleSubmit(password)}
           setOpenAlert={(err:string) => setOpenAlert(err)}
           main={activeServer} setClose={() => setConnectServer(false)} />}
         <Grid container spacing={0}>
@@ -286,15 +305,25 @@ const App = observer(() => {
                       setOpenAlert={(value:string) => setOpenAlert(value)}
                       setOpenSuccess={(value:string) => setOpenSuccess(value)}
                       main={activeServer} />}
-                  <Button
-                    variant={'contained'}
-                    color={connected ? 'secondary': 'primary' }
-                    component="span"
-                    startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
-                    onClick={handleConnectServer}
-                  >
-                    {connected ? 'Disconnect' : 'Connect'}
-                  </Button>
+
+                  <ButtonGroup variant={'contained'}>
+                    <Button
+                      component="span"
+                      color={connected ? 'secondary': 'primary' }
+                      onClick={handleServerDialog}
+                    >
+                      <EditIcon />
+                    </Button>
+                    <Button
+                      color={connected ? 'secondary': 'primary' }
+                      component="span"
+                      startIcon={connected ? <LockIcon /> : <LockOpenIcon />}
+                      onClick={() => handleSubmit(activeServer.config?.syncPass)}
+                    >
+                      {connected ? 'Disconnect' : 'Connect'}
+                    </Button>
+                  </ButtonGroup>
+
                 </Toolbar>
               </Paper>
               {activeServer.sync.connected && (

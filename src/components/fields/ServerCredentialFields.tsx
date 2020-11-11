@@ -4,11 +4,14 @@ import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 const ServerCredentialFields = observer((props: any) => {
-  const [serverAddress, setServerAddress] = useState('');
+  const [serverAddress, setServerAddress] = useState(props.main.sync.serverAddress);
 
   useEffect(() => {
     runInAction(() => {
-      props.main.sync.generateConfig();
+      if (props.init) {
+        props.main.sync.generateConfig();
+      }
+
       if (props.main.config.syncEnable === 'true' && props.main.config.syncHost) {
         setServerAddress(props.main.config.syncHostInfo.url);
       }
