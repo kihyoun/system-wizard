@@ -48,7 +48,7 @@ build:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
   only:
-    # - merge_requests
+    - merge_requests
     - master
 test:cypress:
   stage: test
