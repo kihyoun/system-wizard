@@ -36,8 +36,6 @@ export default function ServerControlButton(props:any) {
       try {
         props.setOpenSuccess('Sending Data...');
         await props.main.sync.push();
-        props.setOpenSuccess('Restarting...');
-        await props.main.sync.restart();
         props.setOpenSuccess('Ready.');
         handleClose();
         setPublish(false);
@@ -124,11 +122,11 @@ export default function ServerControlButton(props:any) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleFetch}>Fetch</MenuItem>
         <MenuItem onClick={() => setPublish(true)}>Publish</MenuItem>
-        <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
-        <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
         <MenuItem onClick={() => handleRestore()}>Restore</MenuItem>
+        <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
+        <MenuItem onClick={handleFetch}>Fetch</MenuItem>
+        <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
         <MenuItem onClick={() => handleHotPatch()}>Pull</MenuItem>
       </Menu>
     </React.Fragment>

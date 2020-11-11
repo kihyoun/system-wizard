@@ -112,12 +112,7 @@ const FormWizard = observer((props: any) => {
     }
     reader.onload = function (evt:any) {
       try {
-        if (tab === 0 || file.name.substr(-4,4) === 'json') {
-          main.importFile(file, evt.target.result);
-        }
-        if (tab === 1) {
-          main.importProjectFile(file, evt.target.result);
-        }
+        main.importFile(file, evt.target.result);
         props.setOpenSuccess('Import finished: ' + file.name);
       } catch (e) {
         props.setOpenAlert('error reading file: ' + e.toString());

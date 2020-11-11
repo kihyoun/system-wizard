@@ -16,6 +16,7 @@ export default function ImportFileDialog(props:any) {
   };
 
   const handleImport = () => {
+    console.log('handleimport')
     runInAction(() => {
       if (props.files.length < 1) {
         return;
@@ -28,11 +29,7 @@ export default function ImportFileDialog(props:any) {
       }
       reader.onload = function (evt:any) {
         try {
-          if (props.tab === 0 || file.name.substr(-4,4) === 'json') {
-            props.main.importFile(file, evt.target.result);
-          } else if (props.tab === 1) {
-            props.main.importProjectFile(file, evt.target.result);
-          }
+          props.main.importFile(file, evt.target.result);
           props.setOpenSuccess('Import finished: ' + file.name);
         } catch (e) {
           props.setOpenAlert('error reading file: ' + e.toString());

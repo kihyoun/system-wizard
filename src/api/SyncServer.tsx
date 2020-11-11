@@ -128,6 +128,7 @@ export default class SyncServer {
       }
     });
   }
+
   @action restart() {
     return new Promise(async (resolve, reject) => {
       try {

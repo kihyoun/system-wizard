@@ -95,8 +95,12 @@ export default class Main {
     public importFile(file: File, result:string) {
       if (file.name.substr(-4) === 'json') {
         this.importJson(file, result);
-      } else if (file.name.substr(-3) === 'env') {
+      } else if (file.name.indexOf('.docker.env') > -1) {
         this.importEnv(result);
+      } else if (file.name.indexOf('.env') > -1 ) {
+        this.importProjectEnv(result);
+      } else {
+        throw 'Invalid File';
       }
     }
 
@@ -128,14 +132,13 @@ export default class Main {
       this.importEnvData(result);
     }
 
-    public importEnvData(result: any) {
+    public importEnvData(data: any) {
       console.group('Env File import');
-      console.log(`Filename: ${result.filename}`)
-      console.log('Raw data:', `\n${result.data}`);
+      console.log('Raw data:', `\n${data}`);
       console.groupEnd();
 
-      if (result.data.substr(807, 1) !== '$'
-        || md5(result.data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
+      if (data.substr(807, 1) !== '$'
+        || md5(data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
         throw new Error('Invalid Configuration');
       }
 
@@ -144,7 +147,7 @@ export default class Main {
         this.init=false;
       });
       runInAction(() => {
-        const lines = result.data.split('\n');
+        const lines = data.split('\n');
         lines.forEach((line:any) => {
         // Skip comments
           if (line.substr(0, 1) === '#' || line.length < 3) {
@@ -163,14 +166,13 @@ export default class Main {
       this.importProjectEnvData(result);
     }
 
-    public importProjectEnvData(result:any) {
-      console.group('Env File import');
-      console.log(`Filename: ${result.filename}`)
-      console.log('Raw data:', `\n${result.data}`);
+    public importProjectEnvData(data:any) {
+      console.group('Project Env File import');
+      console.log('Raw data:', `\n${data}`);
       console.groupEnd();
 
-      if (result.data.substr(807, 1) !== '$'
-        || md5(result.data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
+      if (data.substr(807, 1) !== '$'
+        || md5(data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
         throw new Error('Invalid Configuration');
       }
 
@@ -180,7 +182,7 @@ export default class Main {
         this.init = false;
       });
       runInAction(() => {
-        const lines = result.data.split('\n');
+        const lines = data.split('\n');
         lines.forEach((line:any)=> {
         // Skip comments
           if (line.substr(0, 1) === '#' || line.length < 3) {
