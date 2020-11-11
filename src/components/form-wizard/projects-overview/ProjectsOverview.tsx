@@ -98,9 +98,10 @@ const ProjectsOverview = observer((props:any) => {
                   <TableCell component="th" scope="row" >
                     {projectConfig.projectKey}
                   </TableCell>
-                  <TableCell>{projectConfig.prodHostInfo.url}</TableCell>
-                  <TableCell>{projectConfig.betaHostInfo.url}</TableCell>
-                  <TableCell>{projectConfig.reviewHostInfo.url}</TableCell>
+                  <TableCell>{projectConfig.useProdHost === 'true' && projectConfig.prodHostInfo.url || '-'}</TableCell>
+                  <TableCell>{projectConfig.useBetaHost === 'true' && projectConfig.betaHostInfo.url || '-'}</TableCell>
+                  <TableCell>{projectConfig.useReviewHost === 'true'
+                  && projectConfig.reviewHostInfo.url || '-'}</TableCell>
                   <TableCell>
                     <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
 

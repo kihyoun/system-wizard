@@ -365,6 +365,9 @@ test:cypress:
   only:
     - merge_requests
     - master
+    `;
+
+     const review =`
 test:review:
   stage: test
   environment:
@@ -398,6 +401,8 @@ stop:review:
   when: manual
   only:
     - merge_requests
+  ${this.betaDeployMode === 0 && 'when: manual' || ''}
+
 `;
      const beta = `
 deploy:beta:
@@ -440,6 +445,7 @@ deploy:prod:
   ${this.prodDeployMode === 0 && 'when: manual' || ''}
 `;
      return ret
+     + (this.useReviewHost === 'true' && review || '')
      + (this.useBetaHost === 'true' && beta || '')
      + (this.useProdHost === 'true' && prod || '');
    }
