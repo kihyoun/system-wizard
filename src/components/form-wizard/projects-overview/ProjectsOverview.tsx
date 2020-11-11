@@ -28,7 +28,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { runInAction } from 'mobx';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import DownloadReactCiDialog from '../dialogs/DownloadReactCiDialog';
+import DownloadReactCiDialog from '../dialog/DownloadReactCiDialog';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 const useStyles = makeStyles({

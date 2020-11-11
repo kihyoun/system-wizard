@@ -35,7 +35,7 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import { green } from '@material-ui/core/colors';
 import { runInAction } from 'mobx';
-import ConnectServerDialog from './components/form-wizard/dialogs/ConnectServerDialog';
+import ConnectServerDialog from './components/form-wizard/dialog/ConnectServerDialog';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import moment from 'moment';

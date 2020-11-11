@@ -10,10 +10,10 @@ import GeneralForm from './general-form/GeneralForm';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import DownloadDockerDialog from './dialogs/DownloadDockerDialog';
-import DownloadProjectsDialog from './dialogs/DownloadProjectsDialog';
+import DownloadDockerDialog from './dialog/DownloadDockerDialog';
+import DownloadProjectsDialog from './dialog/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
-import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
+import DownloadJsonDialog from './dialog/DownloadJsonDialog';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
