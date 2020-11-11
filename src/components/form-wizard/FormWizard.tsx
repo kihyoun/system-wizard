@@ -14,7 +14,6 @@ import DownloadDockerDialog from './dialogs/DownloadDockerDialog';
 import DownloadProjectsDialog from './dialogs/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
 import DownloadJsonDialog from './dialogs/DownloadJsonDialog';
-import ImportFileDialog from './dialogs/ImportFileDialog';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -74,7 +73,7 @@ const FormWizard = observer((props: any) => {
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
-  const [importFile, setImportFile] = useState(false);
+  const [files, setFiles] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
   const classes = useStyles({ progress: progress });
@@ -100,22 +99,32 @@ const FormWizard = observer((props: any) => {
   };
 
   const onChangeHandler=(event:any)=>{
-
-    if (event.target.files.length < 1) {
+    if (event.target?.files?.length < 1 || event.dataTransfer?.files?.length < 1) {
       return;
     }
-    const file = event.target.files[0];
+    const file = event.target?.files?.[0] || event.dataTransfer?.files?.[0];
     const reader = new FileReader();
-    reader.readAsText(event.target.files[0], 'UTF-8');
+    reader.readAsText(file, 'UTF-8');
     reader.onprogress = function (evt:any) {
       setProgress(100 * (evt.loaded / evt.total));
     }
     reader.onload = function (evt:any) {
       try {
-        main.importFile(file, evt.target.result);
-        props.setOpenSuccess('Import finished: ' + file.name);
+        runInAction(() => {
+          main.importFile(file, evt.target.result);
+          props.setOpenSuccess('Import finished: ' + file.name);
+          if (event.target) {
+            console.log('reset event target')
+            setFiles([]);
+          }
+        });
       } catch (e) {
-        props.setOpenAlert('error reading file: ' + e.toString());
+        runInAction(() => {
+          props.setOpenAlert('error reading file: ' + e.toString());
+          if (event.target) {
+            setFiles([]);
+          }
+        });
       }
     }
     reader.onerror = function () {
@@ -131,13 +140,6 @@ const FormWizard = observer((props: any) => {
         setClose={() => setDownloadProjects(false)} />}
       {downloadJson && <DownloadJsonDialog main={main}
         setClose={() => setDownloadJson(false)} />}
-      {importFile && <ImportFileDialog setOpenSuccess={props.setOpenSuccess}
-        setOpenAlert={props.setOpenAlert}
-        setProgress={setProgress}
-        main={main}
-        tab={tab}
-        files={importFile}
-        setClose={() => setImportFile(false)} />}
       <Grid item xs={12}>
         <div className={classes.progressBar}></div>
       </Grid>
@@ -150,7 +152,7 @@ const FormWizard = observer((props: any) => {
           if (ev.dataTransfer.files.length > 0
             && (ev.dataTransfer.files[0].name.substr(-4) === '.env'
             || ev.dataTransfer.files[0].name.substr(-4) === 'json')) {
-            setImportFile(ev.dataTransfer.files);
+            onChangeHandler(ev);
             ev.preventDefault();
           }}}
       >
@@ -186,6 +188,7 @@ const FormWizard = observer((props: any) => {
                   className={classes.input}
                   id="contained-button-file"
                   multiple
+                  value={files}
                   type="file"
                   onChange={onChangeHandler}
                 />

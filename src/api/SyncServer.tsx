@@ -73,13 +73,13 @@ export default class SyncServer {
       try {
         await this.token();
         const res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
-        this.main.importEnvData(res.data);
+        this.main.importEnvData(res.data.data);
         const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
         let skipCount = 0;
         this.main.projects.clear();
         projects.data.forEach((fileinfo:any) => {
           try {
-            this.main.importProjectEnvData(fileinfo);
+            this.main.importProjectEnvData(fileinfo.data);
           } catch (err) {
             skipCount++;
             console.log(`${fileinfo.filename} is invalid, skipped`);
