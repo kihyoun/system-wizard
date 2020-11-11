@@ -8,7 +8,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import ServerCredentialFields from 'src/components/fields/ServerCredentialFields';
 import { observer } from 'mobx-react';
 
-const ConnectServerDialog = observer((props:any) => {
+export const ConnectServerDialog = observer((props:any) => {
   const [open, setOpen] = useState(props.connectServer);
   const [password, setPassword] = useState(props.main.config.syncPass);
 
