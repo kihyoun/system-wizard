@@ -35,7 +35,7 @@ export default class MainConfig implements MainConfigInterface {
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.backupDir = _config?.backupDir || '/mnt/backup';
+      this.seedDir = _config?.seedDir || '/mnt/seed';
     });
   }
 
@@ -113,8 +113,8 @@ export default class MainConfig implements MainConfigInterface {
     public get content() : string {
       const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
-# -- BACKUP
-export BACKUPDIR=${this.backupDir}
+# -- SEED
+export SEED_DIR=${this.seedDir}
 
 # -- GITLAB
 GITLAB_EXTERNAL_URL=${this.gitlabExternalUrl}
@@ -182,8 +182,8 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
       });
     }
 
-  // Backup Settings
-  backupDir!:string;
+  // Seed Settings
+  seedDir!:string;
 
   // Gitlab
   gitlabExternalUrl!:string;
@@ -238,7 +238,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
   @computed public get asJson() : any {
     let ret = {
-      backupDir        : this.backupDir,
+      seedDir          : this.seedDir,
       gitlabExternalUrl: this.gitlabExternalUrl,
       gitlabRegistryUrl: this.gitlabRegistryUrl,
       sslBaseDir       : this.sslBaseDir,
@@ -294,7 +294,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
   public setProperty(propertyKey : any, value : any) {
     switch (propertyKey) {
-    case 'BACKUPDIR': this.backupDir = value; break;
+    case 'SEED_DIR': this.seedDir = value; break;
     case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
     case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
     case 'GITLAB_HOST': this.gitlabHost = value; break;
@@ -325,7 +325,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
 
 export interface MainConfigInterface {
-  backupDir:string;
+  seedDir:string;
   // Gitlab
   gitlabExternalUrl:string;
   gitlabRegistryUrl:string;

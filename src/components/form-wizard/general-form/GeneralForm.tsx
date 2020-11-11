@@ -7,7 +7,7 @@ import {
   Step, StepButton, StepContent, Stepper
 } from '@material-ui/core';
 
-import BackupFields from './fields/BackupFields';
+import SeedFields from './fields/SeedFields';
 import GitlabSettingsFields from './fields/GitlabSettingsFields';
 import NginxSettingsFields from './fields/NginxSettingsFields';
 import ProxySettingsFields from './fields/ProxySettingsFields';
@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
   const [main, setMain] = useState(props.main);
-  const [backupInit, setBackupInit] = useState(main.init);
+  const [seedInit, setSeedInit] = useState(main.init);
   const [syncInit, setSyncInit] = useState(main.init);
   const [gitlabInit, setGitlabInit] = useState(main.init);
   const [nginxInit, setNginxInit] = useState(main.init);
@@ -44,7 +44,7 @@ const GeneralForm = observer((props: any) => {
 
   useEffect(() => {
     runInAction(() => {
-      setBackupInit(main.init);
+      setSeedInit(main.init);
       setSyncInit(main.init);
       setGitlabInit(main.init);
       setNginxInit(main.init);
@@ -60,7 +60,7 @@ const GeneralForm = observer((props: any) => {
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [{
-    label  : 'Backup',
+    label  : 'Seed',
     enabled: true
   }, {
     label  : 'Sync',
@@ -82,7 +82,7 @@ const GeneralForm = observer((props: any) => {
   const handleStep = (step: number) => () => {
     runInAction(() => {
       switch (step) {
-      case 0: setBackupInit(false); break;
+      case 0: setSeedInit(false); break;
       case 1: setSyncInit(false); break;
       case 2: setGitlabInit(false); break;
       case 3: setNginxInit(false); break;
@@ -132,7 +132,7 @@ const GeneralForm = observer((props: any) => {
           </Stepper>
         </Grid>
         <Grid item xs={7}>
-          <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
+          <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
           <SyncServerFields init={syncInit} hidden={activeStep !== 1} main={main} />
           <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 2} main={main} />
           <NginxSettingsFields init={nginxInit} hidden={activeStep !== 3} main={main} />

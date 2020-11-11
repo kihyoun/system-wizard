@@ -3,7 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
-const BackupFields = observer((props: any) => {
+const SeedFields = observer((props: any) => {
   const [init, setInit] = useState(props.init);
 
   useEffect(() => {
@@ -24,19 +24,19 @@ const BackupFields = observer((props: any) => {
   return (
     <>
       <TextField
-        label="BACKUPDIR"
-        value={props.main.config.backupDir}
+        label="SEED_DIR"
+        value={props.main.config.seedDir}
         style={{ margin: 8 }}
         helperText="Location for persistent Data, will be synced with rsync"
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => props.main.config.backupDir = event.target.value);
+          runInAction(() => props.main.config.seedDir = event.target.value);
         }}
       />
     </>
   );
 });
 
-export default BackupFields;
+export default SeedFields;
