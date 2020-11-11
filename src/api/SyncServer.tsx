@@ -220,6 +220,21 @@ export default class SyncServer {
     });
   }
 
+  @action backup() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/backup'
+        });
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
   @action hotPatch() {
     return new Promise(async (resolve, reject) => {
       try {

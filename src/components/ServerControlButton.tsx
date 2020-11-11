@@ -90,6 +90,18 @@ export default function ServerControlButton(props:any) {
       handleClose();
     });
   };
+  const handleBackup = () => {
+    runInAction(async () => {
+      try {
+        props.setOpenSuccess('Starting Backup...');
+        await props.main.sync.backup();
+        props.setOpenSuccess('Ready.');
+      } catch (err) {
+        props.setOpenAlert(err.response?.data || err.toString());
+      }
+      handleClose();
+    });
+  };
 
   const handleRegister = () => {
     runInAction(async () => {
@@ -156,6 +168,7 @@ export default function ServerControlButton(props:any) {
         <MenuItem onClick={() => handleHotPatch()}>Pull</MenuItem>
         <MenuItem onClick={() => handleRegister()}>Register</MenuItem>
         <MenuItem onClick={() => handleUnregister()}>Unregister</MenuItem>
+        <MenuItem onClick={() => handleBackup()}>Backup</MenuItem>
       </Menu>
     </React.Fragment>
   );
