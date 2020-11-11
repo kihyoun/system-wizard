@@ -80,13 +80,13 @@ export default function ServerControlButton(props:any) {
     });
   };
 
-  const handleRestore = () => {
+  const handleFeed = () => {
     runInAction(async () => {
       try {
-        props.setOpenSuccess('Pushing main...');
+        props.setOpenSuccess('Pushing Seed Information...');
         await props.main.sync.pushMain();
-        props.setOpenSuccess('Starting restore...');
-        await props.main.sync.restore();
+        props.setOpenSuccess('Initiating Seed...');
+        await props.main.sync.feed();
         props.setOpenSuccess('Ready.');
       } catch (err) {
         props.setOpenAlert(err.response?.data || err.toString());
@@ -165,7 +165,7 @@ export default function ServerControlButton(props:any) {
         onClose={handleClose}
       >
         <MenuItem onClick={() => setPublish(true)}>Publish</MenuItem>
-        <MenuItem onClick={() => handleRestore()}>Restore</MenuItem>
+        <MenuItem onClick={() => handleFeed()}>Feed</MenuItem>
         <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
         <MenuItem onClick={handleFetch}>Fetch</MenuItem>
         <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
