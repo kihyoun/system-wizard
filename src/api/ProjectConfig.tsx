@@ -355,7 +355,7 @@ test:cypress:
     # useful to make sure we are not carrying around old versions
     - npx cypress cache path
     - npx cypress cache list
-    - npx cypress run --config baseUrl=http://alpha-host:80
+    - npx cypress run --config baseUrl=http://alpha-host:3000
   artifacts:
     when: always
     paths:
