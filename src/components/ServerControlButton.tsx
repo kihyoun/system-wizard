@@ -91,6 +91,32 @@ export default function ServerControlButton(props:any) {
     });
   };
 
+  const handleRegister = () => {
+    runInAction(async () => {
+      try {
+        props.setOpenSuccess('Registering runners...');
+        await props.main.sync.registerRunners();
+        props.setOpenSuccess('Ready.');
+      } catch (err) {
+        props.setOpenAlert(err.response?.data || err.toString());
+      }
+      handleClose();
+    });
+  };
+
+  const handleUnregister = () => {
+    runInAction(async () => {
+      try {
+        props.setOpenSuccess('Unregistering runners...');
+        await props.main.sync.unregisterRunners();
+        props.setOpenSuccess('Ready.');
+      } catch (err) {
+        props.setOpenAlert(err.response?.data || err.toString());
+      }
+      handleClose();
+    });
+  };
+
   const handleHotPatch = () => {
     runInAction(async () => {
       props.setOpenSuccess('Hotpatch started...');
@@ -128,6 +154,8 @@ export default function ServerControlButton(props:any) {
         <MenuItem onClick={handleFetch}>Fetch</MenuItem>
         <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
         <MenuItem onClick={() => handleHotPatch()}>Pull</MenuItem>
+        <MenuItem onClick={() => handleRegister()}>Register</MenuItem>
+        <MenuItem onClick={() => handleUnregister()}>Unregister</MenuItem>
       </Menu>
     </React.Fragment>
   );

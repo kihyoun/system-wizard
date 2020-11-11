@@ -146,6 +146,40 @@ export default class SyncServer {
     });
   }
 
+  @action registerRunners() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/runners/register'
+        });
+
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
+  @action unregisterRunners() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.token();
+        const options:any = Object.assign(this.getHeaders(), {
+          method: 'PATCH',
+          url   : this.serverAddress + '/command/runners/unregister'
+        });
+
+        const res = await axios.request(options);
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
+
   @action deleteMain() {
     return new Promise(async (resolve, reject) => {
       try {
