@@ -76,6 +76,7 @@ export default class SyncServer {
         this.main.importEnvData(res.data);
         const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
         let skipCount = 0;
+        this.main.projects.clear();
         projects.data.forEach((fileinfo:any) => {
           try {
             this.main.importProjectEnvData(fileinfo);
@@ -110,6 +111,23 @@ export default class SyncServer {
     });
   }
 
+  @action pushMain() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const raw = this.main.config?.content || '';
+        const file = new File([raw], '.docker.env');
+        const formData = new FormData();
+        formData.append('.docker.env',file);
+        await this.token();
+        const res = await axios.post(this.serverAddress + '/config/main',
+          formData,
+          this.getFileHeaders());
+        resolve(res);
+      } catch(err) {
+        reject(err)
+      }
+    });
+  }
   @action restart() {
     return new Promise(async (resolve, reject) => {
       try {

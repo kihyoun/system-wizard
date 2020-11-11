@@ -71,21 +71,28 @@ export default function ServerControlButton(props:any) {
         props.setOpenSuccess('Deleting main Config and restarting');
         await props.main.sync.deleteMain();
         props.setOpenSuccess('Ready.');
-        handleClose();
       } catch(err:any) {
         props.setOpenAlert(err.response?.data || err.toString());
-        handleClose();
       }
-    });
-  };
-  const handleRestore = () => {
-    runInAction(async () => {
-      props.setOpenSuccess('Restore Backup...');
-      await props.main.sync.restore();
-      props.setOpenSuccess('Ready.');
       handleClose();
     });
   };
+
+  const handleRestore = () => {
+    runInAction(async () => {
+      try {
+        props.setOpenSuccess('Pushing main...');
+        await props.main.sync.pushMain();
+        props.setOpenSuccess('Starting restore...');
+        await props.main.sync.restore();
+        props.setOpenSuccess('Ready.');
+      } catch (err) {
+        props.setOpenAlert(err.response?.data || err.toString());
+      }
+      handleClose();
+    });
+  };
+
   const handleHotPatch = () => {
     runInAction(async () => {
       props.setOpenSuccess('Hotpatch started...');
@@ -94,6 +101,7 @@ export default function ServerControlButton(props:any) {
       handleClose();
     });
   };
+
   return (
     <React.Fragment>
       <PublishDialog
