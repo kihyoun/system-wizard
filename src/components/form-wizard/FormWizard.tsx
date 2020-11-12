@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  Button, ButtonGroup, createStyles, Tabs, Toolbar
+  Button, ButtonGroup, createStyles, ListItemIcon, Tabs, Toolbar, Typography
 } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab/Tab';
 import GeneralForm from './general-form/GeneralForm';
@@ -14,11 +14,12 @@ import DownloadDockerDialog from './dialog/DownloadDockerDialog';
 import DownloadProjectsDialog from './dialog/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
 import DownloadJsonDialog from './dialog/DownloadJsonDialog';
-
+import LaunchIcon from '@material-ui/icons/Launch';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
-import SaveIcon from '@material-ui/icons/Save';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 const TabPanel = (props: any) => {
   const {
@@ -63,7 +64,8 @@ const useStyles = makeStyles(theme =>
       },
       backgroundColor: theme.palette.primary.main,
       height         : '1ch'
-    }
+    },
+    downloadButtons: { textAlign: 'center' }
   })
 );
 
@@ -167,8 +169,9 @@ const FormWizard = observer((props: any) => {
 
               <div className={classes.divider} />
 
-              <ButtonGroup disableElevation orientation="vertical"
+              <ButtonGroup disableElevation
                 color="primary"
+                className={classes.downloadButtons}
                 aria-label="vertical contained primary button group"
                 variant="text">
 
@@ -192,9 +195,9 @@ const FormWizard = observer((props: any) => {
                 <Button aria-controls="simple-menu"
                   aria-haspopup="true"
                   color="primary"
-                  startIcon={<SaveIcon />}
+                  startIcon={<CloudDownloadIcon />}
                   onClick={handleClick}>
-                Save
+                Backup
                 </Button>
 
               </ButtonGroup>
@@ -205,11 +208,31 @@ const FormWizard = observer((props: any) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={() => setDownloadJson(true)}>Export as JSON</MenuItem>
-                <MenuItem onClick={() => props.main.exportZip()}>Save as ZIP</MenuItem>
+                <MenuItem onClick={() => props.main.exportZip()}>
+                  <ListItemIcon>
+                    <GetAppIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography variant="inherit">bootstrapper.zip</Typography>
+                </MenuItem>
+                <MenuItem onClick={() => setDownloadJson(true)}>
+                  <ListItemIcon>
+                    <LaunchIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography variant="inherit">bootstrapper.json</Typography>
+                </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => setDownloadDocker(true)}>Save .docker.env</MenuItem>
-                <MenuItem onClick={() => setDownloadProjects(true)}>Save projects.env Files</MenuItem>
+                <MenuItem onClick={() => setDownloadDocker(true)}>
+                  <ListItemIcon>
+                    <LaunchIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography variant="inherit">.docker.env</Typography>
+                </MenuItem>
+                <MenuItem onClick={() => setDownloadProjects(true)}>
+                  <ListItemIcon>
+                    <LaunchIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography variant="inherit">Proxies</Typography>
+                </MenuItem>
               </Menu>
             </Toolbar>
           </Paper>

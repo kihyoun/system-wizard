@@ -8,7 +8,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   createStyles, makeStyles, Theme, useTheme
 } from '@material-ui/core/styles';
-import SaveIcon from '@material-ui/icons/Save';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Zoom from '@material-ui/core/Zoom';
@@ -16,6 +15,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Toolbar } from '@material-ui/core';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -86,7 +86,8 @@ export default function DownloadReactCiDialog(props:any) {
         aria-labelledby="responsive-dialog-title"
       >
 
-        <DialogTitle id="responsive-dialog-title">Export .gitlab-ci.yml for React Projects</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Pipeline Configuration for React
+        (.gitlab-ci.yml)</DialogTitle>
         <DialogContent>
           <React.Fragment >
             <div className={classes.toolbarWrapper}>
@@ -140,8 +141,8 @@ export default function DownloadReactCiDialog(props:any) {
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => project.exportGitlabCi()}
-            color="primary" startIcon={<SaveIcon />}>
-            Save
+            color="primary" startIcon={<GetAppIcon />}>
+            Download
           </Button>
           <Button onClick={handleClose} color="primary" autoFocus>
             Close
