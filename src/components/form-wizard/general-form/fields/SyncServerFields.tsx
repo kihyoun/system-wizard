@@ -3,7 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import {
-  FormControl, FormControlLabel, InputLabel, makeStyles, NativeSelect
+  FormControl, FormControlLabel, FormHelperText, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
 const useStyles = makeStyles(theme => ({
@@ -62,10 +62,9 @@ const SyncServerFields = observer((props: any) => {
           <option aria-label="Default (unencrypted)" value={0}>
                 Default, HTTP
           </option>
-          <option value={1}>Wildcard HTTP</option>
           <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.main.config.syncHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
         label="SYNC_HOST"
@@ -126,6 +125,80 @@ const SyncServerFields = observer((props: any) => {
         InputLabelProps={{ shrink: true }}
         onChange={(event: any) => {
           runInAction(() => (props.main.config.syncSSLKey = event.target.value));
+        }}
+        helperText="Path to SSL Key"
+      />
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={props.main.config.wizardEnable === 'true'}
+            onChange={event => {
+              runInAction(() => props.main.config.wizardEnable = event.target.checked ? 'true' : 'false' )
+            }}
+            color="primary"
+          />
+        }
+        label="Enable Wizard"
+      />
+      <FormControl className={classes.formControl}
+        disabled={props.main.config.wizardEnable === 'false'}
+      >
+        <InputLabel htmlFor="wizarddomainmode-native-helper">
+              WIZARD_DOMAIN_MODE
+        </InputLabel>
+        <NativeSelect
+          value={props.main.config.wizardDomainMode}
+          onChange={(event: any) => {
+            runInAction(() => props.main.config.wizardDomainMode = event.target.value);
+          }}
+          inputProps={{
+            name: 'wizardDomainMode',
+            id  : 'wizardDomainMode-native-helper'
+          }}
+        >
+          <option aria-label="Default (unencrypted)" value={0}>
+                Default, HTTP
+          </option>
+          <option value={2}>SSL encrypted</option>
+        </NativeSelect>
+        <FormHelperText>{props.main.config.wizardHostInfo.url}</FormHelperText>
+      </FormControl>
+      <TextField
+        label="WIZARD_HOST"
+        disabled={props.main.config.wizardEnable === 'false'}
+        value={props.main.config.wizardHost}
+        style={{ margin: 8 }}
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        onChange={(event: any) => {
+          runInAction(() => (props.main.config.wizardHost = event.target.value));
+        }}
+      />
+      <TextField
+        label="WIZARD_SSL"
+        disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2}
+        value={props.main.config.wizardSSL}
+        style={{ margin: 8 }}
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        onChange={(event: any) => {
+          runInAction(() => (props.main.config.wizardSSL = event.target.value));
+        }}
+        helperText="Path to SSL Certificate"
+      />
+      <TextField
+        label="WIZARD_SSL_KEY"
+        disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2}
+        value={props.main.config.wizardSSLKey}
+        style={{ margin: 8 }}
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        onChange={(event: any) => {
+          runInAction(() => props.main.config.wizardSSLKey = event.target.value);
         }}
         helperText="Path to SSL Key"
       />

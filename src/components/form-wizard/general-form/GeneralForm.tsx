@@ -9,7 +9,7 @@ import {
 
 import SeedFields from './fields/SeedFields';
 import GitlabSettingsFields from './fields/GitlabSettingsFields';
-import ProxySettingsFields from './fields/ProxySettingsFields';
+import SSLSettingsFields from './fields/SSLSettingsFields';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -35,7 +35,7 @@ const GeneralForm = observer((props: any) => {
   const [main, setMain] = useState(props.main);
   const [seedInit, setSeedInit] = useState(main.init);
   const [gitlabInit, setGitlabInit] = useState(main.init);
-  const [proxyInit, setProxyInit] = useState(main.init);
+  const [sslInit, setSSLInit] = useState(main.init);
   const [syncInit, setSyncInit] = useState(main.init);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const GeneralForm = observer((props: any) => {
       setSeedInit(props.main.init);
       setSyncInit(props.main.init);
       setGitlabInit(props.main.init);
-      setProxyInit(props.main.init);
+      setSSLInit(props.main.init);
       main.init = false;
     });
   }, [props.main.id]);
@@ -58,10 +58,10 @@ const GeneralForm = observer((props: any) => {
     label  : 'Gitlab',
     enabled: !gitlabInit
   }, {
-    label  : 'Proxy',
-    enabled: !proxyInit
+    label  : 'SSL',
+    enabled: !sslInit
   },{
-    label  : 'Sync',
+    label  : 'Sync/Wizard',
     enabled: !syncInit
   }];
 
@@ -70,7 +70,7 @@ const GeneralForm = observer((props: any) => {
       switch (step) {
       case 0: setSeedInit(false); break;
       case 1: setGitlabInit(false); break;
-      case 2: setProxyInit(false); break;
+      case 2: setSSLInit(false); break;
       case 3: setSyncInit(false); break;
       }
 
@@ -118,7 +118,7 @@ const GeneralForm = observer((props: any) => {
         <Grid item xs={7}>
           <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
           <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 2} main={main} />
+          <SSLSettingsFields init={sslInit} hidden={activeStep !== 2} main={main} />
           <SyncServerFields init={syncInit} hidden={activeStep !== 3} main={main} />
         </Grid>
       </Grid>

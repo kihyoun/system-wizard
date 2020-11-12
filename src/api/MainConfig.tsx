@@ -7,7 +7,7 @@ import { HostInfo } from './Main';
 /**
  * General Configuration Object
  */
-export default class MainConfig implements MainConfigInterface {
+export default class MainConfig {
   /**
    * Set Config
    * @param {MainConfig} config MainConfig
@@ -18,12 +18,30 @@ export default class MainConfig implements MainConfigInterface {
   }
 
   syncEnable!: string;
-  syncDomainMode!: number;
+  _syncDomainMode!: number;
+  get syncDomainMode() {
+    return this._syncDomainMode;
+  }
+  set syncDomainMode(mode:any) {
+    this._syncDomainMode = parseInt(mode, 10) || 0;
+  }
   syncHost!:string;
   syncUser!: string;
   syncPass!: string;
   syncSSL!: string;
   syncSSLKey!: string;
+
+  wizardEnable!: string;
+  _wizardDomainMode!: number;
+  get wizardDomainMode() {
+    return this._wizardDomainMode;
+  }
+  set wizardDomainMode(mode:any) {
+    this._wizardDomainMode = parseInt(mode, 10) || 0;
+  }
+  wizardHost!:string;
+  wizardSSL!: string;
+  wizardSSLKey!: string;
 
   @action generateConfig(_config: any | undefined = undefined) {
     this.generateMainConfig(_config);
@@ -75,6 +93,13 @@ export default class MainConfig implements MainConfigInterface {
         || `${this.sslBaseDir}/live/${this.syncHost}/fullchain.pem`;
       this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.syncHost}/privkey.pem`;
+      this.wizardEnable = _config?.wizardEnable || 'false';
+      this.wizardHost = _config?.wizardHost || `wizard${this.gitlabHost.replace('gitlab','')}`;
+      this.wizardDomainMode = _config ? parseInt(_config.wizardDomainMode) || 0 : 2;
+      this.wizardSSL = _config?.wizardSSL?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.wizardHost}/fullchain.pem`;
+      this.wizardSSLKey = _config?.wizardSSLKey?.replace(/;/g, '')
+        || `${this.sslBaseDir}/live/${this.wizardHost}/privkey.pem`;
     });
   }
 
@@ -90,6 +115,21 @@ export default class MainConfig implements MainConfigInterface {
       ssl       : this.syncSSL,
       sslKey    : this.syncSSLKey,
       url       : (this.syncDomainMode < 2 ? 'http://' : 'https://') + host
+    }
+  }
+
+  @computed get wizardHostInfo(): HostInfo {
+    const host = (this.wizardDomainMode === 1 || this.wizardDomainMode === 3 ? '*.' : '')
+        + this.wizardHost;
+    return {
+      context   : 'Wizard',
+      deployMode: 1,
+      useHost   : this.wizardEnable,
+      host,
+      domainMode: this.wizardDomainMode,
+      ssl       : this.wizardSSL,
+      sslKey    : this.wizardSSLKey,
+      url       : (this.wizardDomainMode < 2 ? 'http://' : 'https://') + host
     }
   }
 
@@ -140,6 +180,18 @@ export SYNC_DOMAIN_MODE=${this.syncDomainMode}
 export SYNC_SSL=${this.syncSSL}
 export SYNC_SSL_KEY=${this.syncSSLKey}
 `;
+    const wizard = `
+# --- Wizard
+export WIZARD_ENABLE=${this.wizardEnable}
+`;
+    const wizardSettings = `
+export WIZARD_HOST=${this.wizardHost}
+export WIZARD_DOMAIN_MODE=${this.wizardDomainMode}
+`;
+    const wizardSSL = `
+export WIZARD_SSL=${this.wizardSSL}
+export WIZARD_SSL_KEY=${this.wizardSSLKey}
+`;
     const createdOn = `
 # created on ${new Date()}
 `;
@@ -150,6 +202,9 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
      + nginx
      + (this.syncEnable === 'true' && syncSettings || '')
      + (this.syncEnable === 'true' && this.syncDomainMode && this.syncDomainMode > 1 && syncSSL || '')
+     + wizard
+     + (this.wizardEnable === 'true' && wizardSettings || '')
+     + (this.wizardEnable === 'true' && this.wizardDomainMode && this.wizardDomainMode > 1 && wizardSSL || '')
      + createdOn;
   }
 
@@ -175,15 +230,15 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
   gitlabHost = '';
   _gitlabDomainMode = 2;
 
-  set gitlabDomainMode(mode:number) {
+  set gitlabDomainMode(mode:any) {
     runInAction(() => {
-      this._gitlabDomainMode = mode;
+      this._gitlabDomainMode = parseInt(mode, 10) || 0;
       this.gitlabExternalUrl = (mode < 2 ? 'http://' : 'https://')
-     + this.gitlabHost;
+      + this.gitlabHost;
     });
   }
 
-  get gitlabDomainMode(): number {
+  get gitlabDomainMode() {
     return this._gitlabDomainMode;
   }
 
@@ -193,15 +248,15 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
   gitlabRegistryHost = '';
   _gitlabRegistryDomainMode = 2;
 
-  set gitlabRegistryDomainMode(mode:number) {
+  set gitlabRegistryDomainMode(mode:any) {
     runInAction(() => {
-      this._gitlabRegistryDomainMode = mode;
+      this._gitlabRegistryDomainMode = parseInt(mode, 10) || 0;
       this.gitlabRegistryUrl = (mode < 2 ? 'http://' : 'https://')
       + this.gitlabRegistryHost;
     });
   }
 
-  get gitlabRegistryDomainMode(): number {
+  get gitlabRegistryDomainMode() {
     return this._gitlabRegistryDomainMode;
   }
 
@@ -258,6 +313,22 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
       }
     }
 
+    ret = Object.assign(ret, { wizardEnable: this.wizardEnable });
+
+    if (this.wizardEnable === 'true') {
+      ret = Object.assign(ret, {
+        wizardHost      : this.wizardHost,
+        wizardDomainMode: this.wizardDomainMode
+      });
+
+      if (this.wizardDomainMode > 1) {
+        ret = Object.assign(ret, {
+          wizardSSL   : this.wizardSSL,
+          wizardSSLKey: this.wizardSSLKey
+        });
+      }
+    }
+
     return Object.assign(ret, {
       gitlabRunnerScale: this.gitlabRunnerScale,
       gitlabRunnerToken: this.gitlabRunnerToken
@@ -285,39 +356,13 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     case 'SYNC_DOMAIN_MODE': this.syncDomainMode = parseInt(value, 10); break;
     case 'SYNC_SSL': this.syncSSL = value.replace(/;/g, ''); break;
     case 'SYNC_SSL_KEY': this.syncSSLKey = value.replace(/;/g, ''); break;
+    case 'WIZARD_ENABLE': this.wizardEnable = value; break;
+    case 'WIZARD_HOST': this.wizardHost = value; break;
+    case 'WIZARD_DOMAIN_MODE': this.wizardDomainMode = parseInt(value, 10); break;
+    case 'WIZARD_SSL': this.wizardSSL = value.replace(/;/g, ''); break;
+    case 'WIZARD_SSL_KEY': this.wizardSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10); break;
     }
   }
-}
-
-
-export interface MainConfigInterface {
-  seedDir:string;
-  // Gitlab
-  gitlabExternalUrl:string;
-  gitlabRegistryUrl:string;
-
-  sslBaseDir:string;
-
-  gitlabHost:string;
-  gitlabDomainMode:number;
-  gitlabSSL?:string;
-  gitlabSSLKey?:string;
-
-  gitlabRegistryHost:string;
-  gitlabRegistryDomainMode:number;
-  gitlabRegistrySSL?:string;
-  gitlabRegistrySSLKey?:string;
-
-  syncEnable:string;
-  syncDomainMode:number;
-  syncHost:string;
-  syncUser:string;
-  syncPass:string;
-  syncSSL:string;
-  syncSSLKey:string;
-
-  gitlabRunnerScale:number;
-  gitlabRunnerToken:string;
 }
