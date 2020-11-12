@@ -34,7 +34,6 @@ export default class MainConfig implements MainConfigInterface {
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      console.log('generate main')
       this.seedDir = _config?.seedDir || '/mnt/seed';
       this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
     });
