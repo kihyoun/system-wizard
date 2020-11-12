@@ -98,7 +98,6 @@ export default class MainConfig implements MainConfigInterface {
        deployMode: 1,
        useHost   : this.syncEnable,
        host,
-       port      : 8071,
        domainMode: this.syncDomainMode,
        ssl       : this.syncSSL,
        sslKey    : this.syncSSLKey,

@@ -237,7 +237,6 @@ export interface HostInfo {
   domainMode: number;
   deployMode: number;
   host: string;
-  port: number;
   ssl: string;
   sslKey: string;
   url: string;
