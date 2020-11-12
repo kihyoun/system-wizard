@@ -109,20 +109,6 @@ const ProxySettingsFields = observer((props: any) => {
           runInAction(() => (props.main.config.gitlabSSLKey = event.target.value));
         }}
       />
-      <TextField
-        label="GITLAB_UPSTREAM"
-        value={props.main.config.gitlabUpstream}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabUpstream}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="The Name of the upstream
-              inside the NGINX Main configuration"
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabUpstream = event.target.value));
-        }}
-      />
 
       <h2>Gitlab Registry Settings</h2>
 
@@ -184,18 +170,6 @@ const ProxySettingsFields = observer((props: any) => {
           runInAction(() => (props.main.config.gitlabRegistrySSLKey = event.target.value));
         }}
         helperText="Path to Registry SSL Key"
-      />
-      <TextField
-        label="GITLAB_REGISTRY_UPSTREAM"
-        value={props.main.config.gitlabRegistryUpstream}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabRegistryUpstream}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabRegistryUpstream = event.target.value));
-        }}
       />
     </>
   );

@@ -16,6 +16,7 @@ export default class MainConfig implements MainConfigInterface {
     makeAutoObservable(this);
     this.generateConfig(_config);
   }
+
   syncEnable!: string;
   syncDomainMode!: number;
   syncHost!:string;
@@ -61,13 +62,11 @@ export default class MainConfig implements MainConfigInterface {
         || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
       this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
-      this.gitlabUpstream = _config?.gitlabUpstream || 'gitlab';
       this.gitlabRegistryDomainMode = _config ? parseInt(_config.gitlabRegistryDomainMode, 10) || 0 : 2;
       this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/fullchain.pem`;
       this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/privkey.pem`;
-      this.gitlabRegistryUpstream = _config?.gitlabRegistryUpstream || 'registry';
     });
   }
   @action generateSyncConfig(_config: any | undefined = undefined): void {
@@ -120,7 +119,6 @@ GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 
 # -- NGINX
 export GITLAB_HOST=${this.gitlabHost}
-GITLAB_UPSTREAM=${this.gitlabUpstream}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
 `;
       const gitlabSSL = `
@@ -128,8 +126,6 @@ GITLAB_SSL=${this.gitlabSSL}
 GITLAB_SSL_KEY=${this.gitlabSSLKey}
 `;
       const registry = `
-GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
-
 export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 `;
@@ -206,7 +202,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
   gitlabSSL!:string;
   gitlabSSLKey!:string;
-  gitlabUpstream!:string;
 
   gitlabRegistryHost = '';
   _gitlabRegistryDomainMode = 2;
@@ -225,7 +220,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
   gitlabRegistrySSL = '';
   gitlabRegistrySSLKey = '';
-  gitlabRegistryUpstream = '';
 
   gitlabRunnerDockerScale!:number;
   gitlabRunnerToken!:string;
@@ -236,7 +230,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
       gitlabExternalUrl: this.gitlabExternalUrl,
       gitlabRegistryUrl: this.gitlabRegistryUrl,
       sslBaseDir       : this.sslBaseDir,
-      gitlabUpstream   : this.gitlabUpstream,
       gitlabHost       : this.gitlabHost,
       gitlabDomainMode : this.gitlabDomainMode
     };
@@ -293,12 +286,10 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(value, 10); break;
     case 'GITLAB_SSL': this.gitlabSSL = value.replace(/;/g, ''); break;
     case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value.replace(/;/g, ''); break;
-    case 'GITLAB_UPSTREAM': this.gitlabUpstream = value; break;
     case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
     case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
-    case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
     case 'SSL_BASEDIR': this.sslBaseDir = value; break;
     case 'SYNC_ENABLE': this.syncEnable = value; break;
     case 'SYNC_HOST': this.syncHost = value; break;
@@ -322,14 +313,12 @@ export interface MainConfigInterface {
 
   sslBaseDir:string;
 
-  gitlabUpstream:string;
   gitlabHost:string;
   gitlabDomainMode:number;
   gitlabSSL?:string;
   gitlabSSLKey?:string;
 
   gitlabRegistryHost:string;
-  gitlabRegistryUpstream:string;
   gitlabRegistryDomainMode:number;
   gitlabRegistrySSL?:string;
   gitlabRegistrySSLKey?:string;
