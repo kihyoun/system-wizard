@@ -1,22 +1,24 @@
-import React, {  useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import {
-  Button, createStyles, Snackbar, Tabs, Toolbar
+  Button, ButtonGroup, createStyles, Tabs, Toolbar
 } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab/Tab';
 import GeneralForm from './general-form/GeneralForm';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Divider from '@material-ui/core/Divider';
-import DownloadDockerDialog from './Dialogs/DownloadDockerDialog';
-import DownloadProjectsDialog from './Dialogs/DownloadProjectsDialog';
+import DownloadDockerDialog from './dialog/DownloadDockerDialog';
+import DownloadProjectsDialog from './dialog/DownloadProjectsDialog';
 import ProjectsOverview from './projects-overview/ProjectsOverview';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import DownloadJsonDialog from './Dialogs/DownloadJsonDialog';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import ImportFileDialog from './Dialogs/ImportFileDialog';
+import DownloadJsonDialog from './dialog/DownloadJsonDialog';
+
+import { observer } from 'mobx-react';
+import { runInAction } from 'mobx';
+import SaveIcon from '@material-ui/icons/Save';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 const TabPanel = (props: any) => {
   const {
@@ -65,19 +67,22 @@ const useStyles = makeStyles(theme =>
   })
 );
 
-const FormWizard = (props: any) => {
-  const main = props.main;
+const FormWizard = observer((props: any) => {
+  const [main, setMain] = useState(props.main);
   const [tab, setTab] = useState(0);
   const [downloadDocker, setDownloadDocker] = useState(false);
   const [downloadProjects, setDownloadProjects] = useState(false);
   const [downloadJson, setDownloadJson] = useState(false);
-  const [importFile, setImportFile] = useState(false);
+  const [files, setFiles] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [progress, setProgress] = useState(100);
   const classes = useStyles({ progress: progress });
 
-  const [openAlert, setOpenAlert] = useState('');
-  const [openSuccess, setOpenSuccess] = useState('');
+  useEffect(() => {
+    runInAction(() => {
+      setMain(props.main);
+    });
+  }, [props.main]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -92,54 +97,51 @@ const FormWizard = (props: any) => {
   };
 
   const onChangeHandler=(event:any)=>{
-
-    if (event.target.files.length < 1) {
+    if (event.target?.files?.length < 1 || event.dataTransfer?.files?.length < 1) {
       return;
     }
-    const file = event.target.files[0];
+    const file = event.target?.files?.[0] || event.dataTransfer?.files?.[0];
     const reader = new FileReader();
-    reader.readAsText(event.target.files[0], 'UTF-8');
+    reader.readAsText(file, 'UTF-8');
     reader.onprogress = function (evt:any) {
       setProgress(100 * (evt.loaded / evt.total));
     }
     reader.onload = function (evt:any) {
       try {
-        if (tab === 0 || file.name.substr(-4,4) === 'json') {
-          props.main.importFile(file, evt.target.result);
-        }
-        if (tab === 1) {
-          props.main.importProjectFile(file, evt.target.result);
-        }
-        setOpenSuccess('Import finished: ' + file.name);
+        runInAction(() => {
+          main.importFile(file, evt.target.result);
+          props.setOpenSuccess('Import finished: ' + file.name);
+          if (event.target) {
+            setFiles([]);
+          }
+        });
       } catch (e) {
-        setOpenAlert('error reading file: ' + e.toString());
+        runInAction(() => {
+          props.setOpenAlert('error reading file: ' + e.toString());
+          if (event.target) {
+            setFiles([]);
+          }
+        });
       }
     }
     reader.onerror = function () {
-      setOpenAlert('error reading file')
+      props.setOpenAlert('error reading file')
     }
   };
 
   return (
     <React.Fragment>
-      <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')}
-        message={openAlert} />
-      <Snackbar open={openSuccess.length > 0} autoHideDuration={6000} onClose={() => setOpenSuccess('')}
-        message={openSuccess} />
-      {downloadDocker && <DownloadDockerDialog main={main} setClose={() => setDownloadDocker(false)} />}
-      {downloadProjects && <DownloadProjectsDialog main={main} setClose={() => setDownloadProjects(false)} />}
-      {downloadJson && <DownloadJsonDialog main={main} setClose={() => setDownloadJson(false)} />}
-      {importFile && <ImportFileDialog setOpenSuccess={setOpenSuccess}
-        setOpenAlert={setOpenAlert}
-        setProgress={setProgress}
-        main={main}
-        tab={tab}
-        files={importFile}
-        setClose={() => setImportFile(false)} />}
+      {downloadDocker && <DownloadDockerDialog main={main}
+        setClose={() => setDownloadDocker(false)} />}
+      {downloadProjects && <DownloadProjectsDialog main={main}
+        setClose={() => setDownloadProjects(false)} />}
+      {downloadJson && <DownloadJsonDialog main={main}
+        setClose={() => setDownloadJson(false)} />}
       <Grid item xs={12}>
         <div className={classes.progressBar}></div>
       </Grid>
-      <Grid container direction="row" justify="center" spacing={2} alignItems="center"
+      <Grid container direction="row" spacing={0}
+        alignItems="center" justify="center"
         onDragOver={ev => {
           ev.preventDefault();
         }}
@@ -147,7 +149,7 @@ const FormWizard = (props: any) => {
           if (ev.dataTransfer.files.length > 0
             && (ev.dataTransfer.files[0].name.substr(-4) === '.env'
             || ev.dataTransfer.files[0].name.substr(-4) === 'json')) {
-            setImportFile(ev.dataTransfer.files);
+            onChangeHandler(ev);
             ev.preventDefault();
           }}}
       >
@@ -159,41 +161,43 @@ const FormWizard = (props: any) => {
                 textColor="primary"
                 value={tab}
                 onChange={handleChange}>
-                <Tab label="General Settings" {...a11yProps(0)} />
-                <Tab label="Proxy Configurations" {...a11yProps(1)} />
+                <Tab label="General" {...a11yProps(0)} />
+                <Tab label="Proxy" {...a11yProps(1)} />
               </Tabs>
 
               <div className={classes.divider} />
-              <input
-                accept="application/json, .env"
-                className={classes.input}
-                id="contained-button-file"
-                multiple
-                type="file"
-                onChange={onChangeHandler}
-              />
 
-              <label htmlFor="contained-button-file">
-                <Button
-                  aria-haspopup="true"
-                  variant="contained"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                  color="primary">
-                Load Configuration
-                </Button>
-              </label>
-
-              <div className={classes.buttonDivider} />
-
-              <Button aria-controls="simple-menu"
-                aria-haspopup="true"
-                variant="contained"
+              <ButtonGroup disableElevation orientation="vertical"
                 color="primary"
-                startIcon={<CloudDownloadIcon />}
-                onClick={handleClick}>
-                Export
-              </Button>
+                aria-label="vertical contained primary button group"
+                variant="text">
+
+                <Button
+                  htmlFor="contained-button-file"
+                  aria-haspopup="true"
+                  component="label"
+                  startIcon={<InsertDriveFileIcon />}
+                  color="primary">
+                Open
+                </Button>
+                <input
+                  accept="application/json, .env"
+                  className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  value={files}
+                  type="file"
+                  onChange={onChangeHandler}
+                />
+                <Button aria-controls="simple-menu"
+                  aria-haspopup="true"
+                  color="primary"
+                  startIcon={<SaveIcon />}
+                  onClick={handleClick}>
+                Save
+                </Button>
+
+              </ButtonGroup>
 
               <Menu
                 anchorEl={anchorEl}
@@ -210,7 +214,7 @@ const FormWizard = (props: any) => {
             </Toolbar>
           </Paper>
         </Grid>
-        <Grid item xs={11}>
+        <Grid item xs={12}>
           <TabPanel value={tab} index={0}>
             <GeneralForm main={main} />
           </TabPanel>
@@ -221,6 +225,6 @@ const FormWizard = (props: any) => {
       </Grid>
     </React.Fragment>
   );
-};
+});
 
 export default FormWizard;

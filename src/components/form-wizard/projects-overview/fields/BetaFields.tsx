@@ -79,19 +79,6 @@ const BetaFields = observer((props: any) => {
           <option value={1}>Auto</option>
         </NativeSelect>
       </FormControl>
-      <TextField
-        label="BETA_PORT"
-        disabled={props.config.useBetaHost==='false'}
-
-        style={{ margin: 8 }}
-        value={props.config.betaPort}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => (props.config.betaPort = event.target.value));
-        }}
-      />
       <FormControl className={classes.formControl}
         disabled={props.config.useBetaHost==='false'}
       >

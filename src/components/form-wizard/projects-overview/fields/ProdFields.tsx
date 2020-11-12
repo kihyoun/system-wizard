@@ -78,18 +78,7 @@ const ProdFields = observer((props: any) => {
           <option value={1}>Auto</option>
         </NativeSelect>
       </FormControl>
-      <TextField
-        label="PROD_PORT"
-        disabled={props.config.useProdHost === 'false'}
-        style={{ margin: 8 }}
-        value={props.config.prodPort}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => (props.config.prodPort = event.target.value));
-        }}
-      />
+
       <FormControl className={classes.formControl}
         disabled={props.config.useProdHost === 'false'}
       >

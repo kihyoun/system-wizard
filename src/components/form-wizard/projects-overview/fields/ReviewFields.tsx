@@ -77,18 +77,7 @@ const ReviewFields = observer((props: any) => {
           <option value={1}>Auto</option>
         </NativeSelect>
       </FormControl>
-      <TextField
-        label="REVIEW_PORT"
-        disabled={props.config.useReviewHost === 'false'}
-        style={{ margin: 8 }}
-        value={props.config.reviewPort}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        onChange={event => {
-          runInAction(() => (props.config.reviewPort = event.target.value));
-        }}
-      />
+
       <FormControl className={classes.formControl}
         disabled={props.config.useReviewHost === 'false'}
       >

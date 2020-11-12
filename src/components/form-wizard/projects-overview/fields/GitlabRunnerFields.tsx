@@ -22,7 +22,7 @@ const GitlabRunnerFields = observer((props: any) => {
 
   const handleInputChange = (event: any) => {
     runInAction(() => {
-      props.config.gitlabRunnerDockerScale =
+      props.config.gitlabRunnerScale =
       event.target.value === '' ? 0 : Number(event.target.value)
     });
   };
@@ -35,10 +35,10 @@ const GitlabRunnerFields = observer((props: any) => {
   }, [props.init, props.hidden]);
 
   const handleBlur = () => {
-    if ( props.config.gitlabRunnerDockerScale < 0) {
-      runInAction(() => props.config.gitlabRunnerDockerScale = 0);
-    } else if (props.config.gitlabRunnerDockerScale > 50) {
-      runInAction(() => props.config.gitlabRunnerDockerScale = 50);
+    if ( props.config.gitlabRunnerScale < 0) {
+      runInAction(() => props.config.gitlabRunnerScale = 0);
+    } else if (props.config.gitlabRunnerScale > 50) {
+      runInAction(() => props.config.gitlabRunnerScale = 50);
     }
   };
 
@@ -49,7 +49,7 @@ const GitlabRunnerFields = observer((props: any) => {
       <FormLabel component="legend">Number of Gitlab Runners</FormLabel>
       <Input
         className={classes.input}
-        value={props.config.gitlabRunnerDockerScale}
+        value={props.config.gitlabRunnerScale}
         margin="dense"
         onChange={e => handleInputChange(e)}
         onBlur={()=> handleBlur()}

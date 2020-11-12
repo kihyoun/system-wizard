@@ -7,14 +7,13 @@ import {
   Step, StepButton, StepContent, Stepper
 } from '@material-ui/core';
 
-import BackupFields from './fields/BackupFields';
+import SeedFields from './fields/SeedFields';
 import GitlabSettingsFields from './fields/GitlabSettingsFields';
-import NginxSettingsFields from './fields/NginxSettingsFields';
 import ProxySettingsFields from './fields/ProxySettingsFields';
-import GitlabRunnerFields from './fields/GitlabRunnerFields';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
+import SyncServerFields from './fields/SyncServerFields';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -33,50 +32,46 @@ const useStyles = makeStyles(theme => ({
 
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
-  const main = props.main;
-  const [backupInit, setBackupInit] = useState(props.main.init);
-  const [gitlabInit, setGitlabInit] = useState(props.main.init);
-  const [nginxInit, setNginxInit] = useState(props.main.init);
-  const [proxyInit, setProxyInit] = useState(props.main.init);
-  const [runnerInit, setRunnerInit] = useState(props.main.init);
+  const [main, setMain] = useState(props.main);
+  const [seedInit, setSeedInit] = useState(main.init);
+  const [gitlabInit, setGitlabInit] = useState(main.init);
+  const [proxyInit, setProxyInit] = useState(main.init);
+  const [syncInit, setSyncInit] = useState(main.init);
 
   useEffect(() => {
     runInAction(() => {
-      setBackupInit(props.main.init);
+      setMain(props.main);
+      setSeedInit(props.main.init);
+      setSyncInit(props.main.init);
       setGitlabInit(props.main.init);
-      setNginxInit(props.main.init);
       setProxyInit(props.main.init);
-      setRunnerInit(props.main.init);
+      main.init = false;
     });
-  },[props.main.init]);
+  }, [props.main.id]);
 
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [{
-    label  : 'Backup',
+    label  : 'Seed',
     enabled: true
   }, {
     label  : 'Gitlab',
     enabled: !gitlabInit
   }, {
-    label  : 'Nginx',
-    enabled: !nginxInit
-  }, {
     label  : 'Proxy',
     enabled: !proxyInit
   },{
-    label  : 'Gitlab Runner',
-    enabled: !runnerInit
+    label  : 'Sync',
+    enabled: !syncInit
   }];
 
   const handleStep = (step: number) => () => {
     runInAction(() => {
       switch (step) {
-      case 0: setBackupInit(false); break;
+      case 0: setSeedInit(false); break;
       case 1: setGitlabInit(false); break;
-      case 2: setNginxInit(false); break;
-      case 3: setProxyInit(false); break;
-      case 4: setRunnerInit(false); break;
+      case 2: setProxyInit(false); break;
+      case 3: setSyncInit(false); break;
       }
 
       if (step > steps.length - 1) {
@@ -89,8 +84,8 @@ const GeneralForm = observer((props: any) => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Grid container>
-        <Grid item xs={2}>
+      <Grid container justify="center">
+        <Grid item xs={3}>
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
             {steps.map((step, index) => (
               <Step key={step.label}>
@@ -120,12 +115,11 @@ const GeneralForm = observer((props: any) => {
             ))}
           </Stepper>
         </Grid>
-        <Grid item xs={6}>
-          <BackupFields init={backupInit} hidden={activeStep !== 0} main={main} />
+        <Grid item xs={7}>
+          <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
           <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
-          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 2} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
-          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 4} main={main} />
+          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 2} main={main} />
+          <SyncServerFields init={syncInit} hidden={activeStep !== 3} main={main} />
         </Grid>
       </Grid>
     </Paper>
