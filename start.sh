@@ -1,6 +1,6 @@
 #l! /bin/bash
 if [ -f ../system/docker-compose.yml ]; then
-    docker-compose -f ../system/docker-compose.yml up --remove-orphans --build wizard
+    docker-compose -f ../system/docker-compose.yml up --remove-orphans --build -d wizard
 else
     docker-compose -p system up --remove-orphans --build
 fi
