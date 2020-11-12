@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import {
-  FormControl, InputLabel, makeStyles, NativeSelect
+  FormControl, FormHelperText, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ProxySettingsFields = observer((props: any) => {
+const SSLSettingsFields = observer((props: any) => {
   const classes = useStyles();
   const [init, setInit] = useState(props.init);
 
@@ -48,21 +48,8 @@ const ProxySettingsFields = observer((props: any) => {
 
   return (
     <>
-      <h2>Gitlab Proxy Settings</h2>
-
-      <TextField
-        label="GITLAB_EXTERNAL_URL"
-        value={props.main.config.gitlabExternalUrl}
-        disabled={true}
-        style={{ margin: 8 }}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="domainmode-native-helper">
-              GITLAB_DOMAIN_MODE
-        </InputLabel>
+        <InputLabel htmlFor="domainmode-native-helper">GITLAB_DOMAIN_MODE</InputLabel>
         <NativeSelect
           value={props.main.config.gitlabDomainMode}
           onChange={(event: any) => {
@@ -73,13 +60,10 @@ const ProxySettingsFields = observer((props: any) => {
             id  : 'domainmode-native-helper'
           }}
         >
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={1}>Wildcard HTTP</option>
+          <option value={0}>Default, HTTP</option>
           <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.main.config.gitlabExternalUrl}</FormHelperText>
       </FormControl>
       <TextField
         label="GITLAB_SSL"
@@ -110,17 +94,6 @@ const ProxySettingsFields = observer((props: any) => {
         }}
       />
 
-      <h2>Gitlab Registry Settings</h2>
-
-      <TextField
-        label="GITLAB_REGISTRY_URL"
-        value={props.main.config.gitlabRegistryUrl}
-        style={{ margin: 8 }}
-        disabled={true}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="regdomainmode-native-helper">
               GITLAB_REGISTRY_DOMAIN_MODE
@@ -135,13 +108,10 @@ const ProxySettingsFields = observer((props: any) => {
             id  : 'regdomainmode-native-helper'
           }}
         >
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={1}>Wildcard HTTP</option>
+          <option value={0}>Default, HTTP</option>
           <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.main.config.gitlabRegistryUrl}</FormHelperText>
       </FormControl>
       <TextField
         label="GITLAB_REGISTRY_SSL"
@@ -175,4 +145,4 @@ const ProxySettingsFields = observer((props: any) => {
   );
 });
 
-export default ProxySettingsFields;
+export default SSLSettingsFields;
