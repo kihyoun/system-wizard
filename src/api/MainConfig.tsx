@@ -85,7 +85,7 @@ export default class MainConfig implements MainConfigInterface {
 
    @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = _config ? parseInt(_config.gitlabRunnerDockerScale, 10) : 0;
+      this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
@@ -138,7 +138,7 @@ export SSL_BASEDIR=${this.sslBaseDir}
 
 # -- GITLAB RUNNER
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
-export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
+export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
 
 # --- Sync Settings
 export SYNC_ENABLE=${this.syncEnable}
@@ -221,7 +221,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
   gitlabRegistrySSL = '';
   gitlabRegistrySSLKey = '';
 
-  gitlabRunnerDockerScale!:number;
+  gitlabRunnerScale!:number;
   gitlabRunnerToken!:string;
 
   @computed public get asJson() : any {
@@ -272,8 +272,8 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     }
 
     return Object.assign(ret, {
-      gitlabRunnerDockerScale: this.gitlabRunnerDockerScale,
-      gitlabRunnerToken      : this.gitlabRunnerToken
+      gitlabRunnerScale: this.gitlabRunnerScale,
+      gitlabRunnerToken: this.gitlabRunnerToken
     });
   }
 
@@ -299,7 +299,7 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     case 'SYNC_SSL': this.syncSSL = value.replace(/;/g, ''); break;
     case 'SYNC_SSL_KEY': this.syncSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
-    case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
+    case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10); break;
     }
   }
 }
@@ -331,6 +331,6 @@ export interface MainConfigInterface {
   syncSSL:string;
   syncSSLKey:string;
 
-  gitlabRunnerDockerScale:number;
+  gitlabRunnerScale:number;
   gitlabRunnerToken:string;
 }

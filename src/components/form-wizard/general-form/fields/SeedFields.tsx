@@ -35,6 +35,18 @@ const SeedFields = observer((props: any) => {
           runInAction(() => props.main.config.seedDir = event.target.value);
         }}
       />
+      <TextField
+        label="SSL_BASEDIR"
+        value={props.main.config.sslBaseDir}
+        placeholder={props.main.placeholder.sslBaseDir}
+        style={{ margin: 8 }}
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        onChange={event => {
+          runInAction(() => (props.main.config.sslBaseDir = event.target.value));
+        }}
+      />
     </>
   );
 });

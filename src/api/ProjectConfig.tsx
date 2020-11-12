@@ -104,7 +104,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     reviewSSLKey!:string;
 
     gitlabRunnerToken!:string;
-    gitlabRunnerDockerScale!:number;
+    gitlabRunnerScale!:number;
 
     _main!: Main;
     saved = false;
@@ -222,7 +222,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
    @action generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabRunnerDockerScale = parseInt(_config?.gitlabRunnerDockerScale, 10) || 0;
+      this.gitlabRunnerScale = parseInt(_config?.gitlabRunnerScale, 10) || 0;
       this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
@@ -246,7 +246,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'REVIEW_PORT': this.reviewPort = parseInt(value, 10); break;
      case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
      case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
-     case 'GITLAB_RUNNER_DOCKER_SCALE': this.gitlabRunnerDockerScale = parseInt(value, 10); break;
+     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10); break;
      }
    }
 
@@ -295,7 +295,7 @@ REVIEW_SSL_KEY=${this.reviewSSLKey}
      const gitlabRunner = `
 # -- GITLAB RUNNER for Project
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
-export GITLAB_RUNNER_DOCKER_SCALE=${this.gitlabRunnerDockerScale}
+export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
 `;
      const createdOn = `# created on ${new Date()}`;
      return ret
@@ -515,8 +515,8 @@ deploy:prod:
      }
 
      const config = Object.assign(ret, {
-       gitlabRunnerToken      : this.gitlabRunnerToken,
-       gitlabRunnerDockerScale: this.gitlabRunnerDockerScale
+       gitlabRunnerToken: this.gitlabRunnerToken,
+       gitlabRunnerScale: this.gitlabRunnerScale
      });
 
      return config;
@@ -547,5 +547,5 @@ export interface ProjectConfigInterface {
   reviewSSL?:string;
   reviewSSLKey?:string;
   gitlabRunnerToken:string;
-  gitlabRunnerDockerScale:number;
+  gitlabRunnerScale:number;
 }

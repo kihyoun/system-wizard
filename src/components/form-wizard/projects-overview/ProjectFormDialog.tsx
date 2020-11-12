@@ -64,7 +64,7 @@ const ProjectFormDialog = observer((props: any) => {
     enabled: projectConfig.useReviewHost
   },{
     label  : 'Gitlab Runner',
-    enabled: (projectConfig.gitlabRunnerDockerScale > 0).toString()
+    enabled: (projectConfig.gitlabRunnerScale > 0).toString()
   }];
 
   const handleStep = (step: number) => () => {

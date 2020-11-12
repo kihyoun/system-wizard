@@ -9,9 +9,7 @@ import {
 
 import SeedFields from './fields/SeedFields';
 import GitlabSettingsFields from './fields/GitlabSettingsFields';
-import NginxSettingsFields from './fields/NginxSettingsFields';
 import ProxySettingsFields from './fields/ProxySettingsFields';
-import GitlabRunnerFields from './fields/GitlabRunnerFields';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -38,18 +36,14 @@ const GeneralForm = observer((props: any) => {
   const [seedInit, setSeedInit] = useState(main.init);
   const [syncInit, setSyncInit] = useState(main.init);
   const [gitlabInit, setGitlabInit] = useState(main.init);
-  const [nginxInit, setNginxInit] = useState(main.init);
   const [proxyInit, setProxyInit] = useState(main.init);
-  const [runnerInit, setRunnerInit] = useState(main.init);
 
   useEffect(() => {
     runInAction(() => {
       setSeedInit(main.init);
       setSyncInit(main.init);
       setGitlabInit(main.init);
-      setNginxInit(main.init);
       setProxyInit(main.init);
-      setRunnerInit(main.init);
     });
   },[main.init]);
 
@@ -69,14 +63,8 @@ const GeneralForm = observer((props: any) => {
     label  : 'Gitlab',
     enabled: !gitlabInit
   }, {
-    label  : 'Nginx',
-    enabled: !nginxInit
-  }, {
     label  : 'Proxy',
     enabled: !proxyInit
-  },{
-    label  : 'Gitlab Runner',
-    enabled: !runnerInit
   }];
 
   const handleStep = (step: number) => () => {
@@ -85,9 +73,7 @@ const GeneralForm = observer((props: any) => {
       case 0: setSeedInit(false); break;
       case 1: setSyncInit(false); break;
       case 2: setGitlabInit(false); break;
-      case 3: setNginxInit(false); break;
       case 4: setProxyInit(false); break;
-      case 5: setRunnerInit(false); break;
       }
 
       if (step > steps.length - 1) {
@@ -135,9 +121,7 @@ const GeneralForm = observer((props: any) => {
           <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
           <SyncServerFields init={syncInit} hidden={activeStep !== 1} main={main} />
           <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 2} main={main} />
-          <NginxSettingsFields init={nginxInit} hidden={activeStep !== 3} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 4} main={main} />
-          <GitlabRunnerFields init={runnerInit} hidden={activeStep !== 5} main={main} />
+          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
         </Grid>
       </Grid>
     </Paper>
