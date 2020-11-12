@@ -34,21 +34,19 @@ const GeneralForm = observer((props: any) => {
   const classes = useStyles();
   const [main, setMain] = useState(props.main);
   const [seedInit, setSeedInit] = useState(main.init);
-  const [syncInit, setSyncInit] = useState(main.init);
   const [gitlabInit, setGitlabInit] = useState(main.init);
   const [proxyInit, setProxyInit] = useState(main.init);
+  const [syncInit, setSyncInit] = useState(main.init);
 
   useEffect(() => {
     runInAction(() => {
-      setSeedInit(main.init);
-      setSyncInit(main.init);
-      setGitlabInit(main.init);
-      setProxyInit(main.init);
+      setMain(props.main);
+      setSeedInit(props.main.init);
+      setSyncInit(props.main.init);
+      setGitlabInit(props.main.init);
+      setProxyInit(props.main.init);
+      main.init = false;
     });
-  },[main.init]);
-
-  useEffect(() => {
-    runInAction(() => setMain(props.main));
   }, [props.main.id]);
 
   const [activeStep, setActiveStep] = useState(0);
@@ -57,23 +55,23 @@ const GeneralForm = observer((props: any) => {
     label  : 'Seed',
     enabled: true
   }, {
-    label  : 'Sync',
-    enabled: !syncInit
-  },{
     label  : 'Gitlab',
     enabled: !gitlabInit
   }, {
     label  : 'Proxy',
     enabled: !proxyInit
+  },{
+    label  : 'Sync',
+    enabled: !syncInit
   }];
 
   const handleStep = (step: number) => () => {
     runInAction(() => {
       switch (step) {
       case 0: setSeedInit(false); break;
-      case 1: setSyncInit(false); break;
-      case 2: setGitlabInit(false); break;
-      case 4: setProxyInit(false); break;
+      case 1: setGitlabInit(false); break;
+      case 2: setProxyInit(false); break;
+      case 3: setSyncInit(false); break;
       }
 
       if (step > steps.length - 1) {
@@ -119,9 +117,9 @@ const GeneralForm = observer((props: any) => {
         </Grid>
         <Grid item xs={7}>
           <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
-          <SyncServerFields init={syncInit} hidden={activeStep !== 1} main={main} />
-          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 2} main={main} />
-          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 3} main={main} />
+          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
+          <ProxySettingsFields init={proxyInit} hidden={activeStep !== 2} main={main} />
+          <SyncServerFields init={syncInit} hidden={activeStep !== 3} main={main} />
         </Grid>
       </Grid>
     </Paper>

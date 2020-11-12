@@ -22,10 +22,10 @@ const SyncServerFields = observer((props: any) => {
         setInit(false);
       });
     }
-    if (!props.main.init && init) {
+    if (!props.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.main.init]);
+  }, [props.hidden, props.init]);
 
   if (props.hidden) return null;
 

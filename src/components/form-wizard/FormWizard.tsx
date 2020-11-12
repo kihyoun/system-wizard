@@ -84,8 +84,6 @@ const FormWizard = observer((props: any) => {
     });
   }, [props.main]);
 
-
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };

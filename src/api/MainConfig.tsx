@@ -28,15 +28,15 @@ export default class MainConfig implements MainConfigInterface {
   @action generateConfig(_config: any | undefined = undefined) {
     this.generateMainConfig(_config);
     this.generateGitlabConfig(_config);
-    this.generateNginxConfig(_config);
     this.generateProxyConfig(_config);
     this.generateSyncConfig(_config);
-    this.generateRunnerConfig(_config);
   }
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
+      console.log('generate main')
       this.seedDir = _config?.seedDir || '/mnt/seed';
+      this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
     });
   }
 
@@ -44,12 +44,8 @@ export default class MainConfig implements MainConfigInterface {
     runInAction(() => {
       this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
       this.gitlabRegistryHost = _config?.gitlabRegistryHost || 'registry.example.com';
-    });
-  }
-
-  @action generateNginxConfig(_config: any | undefined = undefined): void {
-    runInAction(() => {
-      this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
+      this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
+      this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
     });
   }
 
@@ -72,7 +68,7 @@ export default class MainConfig implements MainConfigInterface {
   @action generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.syncEnable = _config?.syncEnable || 'false';
-      this.syncHost = _config?.syncHost || `sync.${this.gitlabHost}.com`;
+      this.syncHost = _config?.syncHost || `sync${this.gitlabHost.replace('gitlab','')}`;
       this.syncUser = _config?.syncUser || 'admin';
       this.syncPass = _config?.syncPass || 'admin';
       this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
@@ -83,31 +79,24 @@ export default class MainConfig implements MainConfigInterface {
     });
   }
 
-   @action generateRunnerConfig(_config: any | undefined = undefined): void {
-    runInAction(() => {
-      this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
-      this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
-    });
+  @computed get syncHostInfo(): HostInfo {
+    const host = (this.syncDomainMode === 1 || this.syncDomainMode === 3 ? '*.' : '')
+        + this.syncHost;
+    return {
+      context   : 'Sync',
+      deployMode: 1,
+      useHost   : this.syncEnable,
+      host,
+      domainMode: this.syncDomainMode,
+      ssl       : this.syncSSL,
+      sslKey    : this.syncSSLKey,
+      url       : (this.syncDomainMode < 2 ? 'http://' : 'https://') + host
+    }
   }
 
-    @computed get syncHostInfo(): HostInfo {
-     const host = (this.syncDomainMode === 1 || this.syncDomainMode === 3 ? '*.' : '')
-        + this.syncHost;
-     return {
-       context   : 'Sync',
-       deployMode: 1,
-       useHost   : this.syncEnable,
-       host,
-       domainMode: this.syncDomainMode,
-       ssl       : this.syncSSL,
-       sslKey    : this.syncSSLKey,
-       url       : (this.syncDomainMode < 2 ? 'http://' : 'https://') + host
-     }
-   }
 
-
-    public get content() : string {
-      const ret = Helper.textLogo + `# Filepath: ./.docker.env
+  public get content() : string {
+    const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- SEED
 export SEED_DIR=${this.seedDir}
@@ -120,19 +109,19 @@ GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 export GITLAB_HOST=${this.gitlabHost}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
 `;
-      const gitlabSSL = `
+    const gitlabSSL = `
 GITLAB_SSL=${this.gitlabSSL}
 GITLAB_SSL_KEY=${this.gitlabSSLKey}
 `;
-      const registry = `
+    const registry = `
 export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 `;
-      const registrySSL = `
+    const registrySSL = `
 GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
 GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
 `;
-      const nginx = `
+    const nginx = `
 export SSL_BASEDIR=${this.sslBaseDir}
 
 # -- GITLAB RUNNER
@@ -142,20 +131,20 @@ export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
 # --- Sync Settings
 export SYNC_ENABLE=${this.syncEnable}
 `;
-      const syncSettings = `
+    const syncSettings = `
 export SYNC_HOST=${this.syncHost}
 export SYNC_USER=${this.syncUser}
 export SYNC_PASS=${this.syncPass}
 export SYNC_DOMAIN_MODE=${this.syncDomainMode}
 `;
-      const syncSSL = `
+    const syncSSL = `
 export SYNC_SSL=${this.syncSSL}
 export SYNC_SSL_KEY=${this.syncSSLKey}
 `;
-      const createdOn = `
+    const createdOn = `
 # created on ${new Date()}
 `;
-      return ret
+    return ret
      + (this.gitlabDomainMode > 1 && gitlabSSL || '')
      + registry
      + (this.gitlabRegistryDomainMode > 1 && registrySSL || '')
@@ -163,15 +152,15 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
      + (this.syncEnable === 'true' && syncSettings || '')
      + (this.syncEnable === 'true' && this.syncDomainMode && this.syncDomainMode > 1 && syncSSL || '')
      + createdOn;
-    }
+  }
 
-    public exportConfig() {
-      const zip = new JSZip();
-      zip.file('.docker.env', this.content);
-      zip.generateAsync({ type: 'blob' }).then(function(content) {
-        saveAs(content, 'docker.env.zip');
-      });
-    }
+  public exportConfig() {
+    const zip = new JSZip();
+    zip.file('.docker.env', this.content);
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+      saveAs(content, 'docker.env.zip');
+    });
+  }
 
   // Seed Settings
   seedDir!:string;

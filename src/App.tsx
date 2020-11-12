@@ -119,9 +119,8 @@ const App = observer(() => {
   };
 
   const [open, setOpen] = React.useState(true);
-  const main = new Main();
-  const [servers, setServers] = useState([main]);
-  const [activeServer, setActiveServer] = useState(main);
+  const [activeServer, setActiveServer] = useState(new Main());
+  const [servers, setServers] = useState([activeServer]);
   const [connected, setConnected] = useState(activeServer.sync.connected);
   const [connectServer, setConnectServer] = useState(false);
   const [lastStatusMessage, setLastStatusMessage] = useState('Not connected.')
