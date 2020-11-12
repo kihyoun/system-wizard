@@ -1,5 +1,9 @@
 #l! /bin/bash
-docker-compose -p system up --remove-orphans --build
+if [ -f ../system/docker-compose.yml ]; then
+    docker-compose -f ../system/docker-compose.yml up --remove-orphans --build wizard
+else
+    docker-compose -p system up --remove-orphans --build
+fi
 
 echo > .docker.env
 printf "WIZARD_IP=" > .docker.env
