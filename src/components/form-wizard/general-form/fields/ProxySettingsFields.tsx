@@ -59,19 +59,6 @@ const ProxySettingsFields = observer((props: any) => {
         margin="normal"
         InputLabelProps={{ shrink: true }}
       />
-      <TextField
-        label="GITLAB_PORT"
-        value={props.main.config.gitlabPort}
-        style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabPort?.toString()}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="Internal Port"
-        onChange={event => {
-          runInAction(() => (props.main.config.gitlabPort = event.target.value));
-        }}
-      />
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="domainmode-native-helper">
               GITLAB_DOMAIN_MODE
@@ -147,19 +134,6 @@ const ProxySettingsFields = observer((props: any) => {
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
-      />
-      <TextField
-        label="GITLAB_REGISTRY_PORT"
-        style={{ margin: 8 }}
-        value={props.main.config.gitlabRegistryPort}
-        placeholder={props.main.placeholder.gitlabRegistryPort.toString()}
-        fullWidth
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-        helperText="Internal Port"
-        onChange={(event: any) => {
-          runInAction(() => (props.main.config.gitlabRegistryPort = event.target.value));
-        }}
       />
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="regdomainmode-native-helper">

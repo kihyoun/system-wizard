@@ -56,14 +56,12 @@ export default class MainConfig implements MainConfigInterface {
     runInAction(() => {
       this.gitlabExternalUrl = _config?.gitlabExternalUrl || `https://${this.gitlabHost}`;
       this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
-      this.gitlabPort = parseInt(_config?.gitlabPort, 10) || 80;
       this.gitlabDomainMode = _config ? parseInt(_config.gitlabDomainMode) || 0 : 2;
       this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
       this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
       this.gitlabUpstream = _config?.gitlabUpstream || 'gitlab';
-      this.gitlabRegistryPort = parseInt(_config?.gitlabRegistryPort, 10) || 5050;
       this.gitlabRegistryDomainMode = _config ? parseInt(_config.gitlabRegistryDomainMode, 10) || 0 : 2;
       this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
         || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/fullchain.pem`;
@@ -123,7 +121,6 @@ GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 # -- NGINX
 export GITLAB_HOST=${this.gitlabHost}
 GITLAB_UPSTREAM=${this.gitlabUpstream}
-GITLAB_PORT=${this.gitlabPort}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
 `;
       const gitlabSSL = `
@@ -135,7 +132,6 @@ GITLAB_REGISTRY_UPSTREAM=${this.gitlabRegistryUpstream}
 
 export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
-GITLAB_REGISTRY_PORT=${this.gitlabRegistryPort}
 `;
       const registrySSL = `
 GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
@@ -194,7 +190,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
   // Pruxy
   gitlabHost = '';
-  gitlabPort = 80;
   _gitlabDomainMode = 2;
 
   set gitlabDomainMode(mode:number) {
@@ -214,7 +209,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
   gitlabUpstream!:string;
 
   gitlabRegistryHost = '';
-  gitlabRegistryPort = 80;
   _gitlabRegistryDomainMode = 2;
 
   set gitlabRegistryDomainMode(mode:number) {
@@ -244,7 +238,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
       sslBaseDir       : this.sslBaseDir,
       gitlabUpstream   : this.gitlabUpstream,
       gitlabHost       : this.gitlabHost,
-      gitlabPort       : this.gitlabPort,
       gitlabDomainMode : this.gitlabDomainMode
     };
 
@@ -257,7 +250,6 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
 
     ret = Object.assign(ret, {
       gitlabRegistryHost      : this.gitlabRegistryHost,
-      gitlabRegistryPort      : this.gitlabRegistryPort,
       gitlabRegistryDomainMode: this.gitlabRegistryDomainMode
     });
 
@@ -298,14 +290,12 @@ export SYNC_SSL_KEY=${this.syncSSLKey}
     case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
     case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
     case 'GITLAB_HOST': this.gitlabHost = value; break;
-    case 'GITLAB_PORT': this.gitlabPort = parseInt(value, 10); break;
     case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(value, 10); break;
     case 'GITLAB_SSL': this.gitlabSSL = value.replace(/;/g, ''); break;
     case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_UPSTREAM': this.gitlabUpstream = value; break;
     case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
     case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
-    case 'GITLAB_REGISTRY_PORT': this.gitlabRegistryPort = parseInt(value, 10); break;
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_UPSTREAM': this.gitlabRegistryUpstream = value; break;
@@ -334,14 +324,12 @@ export interface MainConfigInterface {
 
   gitlabUpstream:string;
   gitlabHost:string;
-  gitlabPort:number;
   gitlabDomainMode:number;
   gitlabSSL?:string;
   gitlabSSLKey?:string;
 
   gitlabRegistryHost:string;
   gitlabRegistryUpstream:string;
-  gitlabRegistryPort:number;
   gitlabRegistryDomainMode:number;
   gitlabRegistrySSL?:string;
   gitlabRegistrySSLKey?:string;
