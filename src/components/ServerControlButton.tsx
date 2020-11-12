@@ -80,13 +80,13 @@ export default function ServerControlButton(props:any) {
     });
   };
 
-  const handleFeed = () => {
+  const handleSeed = () => {
     runInAction(async () => {
       try {
         props.setOpenSuccess('Pushing Seed Information...');
         await props.main.sync.pushMain();
         props.setOpenSuccess('Initiating Seed...');
-        await props.main.sync.feed();
+        await props.main.sync.seed();
         props.setOpenSuccess('Ready.');
       } catch (err) {
         props.setOpenAlert(err.response?.data || err.toString());
@@ -94,11 +94,12 @@ export default function ServerControlButton(props:any) {
       handleClose();
     });
   };
-  const handleBackup = () => {
+
+  const handleHarvest = () => {
     runInAction(async () => {
       try {
-        props.setOpenSuccess('Starting Backup...');
-        await props.main.sync.backup();
+        props.setOpenSuccess('Starting Harvest...');
+        await props.main.sync.harvest();
         props.setOpenSuccess('Ready.');
       } catch (err) {
         props.setOpenAlert(err.response?.data || err.toString());
@@ -165,14 +166,14 @@ export default function ServerControlButton(props:any) {
         onClose={handleClose}
       >
         <MenuItem onClick={() => setPublish(true)}>Publish</MenuItem>
-        <MenuItem onClick={() => handleFeed()}>Feed</MenuItem>
+        <MenuItem onClick={() => handleSeed()}>Seed</MenuItem>
         <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
         <MenuItem onClick={handleFetch}>Fetch</MenuItem>
         <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
         <MenuItem onClick={() => handleHotPatch()}>Pull</MenuItem>
         <MenuItem onClick={() => handleRegister()}>Register</MenuItem>
         <MenuItem onClick={() => handleUnregister()}>Unregister</MenuItem>
-        <MenuItem onClick={() => handleBackup()}>Backup</MenuItem>
+        <MenuItem onClick={() => handleHarvest()}>Harvest</MenuItem>
       </Menu>
     </React.Fragment>
   );

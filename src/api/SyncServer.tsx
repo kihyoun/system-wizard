@@ -204,13 +204,13 @@ export default class SyncServer {
     });
   }
 
-  @action feed() {
+  @action seed() {
     return new Promise(async (resolve, reject) => {
       try {
         await this.token();
         const options:any = Object.assign(this.getHeaders(), {
           method: 'PATCH',
-          url   : this.serverAddress + '/command/feed'
+          url   : this.serverAddress + '/command/seed'
         });
         const res = await axios.request(options);
         resolve(res);
@@ -220,13 +220,13 @@ export default class SyncServer {
     });
   }
 
-  @action backup() {
+  @action harvest() {
     return new Promise(async (resolve, reject) => {
       try {
         await this.token();
         const options:any = Object.assign(this.getHeaders(), {
           method: 'PATCH',
-          url   : this.serverAddress + '/command/backup'
+          url   : this.serverAddress + '/command/harvest'
         });
         const res = await axios.request(options);
         resolve(res);
