@@ -80,7 +80,7 @@ const StartFields = observer((props: any) => {
         margin="normal"
         style={{ margin: 8 }}
         InputLabelProps={{ shrink: true }}
-        defaultValue={props.main.config.gitlabRunnerScale}
+        value={props.main.config.gitlabRunnerScale}
         onChange={e => handleInputChange(e)}
         onBlur={()=> handleBlur()}
         inputProps={{
