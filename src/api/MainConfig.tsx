@@ -45,20 +45,14 @@ export default class MainConfig {
 
   @action generateConfig(_config: any | undefined = undefined) {
     this.generateMainConfig(_config);
-    this.generateGitlabConfig(_config);
     this.generateProxyConfig(_config);
     this.generateSyncConfig(_config);
+    this.generateWizardConfig(_config);
   }
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.seedDir = _config?.seedDir || '/mnt/seed';
-      this.sslBaseDir = _config?.sslBaseDir || '/etc/letsencrypt';
-    });
-  }
-
-  @action generateGitlabConfig(_config: any | undefined = undefined): void {
-    runInAction(() => {
       this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
       this.gitlabRegistryHost = _config?.gitlabRegistryHost || 'registry.example.com';
       this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
@@ -72,16 +66,17 @@ export default class MainConfig {
       this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
       this.gitlabDomainMode = _config ? parseInt(_config.gitlabDomainMode) || 0 : 2;
       this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.gitlabHost}/fullchain.pem`;
+        || `/live/${this.gitlabHost}/fullchain.pem`;
       this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.gitlabHost}/privkey.pem`;
+        || `/live/${this.gitlabHost}/privkey.pem`;
       this.gitlabRegistryDomainMode = _config ? parseInt(_config.gitlabRegistryDomainMode, 10) || 0 : 2;
       this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/fullchain.pem`;
+        || `/live/${this.gitlabRegistryHost}/fullchain.pem`;
       this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.gitlabRegistryHost}/privkey.pem`;
+        || `/live/${this.gitlabRegistryHost}/privkey.pem`;
     });
   }
+
   @action generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.syncEnable = _config?.syncEnable || 'false';
@@ -90,16 +85,21 @@ export default class MainConfig {
       this.syncPass = _config?.syncPass || 'admin';
       this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
       this.syncSSL = _config?.syncSSL?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.syncHost}/fullchain.pem`;
+        || `/live/${this.syncHost}/fullchain.pem`;
       this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.syncHost}/privkey.pem`;
+        || `/live/${this.syncHost}/privkey.pem`;
+    });
+  }
+
+  @action generateWizardConfig(_config: any | undefined = undefined): void {
+    runInAction(() => {
       this.wizardEnable = _config?.wizardEnable || 'false';
       this.wizardHost = _config?.wizardHost || `wizard${this.gitlabHost.replace('gitlab','')}`;
       this.wizardDomainMode = _config ? parseInt(_config.wizardDomainMode) || 0 : 2;
       this.wizardSSL = _config?.wizardSSL?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.wizardHost}/fullchain.pem`;
+        || `/live/${this.wizardHost}/fullchain.pem`;
       this.wizardSSLKey = _config?.wizardSSLKey?.replace(/;/g, '')
-        || `${this.sslBaseDir}/live/${this.wizardHost}/privkey.pem`;
+        || `/live/${this.wizardHost}/privkey.pem`;
     });
   }
 
@@ -158,8 +158,6 @@ GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
 `;
     const nginx = `
-export SSL_BASEDIR=${this.sslBaseDir}
-
 # -- GITLAB RUNNER
 GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
 export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
@@ -216,9 +214,6 @@ export WIZARD_SSL_KEY=${this.wizardSSLKey}
   gitlabExternalUrl!:string;
   gitlabRegistryUrl!:string;
 
-  // Basic NGINX/SSL settings
-  sslBaseDir!:string;
-
   // Pruxy
   gitlabHost = '';
   _gitlabDomainMode = 2;
@@ -264,7 +259,6 @@ export WIZARD_SSL_KEY=${this.wizardSSLKey}
       seedDir          : this.seedDir,
       gitlabExternalUrl: this.gitlabExternalUrl,
       gitlabRegistryUrl: this.gitlabRegistryUrl,
-      sslBaseDir       : this.sslBaseDir,
       gitlabHost       : this.gitlabHost,
       gitlabDomainMode : this.gitlabDomainMode
     };
@@ -341,7 +335,6 @@ export WIZARD_SSL_KEY=${this.wizardSSLKey}
     case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
     case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
     case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
-    case 'SSL_BASEDIR': this.sslBaseDir = value; break;
     case 'SYNC_ENABLE': this.syncEnable = value; break;
     case 'SYNC_HOST': this.syncHost = value; break;
     case 'SYNC_USER': this.syncUser = value; break;

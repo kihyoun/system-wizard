@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
+import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
-import { TextField } from '@material-ui/core';
+import { observer } from 'mobx-react';
 
-const GitlabSettingsFields = observer((props: any) => {
+const StartFields = observer((props: any) => {
   const [init, setInit] = useState(props.init);
 
   useEffect(() => {
     if (!props.hidden && init) {
       runInAction(() => {
+        props.main.config.generateMainConfig();
         setInit(false);
-        props.main.config.generateGitlabConfig()
       });
     }
 
@@ -38,6 +38,18 @@ const GitlabSettingsFields = observer((props: any) => {
 
   return (
     <>
+      <TextField
+        label="SEED_DIR"
+        value={props.main.config.seedDir}
+        style={{ margin: 8 }}
+        helperText="Location for persistent Data, will be synced with rsync"
+        fullWidth
+        margin="normal"
+        InputLabelProps={{ shrink: true }}
+        onChange={event => {
+          runInAction(() => props.main.config.seedDir = event.target.value);
+        }}
+      />
       <TextField
         label="GITLAB_HOST"
         value={props.main.config.gitlabHost}
@@ -94,4 +106,4 @@ const GitlabSettingsFields = observer((props: any) => {
   );
 });
 
-export default GitlabSettingsFields;
+export default StartFields;

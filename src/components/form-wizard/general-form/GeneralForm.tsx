@@ -7,13 +7,13 @@ import {
   Step, StepButton, StepContent, Stepper
 } from '@material-ui/core';
 
-import SeedFields from './fields/SeedFields';
-import GitlabSettingsFields from './fields/GitlabSettingsFields';
+import StartFields from './fields/StartFields';
 import SSLSettingsFields from './fields/SSLSettingsFields';
 
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 import SyncServerFields from './fields/SyncServerFields';
+import WizardFields from './fields/WizardFields';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -33,17 +33,17 @@ const useStyles = makeStyles(theme => ({
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
   const [main, setMain] = useState(props.main);
-  const [seedInit, setSeedInit] = useState(main.init);
-  const [gitlabInit, setGitlabInit] = useState(main.init);
+  const [startInit, setStartInit] = useState(main.init);
   const [sslInit, setSSLInit] = useState(main.init);
   const [syncInit, setSyncInit] = useState(main.init);
+  const [wizardInit, setWizardInit] = useState(main.init);
 
   useEffect(() => {
     runInAction(() => {
       setMain(props.main);
-      setSeedInit(props.main.init);
+      setStartInit(props.main.init);
       setSyncInit(props.main.init);
-      setGitlabInit(props.main.init);
+      setWizardInit(props.main.init);
       setSSLInit(props.main.init);
       main.init = false;
     });
@@ -52,26 +52,26 @@ const GeneralForm = observer((props: any) => {
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [{
-    label  : 'Seed',
+    label  : 'Start',
     enabled: true
-  }, {
-    label  : 'Gitlab',
-    enabled: !gitlabInit
   }, {
     label  : 'SSL',
     enabled: !sslInit
   },{
-    label  : 'Sync/Wizard',
+    label  : 'Sync',
     enabled: !syncInit
+  },{
+    label  : 'Wizard',
+    enabled: !wizardInit
   }];
 
   const handleStep = (step: number) => () => {
     runInAction(() => {
       switch (step) {
-      case 0: setSeedInit(false); break;
-      case 1: setGitlabInit(false); break;
-      case 2: setSSLInit(false); break;
-      case 3: setSyncInit(false); break;
+      case 0: setStartInit(false); break;
+      case 1: setSSLInit(false); break;
+      case 2: setSyncInit(false); break;
+      case 3: setWizardInit(false); break;
       }
 
       if (step > steps.length - 1) {
@@ -116,10 +116,10 @@ const GeneralForm = observer((props: any) => {
           </Stepper>
         </Grid>
         <Grid item xs={7}>
-          <SeedFields init={seedInit} hidden={activeStep !== 0} main={main} />
-          <GitlabSettingsFields init={gitlabInit} hidden={activeStep !== 1} main={main} />
-          <SSLSettingsFields init={sslInit} hidden={activeStep !== 2} main={main} />
-          <SyncServerFields init={syncInit} hidden={activeStep !== 3} main={main} />
+          <StartFields init={startInit} hidden={activeStep !== 0} main={main} />
+          <SSLSettingsFields init={sslInit} hidden={activeStep !== 1} main={main} />
+          <SyncServerFields init={syncInit} hidden={activeStep !== 2} main={main} />
+          <WizardFields init={wizardInit} hidden={activeStep !== 3} main={main} />
         </Grid>
       </Grid>
     </Paper>
