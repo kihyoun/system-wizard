@@ -2,7 +2,7 @@
 if [ -f ../system/docker-compose.yml ]; then
     docker-compose -f ../system/docker-compose.yml up --remove-orphans --build -d wizard
 else
-    docker-compose -p system up --remove-orphans --build
+    docker-compose -p system up --remove-orphans --build -d
 fi
 
 echo > .docker.env
