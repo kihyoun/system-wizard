@@ -7,7 +7,7 @@ RUN apk add git
 RUN git clone https://github.com/kihyoun/system-wizard.git /app
 WORKDIR /app
 # Checkout
-RUN git checkout 5ced7e41aaaa66fdd1caba00603896ec5bfddd5e -b release
+RUN git checkout 0f0898038e7b69b40ff3084fc117de637061037d -b release
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
