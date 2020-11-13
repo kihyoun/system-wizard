@@ -348,7 +348,7 @@ export WIZARD_SSL_KEY=${this.wizardSSLKey}
     case 'WIZARD_SSL': this.wizardSSL = value.replace(/;/g, ''); break;
     case 'WIZARD_SSL_KEY': this.wizardSSLKey = value.replace(/;/g, ''); break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
-    case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10); break;
+    case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
     }
   }
 }

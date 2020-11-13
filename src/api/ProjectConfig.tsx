@@ -216,7 +216,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'REVIEW_HOST': this.reviewHost = value; break;
      case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
      case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
-     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10); break;
+     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
      }
    }
 
