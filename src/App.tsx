@@ -41,6 +41,7 @@ import LockOpenIcon from '@material-ui/icons/LockOpen';
 import moment from 'moment';
 import ServerControlButton from './components/ServerControlButton';
 import EditIcon from '@material-ui/icons/Edit';
+import Helper from './api/Helper';
 
 const drawerWidth = 240;
 
@@ -112,6 +113,10 @@ const useDrawerStyles = makeStyles((theme: Theme) =>
   })
 );
 const App = observer(() => {
+  useEffect(() => {
+    console.log(Helper.textLogo);
+  }, []);
+
   const drawerClasses = useDrawerStyles();
   const [dark, setDark] = useState(false);
   const handleDarkMode = (event: any) => {
