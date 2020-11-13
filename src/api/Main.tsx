@@ -41,7 +41,7 @@ export default class Main {
 
     @action public generateConfig(_config: any | undefined): void {
       this._config = new MainConfig(_config);
-      this._syncServer = new SyncServer(this);
+      this._syncServer = this._syncServer ? this._syncServer : new SyncServer(this);
       this._placeHolder = new MainConfig(_config);
     }
 
@@ -115,6 +115,11 @@ export default class Main {
       runInAction(() => this.uploadProgress = true);
       runInAction(() => {
         this.generateConfig(config.main);
+
+        if (!this.sync.connected) {
+          this.sync.generateConfig();
+        }
+
         this._projects = observable(new Map<string, ProjectConfig>());
         config.proxies.forEach((pConfig:ProjectConfigInterface) => {
           this._projects.set(pConfig.projectKey, new ProjectConfig(this, pConfig));
