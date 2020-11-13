@@ -138,50 +138,50 @@ export default class MainConfig {
     const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- SEED
-export SEED_DIR="${this.seedDir}"
+export SEED_DIR=${this.seedDir}
 
 # -- GITLAB
-GITLAB_EXTERNAL_URL="${this.gitlabExternalUrl}"
-GITLAB_REGISTRY_URL="${this.gitlabRegistryUrl}"
+GITLAB_EXTERNAL_URL=${this.gitlabExternalUrl}
+GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
 
 # -- NGINX
-export GITLAB_HOST="${this.gitlabHost}"
+export GITLAB_HOST=${this.gitlabHost}
 GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
 `;
-    const gitlabSSL = `GITLAB_SSL="${this.gitlabSSL}"
-GITLAB_SSL_KEY="${this.gitlabSSLKey}"
+    const gitlabSSL = `GITLAB_SSL=${this.gitlabSSL}
+GITLAB_SSL_KEY=${this.gitlabSSLKey}
 `;
-    const registry = `export GITLAB_REGISTRY_HOST="${this.gitlabRegistryHost}"
+    const registry = `export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
 GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
 `;
-    const registrySSL = `GITLAB_REGISTRY_SSL="${this.gitlabRegistrySSL}"
-GITLAB_REGISTRY_SSL_KEY="${this.gitlabRegistrySSLKey}"
+    const registrySSL = `GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
+GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
 `;
     const nginx = `
 # -- GITLAB RUNNER
-GITLAB_RUNNER_TOKEN="${this.gitlabRunnerToken}"
+GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
 export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
 
 # --- Sync Settings
-export SYNC_ENABLE="${this.syncEnable}"
+export SYNC_ENABLE=${this.syncEnable}
 `;
-    const syncSettings = `export SYNC_HOST="${this.syncHost}"
-export SYNC_USER="${this.syncUser}"
-export SYNC_PASS="${this.syncPass}"
+    const syncSettings = `export SYNC_HOST=${this.syncHost}
+export SYNC_USER=${this.syncUser}
+export SYNC_PASS=${this.syncPass}
 export SYNC_DOMAIN_MODE=${this.syncDomainMode}
 `;
-    const syncSSL = `export SYNC_SSL="${this.syncSSL}"
-export SYNC_SSL_KEY="${this.syncSSLKey}"
+    const syncSSL = `export SYNC_SSL=${this.syncSSL}
+export SYNC_SSL_KEY=${this.syncSSLKey}
 `;
     const wizard = `
 # --- Wizard
-export WIZARD_ENABLE="${this.wizardEnable}"
+export WIZARD_ENABLE=${this.wizardEnable}
 `;
-    const wizardSettings = `export WIZARD_HOST="${this.wizardHost}"
+    const wizardSettings = `export WIZARD_HOST=${this.wizardHost}
 export WIZARD_DOMAIN_MODE=${this.wizardDomainMode}
 `;
-    const wizardSSL = `export WIZARD_SSL="${this.wizardSSL}"
-export WIZARD_SSL_KEY="${this.wizardSSLKey}"
+    const wizardSSL = `export WIZARD_SSL=${this.wizardSSL}
+export WIZARD_SSL_KEY=${this.wizardSSLKey}
 `;
     const createdOn = `
 # created on ${new Date()}
