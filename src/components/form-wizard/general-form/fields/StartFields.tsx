@@ -4,10 +4,10 @@ import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 const StartFields = observer((props: any) => {
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(props.main.init);
 
   useEffect(() => {
-    if (!props.hidden && init) {
+    if (!props.hidden && init && props.main.init) {
       runInAction(() => {
         props.main.config.generateMainConfig();
         setInit(false);
@@ -17,7 +17,7 @@ const StartFields = observer((props: any) => {
     if (!props.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.init, props.main.init]);
 
   if (props.hidden) return null;
 

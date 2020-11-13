@@ -14,9 +14,9 @@ const useStyles = makeStyles(theme => ({
 }));
 const SyncServerFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(props.main.init);
   useEffect(() => {
-    if (!props.hidden && init) {
+    if (!props.hidden && init && props.main.init) {
       runInAction(() => {
         props.main.config.generateSyncConfig();
         setInit(false);
@@ -25,7 +25,7 @@ const SyncServerFields = observer((props: any) => {
     if (!props.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.main.init]);
 
   if (props.hidden) return null;
 

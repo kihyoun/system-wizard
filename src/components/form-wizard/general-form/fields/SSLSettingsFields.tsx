@@ -30,10 +30,10 @@ const useStyles = makeStyles(theme => ({
 
 const SSLSettingsFields = observer((props: any) => {
   const classes = useStyles();
-  const [init, setInit] = useState(props.init);
+  const [init, setInit] = useState(props.main.init);
 
   useEffect(() => {
-    if (!props.hidden && init) {
+    if (!props.hidden && init && props.main.init) {
       runInAction(() => {
         props.main.config.generateProxyConfig()
         setInit(false)
@@ -42,7 +42,7 @@ const SSLSettingsFields = observer((props: any) => {
     if (!props.init && init) {
       setInit(false);
     }
-  }, [props.hidden, props.init]);
+  }, [props.hidden, props.init, props.main.init]);
 
   if (props.hidden) return null;
 

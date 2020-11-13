@@ -32,20 +32,18 @@ const useStyles = makeStyles(theme => ({
 
 const GeneralForm = observer((props: any) => {
   const classes = useStyles();
-  const [main, setMain] = useState(props.main);
-  const [startInit, setStartInit] = useState(main.init);
-  const [sslInit, setSSLInit] = useState(main.init);
-  const [syncInit, setSyncInit] = useState(main.init);
-  const [wizardInit, setWizardInit] = useState(main.init);
+  const [startInit, setStartInit] = useState(props.main.init);
+  const [sslInit, setSSLInit] = useState(props.main.init);
+  const [syncInit, setSyncInit] = useState(props.main.init);
+  const [wizardInit, setWizardInit] = useState(props.main.init);
 
   useEffect(() => {
     runInAction(() => {
-      setMain(props.main);
       setStartInit(props.main.init);
       setSyncInit(props.main.init);
       setWizardInit(props.main.init);
       setSSLInit(props.main.init);
-      main.init = false;
+      props.main.init = false;
     });
   }, [props.main.id]);
 
@@ -116,10 +114,10 @@ const GeneralForm = observer((props: any) => {
           </Stepper>
         </Grid>
         <Grid item xs={7}>
-          <StartFields init={startInit} hidden={activeStep !== 0} main={main} />
-          <SSLSettingsFields init={sslInit} hidden={activeStep !== 1} main={main} />
-          <SyncServerFields init={syncInit} hidden={activeStep !== 2} main={main} />
-          <WizardFields init={wizardInit} hidden={activeStep !== 3} main={main} />
+          <StartFields init={startInit} hidden={activeStep !== 0} main={props.main} />
+          <SSLSettingsFields init={sslInit} hidden={activeStep !== 1} main={props.main} />
+          <SyncServerFields init={syncInit} hidden={activeStep !== 2} main={props.main} />
+          <WizardFields init={wizardInit} hidden={activeStep !== 3} main={props.main} />
         </Grid>
       </Grid>
     </Paper>
