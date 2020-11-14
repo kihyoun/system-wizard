@@ -5,7 +5,7 @@ import {
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography
 } from '@material-ui/core';
 
-export default function PublishDialog(props:any) {
+export default function PushDialog(props:any) {
 
   return (
     <React.Fragment>
@@ -30,9 +30,9 @@ export default function PublishDialog(props:any) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={props.handlePush}
+          <Button autoFocus disableElevation variant="contained" onClick={props.handlePush}
             color="secondary" startIcon={<PublishIcon />}>
-            Publish
+            Push
           </Button>
           <Button onClick={() => props.setOpen(false)} color="primary" autoFocus>
             Close
