@@ -172,5 +172,6 @@ deploy:system:
     - git pull -r
     - cd ..
     - git commit -am "Pulled down update to system/wizard"
+    - git push origin master
   only:
     - master
