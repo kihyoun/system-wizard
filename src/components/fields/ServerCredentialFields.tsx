@@ -29,6 +29,7 @@ const ServerCredentialFields = observer((props: any) => {
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
+        variant="outlined"
         onChange={event => {
           runInAction(() =>{
             props.main.sync.serverAddress = event.target.value;
@@ -38,6 +39,7 @@ const ServerCredentialFields = observer((props: any) => {
       />
       <TextField
         label="Username"
+        variant="outlined"
         disabled={props.main.sync.connected}
         value={props.main.sync.userName}
         name="userName"
@@ -51,6 +53,7 @@ const ServerCredentialFields = observer((props: any) => {
       />
       <TextField
         label="Password"
+        variant="outlined"
         value={props.password}
         disabled={props.main.sync.connected}
         style={{ margin: 8 }}

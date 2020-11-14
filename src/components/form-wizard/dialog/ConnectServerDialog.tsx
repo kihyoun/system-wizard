@@ -41,11 +41,11 @@ export const ConnectServerDialog = observer((props:any) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={() => props.handleSubmit(password)}
+          <Button size="large" disableElevation autoFocus onClick={() => props.handleSubmit(password)}
             color="primary" variant="contained" >
             {props.main.sync.connected ? 'Logout' : 'Submit'}
           </Button>
-          <Button onClick={handleClose} color="primary" autoFocus>
+          <Button size="large" onClick={handleClose} color="primary" autoFocus disableElevation>
             Close
           </Button>
         </DialogActions>

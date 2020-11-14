@@ -4,6 +4,8 @@ import { runInAction } from 'mobx';
 import {
   FormControl,
   FormControlLabel,
+  FormHelperText,
+  InputAdornment,
   InputLabel, makeStyles,
   NativeSelect
 } from '@material-ui/core';
@@ -14,7 +16,8 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     margin  : theme.spacing(1),
     minWidth: 120
-  }
+  },
+  positionStart: { marginRight: 0 }
 }));
 
 const ProdFields = observer((props: any) => {
@@ -102,6 +105,7 @@ const ProdFields = observer((props: any) => {
           <option value={2}>SSL encrypted</option>
           <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.config.prodHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
         label="PROD_SSL"
@@ -115,6 +119,12 @@ const ProdFields = observer((props: any) => {
           runInAction(() => (props.config.prodSSL = event.target.value));
         }}
         helperText="Path to Registry SSL Certificate"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
       />
       <TextField
         label="PROD_SSL_KEY"
@@ -128,6 +138,12 @@ const ProdFields = observer((props: any) => {
           runInAction(() => (props.config.prodSSLKey = event.target.value));
         }}
         helperText="Path to SSL Key"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
       />
     </>
   );

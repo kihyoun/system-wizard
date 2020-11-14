@@ -66,14 +66,14 @@ export default class MainConfig {
       this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
       this.gitlabDomainMode = _config ? parseInt(_config.gitlabDomainMode) || 0 : 2;
       this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
-        || `/live/${this.gitlabHost}/fullchain.pem`;
+        || `/ssl/live/${this.gitlabHost}/fullchain.pem`;
       this.gitlabSSLKey = _config?.gitlabSSLKey?.replace(/;/g, '')
-        || `/live/${this.gitlabHost}/privkey.pem`;
+        || `/ssl/live/${this.gitlabHost}/privkey.pem`;
       this.gitlabRegistryDomainMode = _config ? parseInt(_config.gitlabRegistryDomainMode, 10) || 0 : 2;
       this.gitlabRegistrySSL = _config?.gitlabRegistrySSL?.replace(/;/g, '')
-        || `/live/${this.gitlabRegistryHost}/fullchain.pem`;
+        || `/ssl/live/${this.gitlabRegistryHost}/fullchain.pem`;
       this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
-        || `/live/${this.gitlabRegistryHost}/privkey.pem`;
+        || `/ssl/live/${this.gitlabRegistryHost}/privkey.pem`;
     });
   }
 
@@ -85,9 +85,9 @@ export default class MainConfig {
       this.syncPass = _config?.syncPass || 'admin';
       this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
       this.syncSSL = _config?.syncSSL?.replace(/;/g, '')
-        || `/live/${this.syncHost}/fullchain.pem`;
+        || `/ssl/live/${this.syncHost}/fullchain.pem`;
       this.syncSSLKey = _config?.syncSSLKey?.replace(/;/g, '')
-        || `/live/${this.syncHost}/privkey.pem`;
+        || `/ssl/live/${this.syncHost}/privkey.pem`;
     });
   }
 
@@ -97,9 +97,9 @@ export default class MainConfig {
       this.wizardHost = _config?.wizardHost || `wizard${this.gitlabHost.replace('gitlab','')}`;
       this.wizardDomainMode = _config ? parseInt(_config.wizardDomainMode) || 0 : 2;
       this.wizardSSL = _config?.wizardSSL?.replace(/;/g, '')
-        || `/live/${this.wizardHost}/fullchain.pem`;
+        || `/ssl/live/${this.wizardHost}/fullchain.pem`;
       this.wizardSSLKey = _config?.wizardSSLKey?.replace(/;/g, '')
-        || `/live/${this.wizardHost}/privkey.pem`;
+        || `/ssl/live/${this.wizardHost}/privkey.pem`;
     });
   }
 

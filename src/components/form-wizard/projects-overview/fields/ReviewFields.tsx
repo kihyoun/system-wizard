@@ -4,6 +4,8 @@ import { runInAction } from 'mobx';
 import {
   FormControl,
   FormControlLabel,
+  FormHelperText,
+  InputAdornment,
   InputLabel, makeStyles,
   NativeSelect
 } from '@material-ui/core';
@@ -14,7 +16,8 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     margin  : theme.spacing(1),
     minWidth: 120
-  }
+  },
+  positionStart: { marginRight: 0 }
 }));
 
 const ReviewFields = observer((props: any) => {
@@ -94,13 +97,10 @@ const ReviewFields = observer((props: any) => {
             id  : 'reviewDomainMode-native-helper'
           }}
         >
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
           <option value={1}>Wildcard HTTP</option>
-          <option value={2}>SSL encrypted</option>
           <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.config.reviewHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
         label="REVIEW_SSL"
@@ -114,6 +114,12 @@ const ReviewFields = observer((props: any) => {
           runInAction(() => (props.config.reviewSSL = event.target.value));
         }}
         helperText="Path to Registry SSL Certificate"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
       />
       <TextField
         label="REVIEW_SSL_KEY"
@@ -127,6 +133,12 @@ const ReviewFields = observer((props: any) => {
           runInAction(() => (props.config.reviewSSLKey = event.target.value));
         }}
         helperText="Path to SSL Key"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
       />
     </>
   );

@@ -184,7 +184,7 @@ const ProjectsOverview = observer((props:any) => {
 
       <Toolbar>
         <div className={classes.divider} />
-        <Button variant="contained" color="primary"
+        <Button variant="contained" color="primary" disableElevation
           onClick={() => {
             setActiveProject('');
             setOpen(true);

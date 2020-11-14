@@ -4,17 +4,20 @@ import { runInAction } from 'mobx';
 import {
   FormControl,
   FormControlLabel,
+  FormHelperText,
   InputLabel, makeStyles,
   NativeSelect
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import Switch from '@material-ui/core/Switch';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 const useStyles = makeStyles(theme => ({
   formControl: {
     margin  : theme.spacing(1),
     minWidth: 120
-  }
+  },
+  positionStart: { marginRight: 0 }
 }));
 
 const BetaFields = observer((props: any) => {
@@ -102,6 +105,7 @@ const BetaFields = observer((props: any) => {
           <option value={2}>SSL encrypted</option>
           <option value={3}>Wildcard SSL encrypted</option>
         </NativeSelect>
+        <FormHelperText>{props.config.betaHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
         label="BETA_SSL"
@@ -112,6 +116,12 @@ const BetaFields = observer((props: any) => {
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
         onChange={(event: any) => {
           runInAction(() => (props.config.betaSSL = event.target.value));
         }}
@@ -129,6 +139,12 @@ const BetaFields = observer((props: any) => {
           runInAction(() => (props.config.betaSSLKey = event.target.value));
         }}
         helperText="Path to SSL Key"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.config.main.config.seedDir}</InputAdornment>
+        }}
       />
     </>
   );
