@@ -162,7 +162,7 @@ deploy:system:
     - ssh-keyscan gitlab.system-bootstrapper.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - git clone --resursive git@gitlab.system-bootstrapper.com:system-bootstrapper/system.git
+    - git clone --recursive git@gitlab.system-bootstrapper.com:system-bootstrapper/system.git
     - cd system/wizard
     - git checkout master
     - git pull -r
