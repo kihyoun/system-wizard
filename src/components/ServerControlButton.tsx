@@ -4,11 +4,11 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import SyncIcon from '@material-ui/icons/Sync';
 import { runInAction } from 'mobx';
-import PublishDialog from './dialogs/PublishDialog';
+import PushDialog from './dialogs/PushDialog';
 
 export default function ServerControlButton(props:any) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [publish, setPublish] = React.useState(false);
+  const [push, setPush] = React.useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -40,13 +40,13 @@ export default function ServerControlButton(props:any) {
         await props.main.sync.push();
         props.setOpenSuccess('Ready.');
         handleClose();
-        setPublish(false);
+        setPush(false);
       } catch(err:any) {
         const msg = err.response?.data || err.toString();
         props.setOpenAlert(msg);
         props.setLastStatusMessage(msg);
         handleClose();
-        setPublish(false);
+        setPush(false);
       }
     });
   };
@@ -145,11 +145,11 @@ export default function ServerControlButton(props:any) {
 
   return (
     <React.Fragment>
-      <PublishDialog
-        open={publish}
-        setOpen={setPublish}
+      <PushDialog
+        open={push}
+        setOpen={setPush}
         handlePush={handlePush}
-        onClose={()=> setPublish(false)}
+        onClose={()=> setPush(false)}
       />
       <Button style={{ marginRight: '1ch' }} variant="text" aria-controls="simple-menu" aria-haspopup="true"
         color={'primary'}
@@ -165,12 +165,12 @@ export default function ServerControlButton(props:any) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => setPublish(true)}>Publish</MenuItem>
+        <MenuItem onClick={() => setPush(true)}>Push</MenuItem>
         <MenuItem onClick={() => handleSeed()}>Seed</MenuItem>
         <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
         <MenuItem onClick={handleFetch}>Fetch</MenuItem>
         <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
-        <MenuItem onClick={() => handleHotPatch()}>Pull</MenuItem>
+        <MenuItem onClick={() => handleHotPatch()}>Update</MenuItem>
         <MenuItem onClick={() => handleRegister()}>Register</MenuItem>
         <MenuItem onClick={() => handleUnregister()}>Unregister</MenuItem>
         <MenuItem onClick={() => handleHarvest()}>Harvest</MenuItem>
