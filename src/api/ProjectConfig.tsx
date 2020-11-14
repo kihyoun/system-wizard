@@ -8,7 +8,7 @@ import Main, { HostInfo } from './Main';
 /**
  * General Configuration Object
  */
-export default class ProjectConfig implements ProjectConfigInterface {
+export default class ProjectConfig {
     _projectKey!:string;
 
     get projectKey() {
@@ -92,14 +92,14 @@ export default class ProjectConfig implements ProjectConfigInterface {
    * @param {ProjectConfig} config ProjectConfig
    */
     constructor(main: Main,
-      _config: ProjectConfigInterface | undefined = undefined
+      _config: any | undefined = undefined
     ) {
       makeAutoObservable(this);
       this.main = main;
       this.generateConfig(_config);
     }
 
-  @action generateConfig(_config: ProjectConfigInterface | undefined = undefined) {
+  @action generateConfig(_config: any | undefined = undefined) {
       this.generateMainConfig(_config);
       this.generateProdProxyConfig(_config);
       this.generateBetaProxyConfig(_config);
@@ -107,7 +107,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.generateRunnerConfig(_config);
     }
 
-  @action generateMainConfig(_config: ProjectConfigInterface | undefined = undefined): void {
+  @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this._projectKey = _config?.projectKey || 'systembootstrapper';
     });
@@ -119,9 +119,9 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
       this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
       this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
-      this.prodSSL = _config?.prodSSL.replace(/;/g, '')
+      this.prodSSL = _config?.prodSSL?.replace(/;/g, '')
         || `/ssl/live/${this.prodHost}/fullchain.pem`;
-      this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
+      this.prodSSLKey = _config?.prodSSLKey?.replace(/;/g, '')
         || `/ssl/live/${this.prodHost}/privkey.pem`;
     });
   }
@@ -205,16 +205,18 @@ export default class ProjectConfig implements ProjectConfigInterface {
      case 'USE_PROD_HOST': this.useProdHost = value; break;
      case 'PROD_HOST': this.prodHost = value; break;
      case 'PROD_DOMAIN_MODE': this.prodDomainMode = parseInt(value, 10); break;
-     case 'PROD_SSL': this.prodSSL = value.replace(/;/g, ''); break;
-     case 'PROD_SSL_KEY': this.prodSSLKey = value.replace(/;/g, ''); break;
+     case 'PROD_SSL': this.prodSSL = value?.replace(/;/g, ''); break;
+     case 'PROD_SSL_KEY': this.prodSSLKey = value?.replace(/;/g, ''); break;
      case 'USE_BETA_HOST': this.useBetaHost = value; break;
      case 'BETA_HOST': this.betaHost = value; break;
      case 'BETA_DOMAIN_MODE': this.betaDomainMode = parseInt(value, 10); break;
-     case 'BETA_SSL': this.betaSSL = value.replace(/;/g, ''); break;
-     case 'BETA_SSL_KEY': this.betaSSLKey = value.replace(/;/g, ''); break;
+     case 'BETA_SSL': this.betaSSL = value?.replace(/;/g, ''); break;
+     case 'BETA_SSL_KEY': this.betaSSLKey = value?.replace(/;/g, ''); break;
      case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
      case 'REVIEW_HOST': this.reviewHost = value; break;
      case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
+     case 'REVIEW_SSL': this.reviewSSL = value?.replace(/;/g, ''); break;
+     case 'REVIEW_SSL_KEY': this.reviewSSLKey = value?.replace(/;/g, ''); break;
      case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
      case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
      }
@@ -485,28 +487,4 @@ deploy:prod:
 
      return config;
    }
-
-}
-
-
-
-export interface ProjectConfigInterface {
-  projectKey:string;
-  prodHost?: string;
-  useProdHost:string;
-  prodDomainMode?:number;
-  prodSSL?:string;
-  prodSSLKey?:string;
-  useBetaHost:string;
-  betaHost?:string;
-  betaDomainMode:number;
-  betaSSL?:string;
-  betaSSLKey?:string;
-  useReviewHost:string;
-  reviewHost?:string;
-  reviewDomainMode?:number;
-  reviewSSL?:string;
-  reviewSSLKey?:string;
-  gitlabRunnerToken:string;
-  gitlabRunnerScale:number;
 }

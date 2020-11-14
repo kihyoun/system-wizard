@@ -7,7 +7,7 @@ import {
   runInAction
 } from 'mobx';
 import MainConfig from './MainConfig';
-import ProjectConfig, { ProjectConfigInterface } from './ProjectConfig';
+import ProjectConfig from './ProjectConfig';
 import JSZip from 'jszip';
 import SyncServer from './SyncServer';
 import { v4 as uuidv4 } from 'uuid';
@@ -77,7 +77,7 @@ export default class Main {
     }
 
     @computed public get asJson() {
-      const proxies:ProjectConfigInterface[] = [];
+      const proxies:any = [];
       this._projects.forEach(config => proxies.push(config.asJson));
 
       return {
@@ -121,7 +121,7 @@ export default class Main {
         }
 
         this._projects = observable(new Map<string, ProjectConfig>());
-        config.proxies.forEach((pConfig:ProjectConfigInterface) => {
+        config.proxies.forEach((pConfig:any) => {
           this._projects.set(pConfig.projectKey, new ProjectConfig(this, pConfig));
         });
         this.init = false;
