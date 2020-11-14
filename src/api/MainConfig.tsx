@@ -138,50 +138,50 @@ export default class MainConfig {
     const ret = Helper.textLogo + `# Filepath: ./.docker.env
 
 # -- SEED
-export SEED_DIR=${this.seedDir}
+export SEED_DIR=${Helper.quote(this.seedDir)}
 
 # -- GITLAB
-GITLAB_EXTERNAL_URL=${this.gitlabExternalUrl}
-GITLAB_REGISTRY_URL=${this.gitlabRegistryUrl}
+GITLAB_EXTERNAL_URL=${Helper.quote(this.gitlabExternalUrl)}
+GITLAB_REGISTRY_URL=${Helper.quote(this.gitlabRegistryUrl)}
 
 # -- NGINX
-export GITLAB_HOST=${this.gitlabHost}
-GITLAB_DOMAIN_MODE=${this.gitlabDomainMode}
+export GITLAB_HOST=${Helper.quote(this.gitlabHost)}
+GITLAB_DOMAIN_MODE=${Helper.quote(this.gitlabDomainMode)}
 `;
-    const gitlabSSL = `GITLAB_SSL=${this.gitlabSSL}
-GITLAB_SSL_KEY=${this.gitlabSSLKey}
+    const gitlabSSL = `GITLAB_SSL=${Helper.quote(this.gitlabSSL)}
+GITLAB_SSL_KEY=${Helper.quote(this.gitlabSSLKey)}
 `;
-    const registry = `export GITLAB_REGISTRY_HOST=${this.gitlabRegistryHost}
-GITLAB_REGISTRY_DOMAIN_MODE=${this.gitlabRegistryDomainMode}
+    const registry = `export GITLAB_REGISTRY_HOST=${Helper.quote(this.gitlabRegistryHost)}
+GITLAB_REGISTRY_DOMAIN_MODE=${Helper.quote(this.gitlabRegistryDomainMode)}
 `;
-    const registrySSL = `GITLAB_REGISTRY_SSL=${this.gitlabRegistrySSL}
-GITLAB_REGISTRY_SSL_KEY=${this.gitlabRegistrySSLKey}
+    const registrySSL = `GITLAB_REGISTRY_SSL=${Helper.quote(this.gitlabRegistrySSL)}
+GITLAB_REGISTRY_SSL_KEY=${Helper.quote(this.gitlabRegistrySSLKey)}
 `;
     const nginx = `
 # -- GITLAB RUNNER
-GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
-export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
+GITLAB_RUNNER_TOKEN=${Helper.quote(this.gitlabRunnerToken)}
+export GITLAB_RUNNER_SCALE=${Helper.quote(this.gitlabRunnerScale)}
 
 # --- Sync Settings
-export SYNC_ENABLE=${this.syncEnable}
+export SYNC_ENABLE=${Helper.quote(this.syncEnable)}
 `;
-    const syncSettings = `export SYNC_HOST=${this.syncHost}
-export SYNC_USER=${this.syncUser}
-export SYNC_PASS=${this.syncPass}
-export SYNC_DOMAIN_MODE=${this.syncDomainMode}
+    const syncSettings = `export SYNC_HOST=${Helper.quote(this.syncHost)}
+export SYNC_USER=${Helper.quote(this.syncUser)}
+export SYNC_PASS=${Helper.quote(this.syncPass)}
+export SYNC_DOMAIN_MODE=${Helper.quote(this.syncDomainMode)}
 `;
-    const syncSSL = `export SYNC_SSL=${this.syncSSL}
-export SYNC_SSL_KEY=${this.syncSSLKey}
+    const syncSSL = `export SYNC_SSL=${Helper.quote(this.syncSSL)}
+export SYNC_SSL_KEY=${Helper.quote(this.syncSSLKey)}
 `;
     const wizard = `
 # --- Wizard
-export WIZARD_ENABLE=${this.wizardEnable}
+export WIZARD_ENABLE=${Helper.quote(this.wizardEnable)}
 `;
-    const wizardSettings = `export WIZARD_HOST=${this.wizardHost}
-export WIZARD_DOMAIN_MODE=${this.wizardDomainMode}
+    const wizardSettings = `export WIZARD_HOST=${Helper.quote(this.wizardHost)}
+export WIZARD_DOMAIN_MODE=${Helper.quote(this.wizardDomainMode)}
 `;
-    const wizardSSL = `export WIZARD_SSL=${this.wizardSSL}
-export WIZARD_SSL_KEY=${this.wizardSSLKey}
+    const wizardSSL = `export WIZARD_SSL=${Helper.quote(this.wizardSSL)}
+export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
 `;
     const createdOn = `
 # created on ${new Date()}
@@ -324,31 +324,31 @@ export WIZARD_SSL_KEY=${this.wizardSSLKey}
 
   public setProperty(propertyKey : any, value : any) {
     switch (propertyKey) {
-    case 'SEED_DIR': this.seedDir = value; break;
-    case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = value; break;
-    case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = value; break;
-    case 'GITLAB_HOST': this.gitlabHost = value; break;
-    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(value, 10); break;
-    case 'GITLAB_SSL': this.gitlabSSL = value.replace(/;/g, ''); break;
-    case 'GITLAB_SSL_KEY': this.gitlabSSLKey = value.replace(/;/g, ''); break;
-    case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = value; break;
-    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(value, 10); break;
-    case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = value.replace(/;/g, ''); break;
-    case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = value.replace(/;/g, ''); break;
-    case 'SYNC_ENABLE': this.syncEnable = value; break;
-    case 'SYNC_HOST': this.syncHost = value; break;
-    case 'SYNC_USER': this.syncUser = value; break;
-    case 'SYNC_PASS': this.syncPass = value; break;
-    case 'SYNC_DOMAIN_MODE': this.syncDomainMode = parseInt(value, 10); break;
-    case 'SYNC_SSL': this.syncSSL = value.replace(/;/g, ''); break;
-    case 'SYNC_SSL_KEY': this.syncSSLKey = value.replace(/;/g, ''); break;
-    case 'WIZARD_ENABLE': this.wizardEnable = value; break;
-    case 'WIZARD_HOST': this.wizardHost = value; break;
-    case 'WIZARD_DOMAIN_MODE': this.wizardDomainMode = parseInt(value, 10); break;
-    case 'WIZARD_SSL': this.wizardSSL = value.replace(/;/g, ''); break;
-    case 'WIZARD_SSL_KEY': this.wizardSSLKey = value.replace(/;/g, ''); break;
-    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret'; break;
-    case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
+    case 'SEED_DIR': this.seedDir = Helper.unquote(value); break;
+    case 'GITLAB_EXTERNAL_URL': this.gitlabExternalUrl = Helper.unquote(value); break;
+    case 'GITLAB_REGISTRY_URL': this.gitlabRegistryUrl = Helper.unquote(value); break;
+    case 'GITLAB_HOST': this.gitlabHost = Helper.unquote(value); break;
+    case 'GITLAB_DOMAIN_MODE': this.gitlabDomainMode = parseInt(Helper.unquote(value), 10); break;
+    case 'GITLAB_SSL': this.gitlabSSL = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'GITLAB_SSL_KEY': this.gitlabSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'GITLAB_REGISTRY_HOST': this.gitlabRegistryHost = Helper.unquote(value); break;
+    case 'GITLAB_REGISTRY_DOMAIN_MODE': this.gitlabRegistryDomainMode = parseInt(Helper.unquote(value), 10); break;
+    case 'GITLAB_REGISTRY_SSL': this.gitlabRegistrySSL = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'GITLAB_REGISTRY_SSL_KEY': this.gitlabRegistrySSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'SYNC_ENABLE': this.syncEnable = Helper.unquote(value); break;
+    case 'SYNC_HOST': this.syncHost = Helper.unquote(value); break;
+    case 'SYNC_USER': this.syncUser = Helper.unquote(value); break;
+    case 'SYNC_PASS': this.syncPass = Helper.unquote(value); break;
+    case 'SYNC_DOMAIN_MODE': this.syncDomainMode = parseInt(Helper.unquote(value), 10); break;
+    case 'SYNC_SSL': this.syncSSL = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'SYNC_SSL_KEY': this.syncSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'WIZARD_ENABLE': this.wizardEnable = Helper.unquote(value); break;
+    case 'WIZARD_HOST': this.wizardHost = Helper.unquote(value); break;
+    case 'WIZARD_DOMAIN_MODE': this.wizardDomainMode = parseInt(Helper.unquote(value), 10); break;
+    case 'WIZARD_SSL': this.wizardSSL = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'WIZARD_SSL_KEY': this.wizardSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value) || 'secret'; break;
+    case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(Helper.unquote(value), 10) || 0; break;
     }
   }
 }
