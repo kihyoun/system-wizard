@@ -17,7 +17,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
 
     set projectKey(key:string) {
       runInAction(() => {
-        if (this._main.projects.has(key)) {
+        if (this.main.projects.has(key)) {
           throw 'Key already exists!';
         }
 
@@ -70,7 +70,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
       return this._reviewDomainMode;
     }
     set reviewDomainMode(mode:any) {
-      this._reviewDomainMode = parseInt(mode, 10) || 0;
+      this._reviewDomainMode = parseInt(mode, 10) || 1;
     }
     _reviewDeployMode!:number;
     get reviewDeployMode() {
@@ -85,7 +85,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
     gitlabRunnerToken!:string;
     gitlabRunnerScale!:number;
 
-    _main!: Main;
+    main!: Main;
     saved = false;
     /**
    * Set Config
@@ -95,7 +95,7 @@ export default class ProjectConfig implements ProjectConfigInterface {
       _config: ProjectConfigInterface | undefined = undefined
     ) {
       makeAutoObservable(this);
-      this._main = main;
+      this.main = main;
       this.generateConfig(_config);
     }
 
@@ -120,9 +120,9 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
       this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
       this.prodSSL = _config?.prodSSL.replace(/;/g, '')
-        || `/lilve/${this.prodHost}/fullchain.pem`;
+        || `/ssl/live/${this.prodHost}/fullchain.pem`;
       this.prodSSLKey = _config?.prodSSLKey.replace(/;/g, '')
-        || `/live/${this.prodHost}/privkey.pem`;
+        || `/ssl/live/${this.prodHost}/privkey.pem`;
     });
   }
 
@@ -147,8 +147,8 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
       this.betaDomainMode = _config ? parseInt(_config.betaDomainMode, 10) || 0 : 2;
       this.betaDeployMode = _config ? parseInt(_config.betaDeployMode, 10) || 0 : 1;
-      this.betaSSL = _config?.betaSSL || `/live/${this.betaHost}/fullchain.pem`;
-      this.betaSSLKey = _config?.betaSSLKey || `/live/${this.betaHost}/privkey.pem`;
+      this.betaSSL = _config?.betaSSL || `/ssl/live/${this.betaHost}/fullchain.pem`;
+      this.betaSSLKey = _config?.betaSSLKey || `/ssl/live/${this.betaHost}/privkey.pem`;
     });
   }
 
@@ -173,8 +173,8 @@ export default class ProjectConfig implements ProjectConfigInterface {
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
       this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
       this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
-      this.reviewSSL = _config?.betaSSL || `/live/${this.reviewHost}/fullchain.pem`;
-      this.reviewSSLKey = _config?.betaSSLKey || `/live/${this.reviewHost}/privkey.pem`;
+      this.reviewSSL = _config?.betaSSL || `/ssl/live/${this.reviewHost}/fullchain.pem`;
+      this.reviewSSLKey = _config?.betaSSLKey || `/ssl/live/${this.reviewHost}/privkey.pem`;
     });
   }
 

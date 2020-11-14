@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import {
-  FormControl, FormHelperText, InputLabel, makeStyles, NativeSelect
+  FormControl, FormHelperText, InputAdornment, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
@@ -25,7 +25,8 @@ const useStyles = makeStyles(theme => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color   : theme.palette.text.secondary
-  }
+  },
+  positionStart: { marginRight: 0 }
 }));
 
 const SSLSettingsFields = observer((props: any) => {
@@ -78,6 +79,12 @@ const SSLSettingsFields = observer((props: any) => {
         onChange={(event: any) => {
           runInAction(() => (props.main.config.gitlabSSL = event.target.value));
         }}
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.main.config.seedDir}</InputAdornment>
+        }}
       />
       <TextField
         label="GITLAB_SSL_KEY"
@@ -92,8 +99,13 @@ const SSLSettingsFields = observer((props: any) => {
         onChange={(event: any) => {
           runInAction(() => (props.main.config.gitlabSSLKey = event.target.value));
         }}
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.main.config.seedDir}</InputAdornment>
+        }}
       />
-
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="regdomainmode-native-helper">
               GITLAB_REGISTRY_DOMAIN_MODE
@@ -126,6 +138,12 @@ const SSLSettingsFields = observer((props: any) => {
           runInAction(() => (props.main.config.gitlabRegistrySSL = event.target.value));
         }}
         helperText="Path to Registry SSL Certificate"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.main.config.seedDir}</InputAdornment>
+        }}
       />
       <TextField
         label="GITLAB_REGISTRY_SSL_KEY"
@@ -140,6 +158,12 @@ const SSLSettingsFields = observer((props: any) => {
           runInAction(() => (props.main.config.gitlabRegistrySSLKey = event.target.value));
         }}
         helperText="Path to Registry SSL Key"
+        InputProps={{
+          startAdornment: <InputAdornment
+            classes={{ positionStart: classes.positionStart }}
+            position="start">
+            {props.main.config.seedDir}</InputAdornment>
+        }}
       />
     </>
   );

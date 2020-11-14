@@ -127,11 +127,13 @@ const ProjectFormDialog = observer((props: any) => {
                       <div className={classes.actionsContainer}>
                         <div>
                           <Button
+                            disableElevation
                             disabled={activeStep === 0}
                             onClick={handleStep(index-1)}
                             className={classes.button}
                           >Back</Button>
                           <Button
+                            disableElevation
                             variant="contained"
                             onClick={handleStep(index+1)}
                             color="primary"

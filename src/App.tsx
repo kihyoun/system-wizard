@@ -243,6 +243,7 @@ const App = observer(() => {
 
             <div className={drawerClasses.root}>
               <AppBar
+                elevation={0}
                 position="fixed"
                 className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: open })}
               >
@@ -314,7 +315,7 @@ const App = observer(() => {
                       setLastStatusMessage={(value:string) => setLastStatusMessage(value)}
                       main={activeServer} />}
 
-                    <ButtonGroup variant={'contained'}>
+                    <ButtonGroup variant={'contained'} disableElevation>
                       <Button
                         component="span"
                         color={connected ? 'secondary': 'primary' }
