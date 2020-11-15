@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import {
-  FormControl, FormHelperText, InputAdornment, InputLabel, makeStyles, NativeSelect
+  FormControl, FormHelperText, InputAdornment, InputLabel, Link, makeStyles, NativeSelect
 } from '@material-ui/core';
 import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { duotoneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const useStyles = makeStyles(theme => ({
   formControl: {
@@ -32,6 +34,18 @@ const useStyles = makeStyles(theme => ({
 const SSLSettingsFields = observer((props: any) => {
   const classes = useStyles();
   const [init, setInit] = useState(props.main.init);
+  const entry = { 'insecure-registries': [`${props.main.config.gitlabRegistryUrl}:5050`] };
+  const warning = <div>
+    <b>Attention:</b> You are using an insecure-registry. This is not recommended.
+    <br />(Insecure Registries <Link>https://docs.docker.com/registry/insecure/</Link>)
+    <br />
+    In order to use it, add the following entry to /etc/docker/daemon.json:
+    <SyntaxHighlighter language="json" style={duotoneLight}>
+      {JSON.stringify(entry, null, 2)}
+    </SyntaxHighlighter>
+  </div>;
+  const [insecureRegistryWarning, setInsercureRegistryWarning] =
+    useState(props.main.config.gitlabRegistryDomainMode < 2 ? warning : '');
 
   useEffect(() => {
     if (!props.hidden && init && props.main.init) {
@@ -113,7 +127,14 @@ const SSLSettingsFields = observer((props: any) => {
         <NativeSelect
           value={props.main.config.gitlabRegistryDomainMode}
           onChange={(event: any) => {
-            runInAction(() => (props.main.config.gitlabRegistryDomainMode = event.target.value));
+            runInAction(() => {
+              props.main.config.gitlabRegistryDomainMode = event.target.value;
+              if (event.target.value < 2) {
+                setInsercureRegistryWarning(warning);
+              } else {
+                setInsercureRegistryWarning('')
+              }
+            });
           }}
           inputProps={{
             name: 'regdomainmode',
@@ -123,7 +144,7 @@ const SSLSettingsFields = observer((props: any) => {
           <option value={0}>Default, HTTP</option>
           <option value={2}>SSL encrypted</option>
         </NativeSelect>
-        <FormHelperText>{props.main.config.gitlabRegistryUrl}</FormHelperText>
+        <FormHelperText>{props.main.config.gitlabRegistryUrl}{insecureRegistryWarning}</FormHelperText>
       </FormControl>
       <TextField
         label="GITLAB_REGISTRY_SSL"
