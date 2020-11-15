@@ -201,70 +201,69 @@ export default class ProjectConfig {
   }
    public setProperty(propertyKey: any, value: any){
      switch (propertyKey) {
-     case 'PROJECT_NAME': this.projectKey = value; break;
-     case 'USE_PROD_HOST': this.useProdHost = value; break;
-     case 'PROD_HOST': this.prodHost = value; break;
-     case 'PROD_DOMAIN_MODE': this.prodDomainMode = parseInt(value, 10); break;
-     case 'PROD_SSL': this.prodSSL = value?.replace(/;/g, ''); break;
-     case 'PROD_SSL_KEY': this.prodSSLKey = value?.replace(/;/g, ''); break;
-     case 'USE_BETA_HOST': this.useBetaHost = value; break;
-     case 'BETA_HOST': this.betaHost = value; break;
-     case 'BETA_DOMAIN_MODE': this.betaDomainMode = parseInt(value, 10); break;
-     case 'BETA_SSL': this.betaSSL = value?.replace(/;/g, ''); break;
-     case 'BETA_SSL_KEY': this.betaSSLKey = value?.replace(/;/g, ''); break;
-     case 'USE_REVIEW_HOST': this.useReviewHost = value; break;
-     case 'REVIEW_HOST': this.reviewHost = value; break;
-     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(value, 10); break;
-     case 'REVIEW_SSL': this.reviewSSL = value?.replace(/;/g, ''); break;
-     case 'REVIEW_SSL_KEY': this.reviewSSLKey = value?.replace(/;/g, ''); break;
-     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = value || 'secret-token'; break;
-     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(value, 10) || 0; break;
+     case 'PROJECT_NAME': this.projectKey = Helper.unquote(value); break;
+     case 'USE_PROD_HOST': this.useProdHost = Helper.unquote(value); break;
+     case 'PROD_HOST': this.prodHost = Helper.unquote(value); break;
+     case 'PROD_DOMAIN_MODE': this.prodDomainMode = parseInt(Helper.unquote(value), 10); break;
+     case 'PROD_SSL': this.prodSSL = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'PROD_SSL_KEY': this.prodSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'USE_BETA_HOST': this.useBetaHost = Helper.unquote(value); break;
+     case 'BETA_HOST': this.betaHost = Helper.unquote(value); break;
+     case 'BETA_DOMAIN_MODE': this.betaDomainMode = parseInt(Helper.unquote(value), 10); break;
+     case 'BETA_SSL': this.betaSSL = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'BETA_SSL_KEY': this.betaSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'USE_REVIEW_HOST': this.useReviewHost = Helper.unquote(value); break;
+     case 'REVIEW_HOST': this.reviewHost = Helper.unquote(value); break;
+     case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(Helper.unquote(value), 10); break;
+     case 'REVIEW_SSL': this.reviewSSL = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'REVIEW_SSL_KEY': this.reviewSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
+     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value) || 'secret-token'; break;
+     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(Helper.unquote(value), 10) || 0; break;
      }
    }
-
 
    public get content() : string {
      const ret = Helper.textLogo + `# Filepath: ./.projects.env/.${this.projectKey}.env
 
-USE_PROD_HOST=${this.useProdHost}
+USE_PROD_HOST=${Helper.quote(this.useProdHost)}
 `;
      const prod = `
-PROJECT_NAME=${this.projectKey}
-PROD_HOST=${this.prodHost}
-PROD_DOMAIN_MODE=${this.prodDomainMode}
+PROJECT_NAME=${Helper.quote(this.projectKey)}
+PROD_HOST=${Helper.quote(this.prodHost)}
+PROD_DOMAIN_MODE=${Helper.quote(this.prodDomainMode)}
 `;
      const prodSSL = `
-PROD_SSL=${this.prodSSL}
-PROD_SSL_KEY=${this.prodSSLKey}
+PROD_SSL=${Helper.quote(this.prodSSL)}
+PROD_SSL_KEY=${Helper.quote(this.prodSSLKey)}
 `;
      const betaUse = `
 # Set false if not using a Beta Deployment
-USE_BETA_HOST=${this.useBetaHost}
+USE_BETA_HOST=${Helper.quote(this.useBetaHost)}
 `;
      const beta = `
-BETA_HOST=${this.betaHost}
-BETA_DOMAIN_MODE=${this.betaDomainMode}
+BETA_HOST=${Helper.quote(this.betaHost)}
+BETA_DOMAIN_MODE=${Helper.quote(this.betaDomainMode)}
 `;
      const betaSSL = `
-BETA_SSL=${this.betaSSL}
-BETA_SSL_KEY=${this.betaSSLKey}
+BETA_SSL=${Helper.quote(this.betaSSL)}
+BETA_SSL_KEY=${Helper.quote(this.betaSSLKey)}
 `;
      const reviewUse = `
 # Set false if not using the Review
-USE_REVIEW_HOST=${this.useReviewHost}
+USE_REVIEW_HOST=${Helper.quote(this.useReviewHost)}
 `;
      const reviewHost =`
-REVIEW_HOST=${this.reviewHost}
-REVIEW_DOMAIN_MODE=${this.reviewDomainMode}
+REVIEW_HOST=${Helper.quote(this.reviewHost)}
+REVIEW_DOMAIN_MODE=${Helper.quote(this.reviewDomainMode)}
 `;
      const reviewSSL = `
-REVIEW_SSL=${this.reviewSSL}
-REVIEW_SSL_KEY=${this.reviewSSLKey}
+REVIEW_SSL=${Helper.quote(this.reviewSSL)}
+REVIEW_SSL_KEY=${Helper.quote(this.reviewSSLKey)}
   `;
      const gitlabRunner = `
 # -- GITLAB RUNNER for Project
-GITLAB_RUNNER_TOKEN=${this.gitlabRunnerToken}
-export GITLAB_RUNNER_SCALE=${this.gitlabRunnerScale}
+GITLAB_RUNNER_TOKEN=${Helper.quote(this.gitlabRunnerToken)}
+export GITLAB_RUNNER_SCALE=${Helper.quote(this.gitlabRunnerScale)}
 `;
      const createdOn = `# created on ${new Date()}`;
      return ret
