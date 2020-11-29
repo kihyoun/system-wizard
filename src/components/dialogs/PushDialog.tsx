@@ -10,6 +10,7 @@ export default function PushDialog(props:any) {
   return (
     <React.Fragment>
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'xs'}
         open={props.open}

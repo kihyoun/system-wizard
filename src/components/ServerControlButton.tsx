@@ -159,8 +159,10 @@ export default function ServerControlButton(props:any) {
         Synchronize
       </Button>
       <Menu
+        elevation={1}
         id="simple-menu"
         anchorEl={anchorEl}
+        transitionDuration={0}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
