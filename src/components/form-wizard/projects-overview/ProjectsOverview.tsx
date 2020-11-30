@@ -162,6 +162,7 @@ const ProjectsOverview = observer((props:any) => {
         </Table>
       </TableContainer>
       <Dialog
+        transitionDuration={0}
         open={openDelete}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"

@@ -79,6 +79,7 @@ export default function DownloadReactCiDialog(props:any) {
   return (
     <div>
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'lg'}
         open={open}

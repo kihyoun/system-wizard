@@ -80,6 +80,7 @@ export default function DownloadJsonDialog(props:any) {
   return (
     <div>
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'lg'}
         open={open}

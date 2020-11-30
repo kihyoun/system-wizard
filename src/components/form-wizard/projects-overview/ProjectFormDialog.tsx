@@ -106,6 +106,7 @@ const ProjectFormDialog = observer((props: any) => {
       <Snackbar open={openEditSuccess} autoHideDuration={6000} onClose={() => setOpenEditSuccess(false)}
         message={'Changes successfully saved.'} />
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'lg'}
         open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">

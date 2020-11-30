@@ -24,6 +24,7 @@ export const ConnectServerDialog = observer((props:any) => {
   return (
     <div>
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'xs'}
         open={open}

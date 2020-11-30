@@ -89,6 +89,7 @@ export default function DownloadDockerDialog(props:any) {
   return (
     <div>
       <Dialog
+        transitionDuration={0}
         fullWidth={true}
         maxWidth={'lg'}
         open={open}

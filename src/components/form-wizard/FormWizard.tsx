@@ -205,6 +205,8 @@ const FormWizard = observer((props: any) => {
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
+                transitionDuration={0}
+                elevation={1}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
