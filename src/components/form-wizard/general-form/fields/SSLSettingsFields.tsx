@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 const SSLSettingsFields = observer((props: any) => {
   const classes = useStyles();
   const [init, setInit] = useState(props.main.init);
-  const entry = { 'insecure-registries': [`${props.main.config.gitlabRegistryUrl}:5050`] };
+  const entry = { 'insecure-registries': [`${props.main.config.gitlabRegistryHost}:5050`] };
   const warning = <div>
     <b>Attention:</b> You are using an insecure-registry. This is not recommended.
     <br />(Insecure Registries <Link>https://docs.docker.com/registry/insecure/</Link>)
@@ -122,7 +122,7 @@ const SSLSettingsFields = observer((props: any) => {
       />
       <FormControl className={classes.formControl}>
         <InputLabel htmlFor="regdomainmode-native-helper">
-              GITLAB_REGISTRY_DOMAIN_MODE
+          GITLAB_REGISTRY_DOMAIN_MODE
         </InputLabel>
         <NativeSelect
           value={props.main.config.gitlabRegistryDomainMode}
