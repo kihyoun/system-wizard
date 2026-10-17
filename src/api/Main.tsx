@@ -233,6 +233,9 @@ export default class Main {
           const key = parts[0].split(' ').reverse()[0];
           config.setProperty(key, value);
         });
+        const metadata = data.split('\n').find((line:string) => line.startsWith('# BOOTSTRAPPER_REPOSITORY='));
+        if (metadata) { config.repository = JSON.parse(decodeURIComponent(metadata.substr('# BOOTSTRAPPER_REPOSITORY='.length))); }
+        config.namespaceId = config.repository?.namespaceId || '';
         this.addProject(config);
         this.uploadProgress = false;
       });

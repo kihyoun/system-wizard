@@ -9,6 +9,9 @@ import Main, { HostInfo } from './Main';
  * General Configuration Object
  */
 export default class ProjectConfig {
+    namespaceId = "";
+    repository: any = undefined;
+    bootstrapPending = false;
     _projectKey!:string;
 
     get projectKey() {
@@ -109,7 +112,10 @@ export default class ProjectConfig {
 
   @action generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this._projectKey = _config?.projectKey || 'systembootstrapper';
+      this._projectKey = _config?.projectKey || '';
+      this.namespaceId = _config?.namespaceId || _config?.repository?.namespaceId || '';
+      this.repository = _config?.repository;
+      this.bootstrapPending = _config?.bootstrapPending || false;
     });
   }
 
@@ -173,8 +179,8 @@ export default class ProjectConfig {
       this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
       this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
       this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
-      this.reviewSSL = _config?.betaSSL || `/ssl/live/${this.reviewHost}/fullchain.pem`;
-      this.reviewSSLKey = _config?.betaSSLKey || `/ssl/live/${this.reviewHost}/privkey.pem`;
+      this.reviewSSL = _config?.reviewSSL || `/ssl/live/${this.reviewHost}/fullchain.pem`;
+      this.reviewSSLKey = _config?.reviewSSLKey || `/ssl/live/${this.reviewHost}/privkey.pem`;
     });
   }
 
@@ -201,6 +207,9 @@ export default class ProjectConfig {
   }
    public setProperty(propertyKey: any, value: any){
      switch (propertyKey) {
+     case 'PROD_DEPLOY_MODE': this.prodDeployMode = parseInt(Helper.unquote(value), 10); break;
+     case 'BETA_DEPLOY_MODE': this.betaDeployMode = parseInt(Helper.unquote(value), 10); break;
+     case 'REVIEW_DEPLOY_MODE': this.reviewDeployMode = parseInt(Helper.unquote(value), 10); break;
      case 'PROJECT_NAME': this.projectKey = Helper.unquote(value); break;
      case 'USE_PROD_HOST': this.useProdHost = Helper.unquote(value); break;
      case 'PROD_HOST': this.prodHost = Helper.unquote(value); break;
@@ -223,12 +232,16 @@ export default class ProjectConfig {
    }
 
    public get content() : string {
-     const ret = Helper.textLogo + `# Filepath: ./.projects.env/.${this.projectKey}.env
+     const ret = Helper.textLogo + `# BOOTSTRAPPER_REPOSITORY=${encodeURIComponent(JSON.stringify(this.repository || null))}
+PROJECT_NAME=${Helper.quote(this.projectKey)}
+PROD_DEPLOY_MODE=${Helper.quote(this.prodDeployMode)}
+BETA_DEPLOY_MODE=${Helper.quote(this.betaDeployMode)}
+REVIEW_DEPLOY_MODE=${Helper.quote(this.reviewDeployMode)}
+# Filepath: ./.projects.env/.${this.projectKey}.env
 
 USE_PROD_HOST=${Helper.quote(this.useProdHost)}
 `;
      const prod = `
-PROJECT_NAME=${Helper.quote(this.projectKey)}
 PROD_HOST=${Helper.quote(this.prodHost)}
 PROD_DOMAIN_MODE=${Helper.quote(this.prodDomainMode)}
 `;
@@ -284,6 +297,11 @@ ${this.useProdHost === 'true' ? `# Production: ${this.prodHostInfo.url}` : ''}
 ${this.useBetaHost === 'true' ? `# Beta: ${this.betaHostInfo.url}` : ''}
 ${this.useReviewHost === 'true' ? `# Review Apps: ${this.reviewHostInfo.url}` : ''}
 # Filepath: ./gitlab-ci.yml
+workflow:
+  rules:
+    - exists:
+        - Dockerfile
+    - when: never
 image: docker:latest
 services:
   - docker:dind
@@ -308,9 +326,9 @@ build:
   script:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
-  only:
-    - merge_requests
-    - master
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 test:cypress:
   stage: test
   services:
@@ -330,30 +348,28 @@ test:cypress:
       - cypress/videos/**/*.mp4
       - cypress/screenshots/**/*.png
     expire_in: 1 day
-  only:
-    - merge_requests
-    - master
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     `;
 
      const review =`
 test:review:
   stage: test
   environment:
-    name: review/$CI_BUILD_REF_NAME
-    url: http://$CI_BUILD_REF_SLUG.${this.reviewHost}
+    name: review/$CI_COMMIT_REF_NAME
+    url: ${this.reviewDomainMode < 2 ? 'http' : 'https'}://$CI_COMMIT_REF_SLUG.${this.reviewHost}
     on_stop: stop:review
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - set +e
-    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
-    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker stop $CI_COMMIT_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_COMMIT_REF_SLUG.${this.reviewHost}
     - set -e
   script:
     - docker run -itd --network `
-    + `${this.projectKey}_review -e VIRTUAL_HOST=$CI_BUILD_REF_SLUG.${this.reviewHost} `
-    + `--name $CI_BUILD_REF_SLUG.${this.reviewHost} $IMAGE_TAG
-  except:
-    - master
+    + `${this.projectKey}_review -e VIRTUAL_HOST=$CI_COMMIT_REF_SLUG.${this.reviewHost} `
+    + `--name $CI_COMMIT_REF_SLUG.${this.reviewHost} $IMAGE_TAG
   only:
     - merge_requests
   ${this.reviewDeployMode === 0 && 'when: manual' || ''}
@@ -361,10 +377,10 @@ stop:review:
   stage: deploy
   allow_failure: true
   script:
-    - docker stop $CI_BUILD_REF_SLUG.${this.reviewHost}
-    - docker rm $CI_BUILD_REF_SLUG.${this.reviewHost}
+    - docker stop $CI_COMMIT_REF_SLUG.${this.reviewHost}
+    - docker rm $CI_COMMIT_REF_SLUG.${this.reviewHost}
   environment:
-    name: review/$CI_BUILD_REF_NAME
+    name: review/$CI_COMMIT_REF_NAME
     action: stop
   when: manual
   only:
@@ -388,8 +404,8 @@ deploy:beta:
     - docker run -itd --network ${this.projectKey}_beta `
     + `-e VIRTUAL_HOST=${this.betaHost} `
     + `--name ${this.betaHost} $IMAGE_TAG
-  only:
-    - master
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   ${this.betaDeployMode === 0 && 'when: manual' || ''}
 `;
      const prod = `
@@ -408,8 +424,8 @@ deploy:prod:
     - docker run -itd --network ${this.projectKey}_prod `
       + `-e VIRTUAL_HOST=${this.prodHost} `
       + `--name ${this.prodHost} $IMAGE_TAG
-  only:
-    - master
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   ${this.prodDeployMode === 0 && 'when: manual' || ''}
 `;
      return ret
@@ -425,65 +441,16 @@ deploy:prod:
    }
 
   @computed public get asJson() : any {
-     let ret = {
-       projectKey : this.projectKey,
-       useProdHost: this.useProdHost
-     };
-
-     if (this.useProdHost === 'true' ) {
-       ret = Object.assign(ret, {
-         prodHost      : this.prodHost,
-         prodDomainMode: this.prodDomainMode,
-         prodDeployMode: this.prodDeployMode
-       });
-
-       if (this.prodDomainMode > 1) {
-         ret = Object.assign(ret, {
-           prodSSL   : this.prodSSL,
-           prodSSLKey: this.prodSSLKey
-         });
-       }
-     }
-
-     ret = Object.assign(ret, { useBetaHost: this.useBetaHost });
-
-     if (this.useBetaHost === 'true') {
-       ret = Object.assign(ret, {
-         betaHost      : this.betaHost,
-         betaDomainMode: this.betaDomainMode,
-         betaDeployMode: this.betaDeployMode
-       });
-
-       if (this.betaDomainMode > 1) {
-         ret = Object.assign(ret, {
-           betaSSL   : this.betaSSL,
-           betaSSLKey: this.betaSSLKey
-         });
-       }
-     }
-
-     ret = Object.assign(ret, { useReviewHost: this.useReviewHost });
-
-     if (this.useReviewHost === 'true') {
-       ret = Object.assign(ret, {
-         reviewHost      : this.reviewHost,
-         reviewDomainMode: this.reviewDomainMode,
-         reviewDeployMode: this.reviewDeployMode
-       });
-
-       if (this.reviewDomainMode > 1) {
-         ret = Object.assign(ret, {
-           reviewSSL   : this.reviewSSL,
-           reviewSSLKey: this.reviewSSLKey
-         });
-       }
-     }
-
-     const config = Object.assign(ret, {
-       gitlabRunnerToken: this.gitlabRunnerToken,
-       gitlabRunnerScale: this.gitlabRunnerScale
-     });
-
-     return config;
-   }
+    return {
+      projectKey: this.projectKey, namespaceId: this.namespaceId, repository: this.repository,
+      bootstrapPending: this.bootstrapPending,
+      useProdHost: this.useProdHost, prodHost: this.prodHost, prodDomainMode: this.prodDomainMode,
+      prodDeployMode: this.prodDeployMode, prodSSL: this.prodSSL, prodSSLKey: this.prodSSLKey,
+      useBetaHost: this.useBetaHost, betaHost: this.betaHost, betaDomainMode: this.betaDomainMode,
+      betaDeployMode: this.betaDeployMode, betaSSL: this.betaSSL, betaSSLKey: this.betaSSLKey,
+      useReviewHost: this.useReviewHost, reviewHost: this.reviewHost, reviewDomainMode: this.reviewDomainMode,
+      reviewDeployMode: this.reviewDeployMode, reviewSSL: this.reviewSSL, reviewSSLKey: this.reviewSSLKey,
+      gitlabRunnerToken: this.gitlabRunnerToken, gitlabRunnerScale: this.gitlabRunnerScale
+    };
+  }
 }

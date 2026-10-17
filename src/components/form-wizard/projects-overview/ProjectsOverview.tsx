@@ -142,6 +142,11 @@ const ProjectsOverview = observer((props:any) => {
                 <TableRow>
                   <TableCell colSpan={5}>
                     <Collapse in={cellOpen === projectConfig.projectKey} timeout="auto" unmountOnExit>
+                      {projectConfig.repository && <p>
+                        <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">Repository</a>{' · '}
+                        <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Pipelines</a>{' · '}
+                        Repository ready — deployment awaits application source and a successful pipeline.
+                      </p>}
                       <Grid container spacing={3}>
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
                           handleChange={(checked:boolean) => runInAction(() =>
