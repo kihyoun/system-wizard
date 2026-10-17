@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
+import DerivedLabel from '../../../DerivedLabel';
 
 const StartFields = observer((props: any) => {
   const [init, setInit] = useState(props.main.init);
@@ -39,7 +40,7 @@ const StartFields = observer((props: any) => {
   return (
     <>
       <TextField
-        label="SEED_DIR"
+        label={<DerivedLabel label="SEED_DIR" source={props.main.derivedFields.seedDir} />}
         value={props.main.config.seedDir}
         style={{ margin: 8 }}
         helperText="Location for persistent Data, will be synced with rsync"
@@ -51,27 +52,33 @@ const StartFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="GITLAB_HOST"
+        label={<DerivedLabel label="GITLAB_HOST" source={props.main.derivedFields.gitlabHost} />}
         value={props.main.config.gitlabHost}
         style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabHost}
+        placeholder={Object.keys(props.main.derivedFields).length ? '' : props.main.placeholder.gitlabHost}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (props.main.config.gitlabHost = event.target.value));
+          runInAction(() => {
+            props.main.config.gitlabHost = event.target.value;
+            props.main.config.gitlabDomainMode = props.main.config.gitlabDomainMode;
+          });
         }}
       />
       <TextField
-        label="GITLAB_REGISTRY_HOST"
+        label={<DerivedLabel label="GITLAB_REGISTRY_HOST" source={props.main.derivedFields.gitlabRegistryHost} />}
         value={props.main.config.gitlabRegistryHost}
         style={{ margin: 8 }}
-        placeholder={props.main.placeholder.gitlabRegistryHost}
+        placeholder={Object.keys(props.main.derivedFields).length ? '' : props.main.placeholder.gitlabRegistryHost}
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
         onChange={event => {
-          runInAction(() => (props.main.config.gitlabRegistryHost = event.target.value));
+          runInAction(() => {
+            props.main.config.gitlabRegistryHost = event.target.value;
+            props.main.config.gitlabRegistryDomainMode = props.main.config.gitlabRegistryDomainMode;
+          });
         }}
       />
       <TextField

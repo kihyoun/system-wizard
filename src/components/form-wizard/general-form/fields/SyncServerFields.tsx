@@ -6,6 +6,7 @@ import {
   FormControl, FormControlLabel, FormHelperText, InputAdornment, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
+import DerivedLabel from '../../../DerivedLabel';
 const useStyles = makeStyles(theme => ({
   formControl: {
     margin  : theme.spacing(1),
@@ -48,7 +49,7 @@ const SyncServerFields = observer((props: any) => {
         disabled={props.main.config.syncEnable === 'false'}
       >
         <InputLabel htmlFor="syncdomainmode-native-helper">
-              SYNC_DOMAIN_MODE
+          <DerivedLabel label="SYNC_DOMAIN_MODE" source={props.main.derivedFields.syncDomainMode} />
         </InputLabel>
         <NativeSelect
           value={props.main.config.syncDomainMode}
@@ -68,7 +69,7 @@ const SyncServerFields = observer((props: any) => {
         <FormHelperText>{props.main.config.syncHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
-        label="SYNC_HOST"
+        label={<DerivedLabel label="SYNC_HOST" source={props.main.derivedFields.syncHost} />}
         disabled={props.main.config.syncEnable === 'false'}
         value={props.main.config.syncHost}
         style={{ margin: 8 }}
@@ -104,7 +105,7 @@ const SyncServerFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="SYNC_SSL"
+        label={<DerivedLabel label="SYNC_SSL" source={props.main.derivedFields.syncSSL} />}
         disabled={props.main.config.syncEnable === 'false' || props.main.config.syncDomainMode < 2}
         value={props.main.config.syncSSL}
         style={{ margin: 8 }}
@@ -123,7 +124,7 @@ const SyncServerFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="SYNC_SSL_KEY"
+        label={<DerivedLabel label="SYNC_SSL_KEY" source={props.main.derivedFields.syncSSLKey} />}
         disabled={props.main.config.syncEnable === 'false' || props.main.config.syncDomainMode < 2}
         value={props.main.config.syncSSLKey}
         style={{ margin: 8 }}
