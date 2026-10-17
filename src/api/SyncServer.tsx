@@ -70,7 +70,7 @@ export default class SyncServer {
 
   async createProject(project:ProjectConfig) {
     const result = await this.projectRequest('/projects', {
-      projectKey: project.projectKey, namespaceId: project.namespaceId,
+      projectKey: project.projectKey, namespaceId: project.namespaceId, template: project.template,
       data: project.content, ci: project.gitlabCi
     });
     runInAction(() => { project.repository = result.repository; project.bootstrapPending = false; });
@@ -120,6 +120,7 @@ export default class SyncServer {
                 project.repository = fileinfo.repository || project.repository;
                 project.namespaceId = project.repository?.namespaceId || fileinfo.namespaceId || '';
                 project.bootstrapPending = fileinfo.bootstrapPending || false;
+                project.template = fileinfo.template || project.repository?.template || project.template;
               }
             }
           } catch (err) {

@@ -176,9 +176,10 @@ const ProjectFormDialog = observer((props: any) => {
             Configure an application&apos;s Production, Beta and Review App environments.
             NGINX proxies route requests to the application containers.
             Save creates a private GitLab repository and installs the generated CI configuration.
-            Deployment starts after you add application source with a Dockerfile.
+            React, Angular and general web templates include source and Dockerfile; Save starts their first pipeline.
+            Empty repositories wait for your application source.
           </DialogContentText>
-          {busy && <p role="status">Creating repository, installing CI and configuring routing… You can continue when setup completes.</p>}
+          {busy && <p role="status">Creating application, installing CI, configuring routing and starting the pipeline… You can continue when setup completes.</p>}
           <fieldset disabled={busy} style={{ border: 0 }}><Grid container>
             <Grid item xs={3}>
               <Stepper activeStep={activeStep} nonLinear orientation="vertical">

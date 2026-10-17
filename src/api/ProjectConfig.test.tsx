@@ -37,3 +37,18 @@ test('legacy keys remain importable without renaming', () => {
   main.importProjectEnvData(project.content);
   expect(main.projects.has('old-project')).toBe(true);
 });
+
+test('application template and canonical generated CI survive Fetch and JSON', () => {
+  const main = new Main();
+  const ci = 'canonical template CI';
+  const project = new ProjectConfig(main, {projectKey:'reactapp', template:'react', repository:{template:'react', generatedCi:ci}});
+  main.importProjectEnvData(project.content);
+  const imported = main.projects.get('reactapp')!;
+  expect(imported.template).toBe('react');
+  expect(imported.gitlabCi).toBe(ci);
+  const stable = (value:string) => value.split('\n').filter(line => !line.startsWith('# created on ')).join('\n');
+  expect(stable(imported.content)).toBe(stable(project.content));
+  const copy = new ProjectConfig(main, JSON.parse(JSON.stringify(imported.asJson)));
+  expect(copy.template).toBe('react');
+  expect(copy.gitlabCi).toBe(ci);
+});

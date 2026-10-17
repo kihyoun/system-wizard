@@ -9,6 +9,7 @@ import Main, { HostInfo } from './Main';
  * General Configuration Object
  */
 export default class ProjectConfig {
+    template = 'react';
     namespaceId = "";
     repository: any = undefined;
     bootstrapPending = false;
@@ -115,6 +116,7 @@ export default class ProjectConfig {
       this._projectKey = _config?.projectKey || '';
       this.namespaceId = _config?.namespaceId || _config?.repository?.namespaceId || '';
       this.repository = _config?.repository;
+      this.template = _config ? (_config.template || _config.repository?.template || 'empty') : 'react';
       this.bootstrapPending = _config?.bootstrapPending || false;
     });
   }
@@ -210,6 +212,7 @@ export default class ProjectConfig {
      case 'PROD_DEPLOY_MODE': this.prodDeployMode = parseInt(Helper.unquote(value), 10); break;
      case 'BETA_DEPLOY_MODE': this.betaDeployMode = parseInt(Helper.unquote(value), 10); break;
      case 'REVIEW_DEPLOY_MODE': this.reviewDeployMode = parseInt(Helper.unquote(value), 10); break;
+     case 'PROJECT_TEMPLATE': this.template = Helper.unquote(value); break;
      case 'PROJECT_NAME': this.projectKey = Helper.unquote(value); break;
      case 'USE_PROD_HOST': this.useProdHost = Helper.unquote(value); break;
      case 'PROD_HOST': this.prodHost = Helper.unquote(value); break;
@@ -234,6 +237,7 @@ export default class ProjectConfig {
    public get content() : string {
      const ret = Helper.textLogo + `# BOOTSTRAPPER_REPOSITORY=${encodeURIComponent(JSON.stringify(this.repository || null))}
 PROJECT_NAME=${Helper.quote(this.projectKey)}
+PROJECT_TEMPLATE=${Helper.quote(this.template)}
 PROD_DEPLOY_MODE=${Helper.quote(this.prodDeployMode)}
 BETA_DEPLOY_MODE=${Helper.quote(this.betaDeployMode)}
 REVIEW_DEPLOY_MODE=${Helper.quote(this.reviewDeployMode)}
@@ -291,6 +295,7 @@ export GITLAB_RUNNER_SCALE=${Helper.quote(this.gitlabRunnerScale)}
    }
 
    public get gitlabCi() : string {
+     if (this.template !== 'empty' && this.repository?.generatedCi) return this.repository.generatedCi;
      const ret = Helper.textLogo + `# Gitlab CI Definition
 # ProjectID: ${this.projectKey}
 ${this.useProdHost === 'true' ? `# Production: ${this.prodHostInfo.url}` : ''}
@@ -442,7 +447,7 @@ deploy:prod:
 
   @computed public get asJson() : any {
     return {
-      projectKey: this.projectKey, namespaceId: this.namespaceId, repository: this.repository,
+      template: this.template, projectKey: this.projectKey, namespaceId: this.namespaceId, repository: this.repository,
       bootstrapPending: this.bootstrapPending,
       useProdHost: this.useProdHost, prodHost: this.prodHost, prodDomainMode: this.prodDomainMode,
       prodDeployMode: this.prodDeployMode, prodSSL: this.prodSSL, prodSSLKey: this.prodSSLKey,

@@ -217,6 +217,12 @@ export default class Main {
       }
 
       const config = new ProjectConfig(this);
+      config.template = 'empty';
+      // Legacy ENV omits disabled domain modes. Do not invent HTTPS fields
+      // during Fetch: pending Save must round-trip to the same configuration.
+      config.prodDomainMode = 0;
+      config.betaDomainMode = 0;
+      config.reviewDomainMode = 1;
       runInAction(() => {
         this.uploadProgress = true;
         this.init = false;
@@ -233,6 +239,13 @@ export default class Main {
           const key = parts[0].split(' ').reverse()[0];
           config.setProperty(key, value);
         });
+        for (const context of ['prod', 'beta', 'review']) {
+          const upper = context.toUpperCase();
+          if (!new RegExp('^' + upper + '_DOMAIN_MODE=', 'm').test(data)
+            && new RegExp('^' + upper + '_SSL=', 'm').test(data)) {
+            (config as any)[context + 'DomainMode'] = 2;
+          }
+        }
         const metadata = data.split('\n').find((line:string) => line.startsWith('# BOOTSTRAPPER_REPOSITORY='));
         if (metadata) { config.repository = JSON.parse(decodeURIComponent(metadata.substr('# BOOTSTRAPPER_REPOSITORY='.length))); }
         config.namespaceId = config.repository?.namespaceId || '';
