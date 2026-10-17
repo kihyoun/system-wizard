@@ -6,6 +6,14 @@ Write and maintain all project documentation in English, including READMEs,
 handbooks, operating guides and generated starter documentation. The maintainer
 confirmed this preference on 2026-10-17. Conversation may remain in German.
 
+Track new requirements and future expansions in GitHub issues; documentation
+should describe current behavior and link to the issue.
+Create an issue before starting new implementation, then link implementing pull
+requests to it. Current registration: https://github.com/kihyoun/system/issues/19.
+The automatically registered Wizard project represents the existing system interface. Source
+import, Review/Beta and rollout are a later delivery tracked in
+https://github.com/kihyoun/system/issues/18.
+
 ## Immutable System Cube signature
 
 The ASCII System Cube is the maintainer's personal signature and a fixed part

@@ -47,6 +47,7 @@ const ProjectCard = observer((props: any) => {
             <FormControlLabel
               control={
                 <Switch
+                  disabled={props.systemProject}
                   checked={props.hostInfo.useHost === 'true'}
                   onChange={ev => props.handleChange(ev.target.checked)}
                   name="prodCfg"
@@ -65,7 +66,7 @@ const ProjectCard = observer((props: any) => {
             </ListItem>
             <ListItem>
               <ListItemText primary="Deployment"
-                secondary={props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
+                secondary={props.systemProject ? 'Managed by Bootstrapper' : props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
             </ListItem>
             <ListItem>
               <ListItemText primary="Internal Port"

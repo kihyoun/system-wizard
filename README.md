@@ -91,8 +91,24 @@ for error recovery and deployment details. Ordinary edits to an existing
 project's environments retain the configuration/Push workflow; they do not
 rename its repository or rewrite committed CI automatically.
 
-Importing System Wizard itself into the platform's GitLab remains an optional,
-separate workflow. Creating a user application does not import the Wizard.
+### The default Wizard project
+
+With the matching System update, configured startup automatically registers
+**wizard** as the first project. Fetch after setup completes to load it. Its
+Production URL is the real system-interface address from General; the existing
+Wizard keeps running at that address. The entry is managed under General, so
+project edit/delete controls and environment switches are disabled.
+
+The private `root/wizard` repository currently contains a README/CI registration
+scaffold. It does not import Wizard source, start a pipeline or replace the UI.
+Beta and Review remain disabled. Registration is idempotent and survives
+Fetch, Backup/Open, Push and restart. Conflicting local keys or foreign
+repositories are reported without overwriting them.
+
+This delivery is tracked in [the registration issue](https://github.com/kihyoun/system/issues/19).
+Source import, development using the local GitLab, Review/Beta and a controlled
+Production rollout are tracked as the
+[next expansion](https://github.com/kihyoun/system/issues/18).
 
 ## Local development
 

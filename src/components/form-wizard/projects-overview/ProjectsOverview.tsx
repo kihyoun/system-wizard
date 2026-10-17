@@ -90,13 +90,14 @@ const ProjectsOverview = observer((props:any) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {[...props.main.projects.values()].map( (projectConfig:ProjectConfig) => (
+            {[...props.main.projects.values()].sort((a:ProjectConfig, b:ProjectConfig) => Number(!!b.repository?.systemProject) - Number(!!a.repository?.systemProject)).map( (projectConfig:ProjectConfig) => (
               <React.Fragment key={projectConfig.projectKey}>
                 <TableRow
                   className={rowClasses.root}
                   onClick={() => setCellOpen(cellOpen !== projectConfig.projectKey ? projectConfig.projectKey : '')}>
                   <TableCell component="th" scope="row" >
                     {projectConfig.projectKey}
+                    {projectConfig.repository?.systemProject && ' · System interface'}
                   </TableCell>
                   <TableCell>{projectConfig.useProdHost === 'true' && projectConfig.prodHostInfo.url || '-'}</TableCell>
                   <TableCell>{projectConfig.useBetaHost === 'true' && projectConfig.betaHostInfo.url || '-'}</TableCell>
@@ -106,6 +107,7 @@ const ProjectsOverview = observer((props:any) => {
                     <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
 
                       <IconButton aria-label="edit"
+                        disabled={!!projectConfig.repository?.systemProject}
                         onClick={event => {
                           setActiveProject(projectConfig.projectKey);
                           setOpen(true);
@@ -115,6 +117,7 @@ const ProjectsOverview = observer((props:any) => {
                         <EditIcon />
                       </IconButton>
                       <IconButton aria-label="delete"
+                        disabled={!!projectConfig.repository?.systemProject}
                         onClick={event => {
                           setActiveProject(projectConfig.projectKey);
                           setOpenDelete(true);
@@ -145,20 +148,28 @@ const ProjectsOverview = observer((props:any) => {
                       {projectConfig.repository && <p>
                         <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">Repository</a>{' · '}
                         <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Pipelines</a>{' · '}
-                        {projectConfig.repository.deploymentState === 'awaiting-source'
+                        {projectConfig.repository.systemProject
+                          ? 'Existing Wizard interface — configured under General. Source import, review and rollout are the next expansion.'
+                          : projectConfig.repository.deploymentState === 'awaiting-source'
                           ? 'Repository ready — deployment awaits application source.'
                           : <a href={projectConfig.repository.initialPipeline?.webUrl || projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Application generated — check build and deployment status</a>}
                       </p>}
                       <Grid container spacing={3}>
+                        {projectConfig.repository?.systemProject && <Grid item xs={12}>
+                          <p>Production points to the running system interface. Beta and Review are not enabled. This repository currently contains a registration scaffold; it does not update the interface.</p>
+                        </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
-                          handleChange={(checked:boolean) => runInAction(() =>
-                            projectConfig.useProdHost = checked.toString())} />
+                          systemProject={!!projectConfig.repository?.systemProject}
+                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
+                            projectConfig.useProdHost = checked.toString()); }} />
                         <ProjectCard hostInfo={projectConfig.betaHostInfo}
-                          handleChange={(checked:boolean) => runInAction(() =>
-                            projectConfig.useBetaHost = checked.toString())} />
+                          systemProject={!!projectConfig.repository?.systemProject}
+                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
+                            projectConfig.useBetaHost = checked.toString()); }} />
                         <ProjectCard hostInfo={projectConfig.reviewHostInfo}
-                          handleChange={(checked:boolean) => runInAction(() =>
-                            projectConfig.useReviewHost = checked.toString())} />
+                          systemProject={!!projectConfig.repository?.systemProject}
+                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
+                            projectConfig.useReviewHost = checked.toString()); }} />
                       </Grid>
                     </Collapse>
                   </TableCell>
