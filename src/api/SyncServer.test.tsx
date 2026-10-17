@@ -29,11 +29,16 @@ test('a saved configuration wins and is not marked as derived', async () => {
 test('missing config loads marked suggestions without generating credentials', async () => {
   const main = connected();
   get.mockRejectedValueOnce({ response: { status: 404 } });
-  get.mockResolvedValueOnce({ data: {
-    source: 'derived',
-    config: { gitlabHost: 'gitlab.localhost', gitlabDomainMode: 0 },
-    fields: { gitlabHost: 'Connection hostname' }
-  } });
+  get.mockResolvedValueOnce({
+    data: {
+      source: 'derived',
+      config: {
+        gitlabHost      : 'gitlab.localhost',
+        gitlabDomainMode: 0
+      },
+      fields: { gitlabHost: 'Connection hostname' }
+    }
+  });
   await main.sync.fetch();
   expect(main.config!.gitlabHost).toBe('gitlab.localhost');
   expect(main.config!.gitlabExternalUrl).toBe('http://gitlab.localhost');

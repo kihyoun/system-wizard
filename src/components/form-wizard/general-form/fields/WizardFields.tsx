@@ -48,7 +48,9 @@ const WizardFields = observer((props: any) => {
       <FormControl className={classes.formControl}
         disabled={props.main.config.wizardEnable === 'false'}
       >
-        <InputLabel htmlFor="wizarddomainmode-native-helper"><DerivedLabel label="WIZARD_DOMAIN_MODE" source={props.main.derivedFields.wizardDomainMode} /></InputLabel>
+        <InputLabel htmlFor="wizarddomainmode-native-helper">
+          <DerivedLabel label="WIZARD_DOMAIN_MODE" source={props.main.derivedFields.wizardDomainMode} />
+        </InputLabel>
         <NativeSelect
           value={props.main.config.wizardDomainMode}
           onChange={(event: any) => {

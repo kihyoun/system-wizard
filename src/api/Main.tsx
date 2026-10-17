@@ -59,7 +59,8 @@ export default class Main {
       config.gitlabExternalUrl = values.gitlabExternalUrl ||
         (config.gitlabHost ? `${config.gitlabDomainMode > 1 ? 'https' : 'http'}://${config.gitlabHost}` : '');
       config.gitlabRegistryUrl = values.gitlabRegistryUrl ||
-        (config.gitlabRegistryHost ? `${config.gitlabRegistryDomainMode > 1 ? 'https' : 'http'}://${config.gitlabRegistryHost}` : '');
+        (config.gitlabRegistryHost
+          ? `${config.gitlabRegistryDomainMode > 1 ? 'https' : 'http'}://${config.gitlabRegistryHost}` : '');
       config.gitlabRunnerScale = 0;
       config.gitlabRunnerToken = '';
       config.syncEnable = 'true';
@@ -118,8 +119,8 @@ export default class Main {
       this._projects.forEach(config => proxies.push(config.asJson));
 
       return {
-        main   : this._config.asJson,
-        proxies: proxies,
+        main         : this._config.asJson,
+        proxies      : proxies,
         derivedFields: this.derivedFields
       }
     }

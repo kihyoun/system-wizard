@@ -160,7 +160,8 @@ const FormWizard = observer((props: any) => {
           <Paper className={classes.paper} elevation={0}>
             {Object.keys(main.derivedFields).length > 0 && (
               <Typography role="status" color="textSecondary">
-                * {derivedWarning} Unavailable values are left blank; credentials and runner settings must be supplied manually.
+                * {derivedWarning} Unavailable values are left blank;
+                credentials and runner settings must be supplied manually.
               </Typography>
             )}
             <Toolbar>

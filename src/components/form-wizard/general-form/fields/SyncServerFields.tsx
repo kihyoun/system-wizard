@@ -48,7 +48,9 @@ const SyncServerFields = observer((props: any) => {
       <FormControl className={classes.formControl}
         disabled={props.main.config.syncEnable === 'false'}
       >
-        <InputLabel htmlFor="syncdomainmode-native-helper"><DerivedLabel label="SYNC_DOMAIN_MODE" source={props.main.derivedFields.syncDomainMode} /></InputLabel>
+        <InputLabel htmlFor="syncdomainmode-native-helper">
+          <DerivedLabel label="SYNC_DOMAIN_MODE" source={props.main.derivedFields.syncDomainMode} />
+        </InputLabel>
         <NativeSelect
           value={props.main.config.syncDomainMode}
           onChange={(event: any) => {

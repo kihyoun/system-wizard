@@ -65,7 +65,9 @@ const SSLSettingsFields = observer((props: any) => {
   return (
     <>
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="domainmode-native-helper"><DerivedLabel label="GITLAB_DOMAIN_MODE" source={props.main.derivedFields.gitlabDomainMode} /></InputLabel>
+        <InputLabel htmlFor="domainmode-native-helper">
+          <DerivedLabel label="GITLAB_DOMAIN_MODE" source={props.main.derivedFields.gitlabDomainMode} />
+        </InputLabel>
         <NativeSelect
           value={props.main.config.gitlabDomainMode}
           onChange={(event: any) => {
@@ -122,7 +124,10 @@ const SSLSettingsFields = observer((props: any) => {
         }}
       />
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="regdomainmode-native-helper"><DerivedLabel label="GITLAB_REGISTRY_DOMAIN_MODE" source={props.main.derivedFields.gitlabRegistryDomainMode} /></InputLabel>
+        <InputLabel htmlFor="regdomainmode-native-helper">
+          <DerivedLabel label="GITLAB_REGISTRY_DOMAIN_MODE"
+            source={props.main.derivedFields.gitlabRegistryDomainMode} />
+        </InputLabel>
         <NativeSelect
           value={props.main.config.gitlabRegistryDomainMode}
           onChange={(event: any) => {
