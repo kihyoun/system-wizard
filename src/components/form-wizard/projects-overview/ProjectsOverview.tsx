@@ -145,7 +145,9 @@ const ProjectsOverview = observer((props:any) => {
                       {projectConfig.repository && <p>
                         <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">Repository</a>{' · '}
                         <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Pipelines</a>{' · '}
-                        Repository ready — deployment awaits application source and a successful pipeline.
+                        {projectConfig.repository.deploymentState === 'awaiting-source'
+                          ? 'Repository ready — deployment awaits application source.'
+                          : <a href={projectConfig.repository.initialPipeline?.webUrl || projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Application generated — check build and deployment status</a>}
                       </p>}
                       <Grid container spacing={3}>
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}

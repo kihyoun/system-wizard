@@ -17,6 +17,15 @@ const MainFields = observer((props: any) => {
       {props.namespaces.map((namespace:any) => <option key={namespace.id} value={namespace.id}>{namespace.path}</option>)}
     </TextField>
     <p>{props.destination}</p>
+    <TextField select label="Application template" fullWidth margin="normal" value={props.config.template}
+      disabled={props.editing} SelectProps={{ native: true }}
+      helperText="Creates editable source, Dockerfile and matching CI. The first pipeline starts automatically."
+      onChange={event => { const value = event.target.value; runInAction(() => { props.config.template = value; }); }}>
+      <option value="react">React + TypeScript + Vite</option>
+      <option value="angular">Angular + TypeScript</option>
+      <option value="web">General web project — HTML, CSS, JavaScript</option>
+      <option value="empty">Empty repository — add your own source later</option>
+    </TextField>
   </>;
 });
 export default MainFields;

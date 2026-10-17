@@ -21,7 +21,19 @@ are pushed automatically. Reading a saved configuration clears the derived
 markers; a local JSON backup preserves them until the user loads saved settings.
 
 This change does not alter the existing Seed/Harvest workflow or deployment
-pipeline. Follow-up: add a repository-specific `AGENTS.md` for code conventions.
+pipeline. Repository instructions are recorded in `AGENTS.md`.
+
+## Application projects
+
+Connect to Sync, Fetch, then choose **Projects → Add Project**. Select a GitLab
+namespace and enter a nonempty lowercase-alphanumeric key. Save now creates a
+private repository with README and managed CI through the authenticated Sync
+service. Availability checks distinguish occupied destinations from lookup
+failures, and long-running setup reports status without holding one HTTP request.
+The empty-repository workflow waits for application source with a Dockerfile.
+See the [project guide](https://github.com/kihyoun/system/blob/master/docs/PROJECT_BOOTSTRAP_GUIDE.md)
+for retries, Fetch/Backup and deployment behavior. The existing Wizard's Node 13
+toolchain is independent of the toolchains used by newly generated applications.
 
 ## Requirement
 
