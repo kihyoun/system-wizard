@@ -21,7 +21,9 @@ export default function ServerControlButton(props:any) {
   const handleFetch = () => {
     runInAction(() => {
       props.main.sync.fetch().then((res:any) => {
-        const msg = 'Import finished. ' +
+        const msg = (Object.keys(props.main.derivedFields).length > 0
+          ? 'Derived suggestions loaded. Please verify all settings before pushing. '
+          : 'Import finished. ') +
           (res > 0 ? `(Skipped ${res} File(s)` : '');
         props.setOpenSuccess(msg);
         props.setLastStatusMessage(msg);

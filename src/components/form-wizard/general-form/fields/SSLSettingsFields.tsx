@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DerivedLabel from '../../../DerivedLabel';
 import TextField from '@material-ui/core/TextField';
 import {
   FormControl, FormHelperText, InputAdornment, InputLabel, Link, makeStyles, NativeSelect
@@ -64,7 +65,7 @@ const SSLSettingsFields = observer((props: any) => {
   return (
     <>
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="domainmode-native-helper">GITLAB_DOMAIN_MODE</InputLabel>
+        <InputLabel htmlFor="domainmode-native-helper"><DerivedLabel label="GITLAB_DOMAIN_MODE" source={props.main.derivedFields.gitlabDomainMode} /></InputLabel>
         <NativeSelect
           value={props.main.config.gitlabDomainMode}
           onChange={(event: any) => {
@@ -81,7 +82,7 @@ const SSLSettingsFields = observer((props: any) => {
         <FormHelperText>{props.main.config.gitlabExternalUrl}</FormHelperText>
       </FormControl>
       <TextField
-        label="GITLAB_SSL"
+        label={<DerivedLabel label="GITLAB_SSL" source={props.main.derivedFields.gitlabSSL} />}
         disabled={props.main.config.gitlabDomainMode < 2}
         value={props.main.config.gitlabSSL}
         style={{ margin: 8 }}
@@ -101,7 +102,7 @@ const SSLSettingsFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="GITLAB_SSL_KEY"
+        label={<DerivedLabel label="GITLAB_SSL_KEY" source={props.main.derivedFields.gitlabSSLKey} />}
         disabled={props.main.config.gitlabDomainMode < 2}
         value={props.main.config.gitlabSSLKey}
         style={{ margin: 8 }}
@@ -121,9 +122,7 @@ const SSLSettingsFields = observer((props: any) => {
         }}
       />
       <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="regdomainmode-native-helper">
-          GITLAB_REGISTRY_DOMAIN_MODE
-        </InputLabel>
+        <InputLabel htmlFor="regdomainmode-native-helper"><DerivedLabel label="GITLAB_REGISTRY_DOMAIN_MODE" source={props.main.derivedFields.gitlabRegistryDomainMode} /></InputLabel>
         <NativeSelect
           value={props.main.config.gitlabRegistryDomainMode}
           onChange={(event: any) => {
@@ -147,7 +146,7 @@ const SSLSettingsFields = observer((props: any) => {
         <FormHelperText>{props.main.config.gitlabRegistryUrl}{insecureRegistryWarning}</FormHelperText>
       </FormControl>
       <TextField
-        label="GITLAB_REGISTRY_SSL"
+        label={<DerivedLabel label="GITLAB_REGISTRY_SSL" source={props.main.derivedFields.gitlabRegistrySSL} />}
         value={props.main.config.gitlabRegistrySSL}
         disabled={props.main.config.gitlabRegistryDomainMode < 2}
         style={{ margin: 8 }}
@@ -167,7 +166,7 @@ const SSLSettingsFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="GITLAB_REGISTRY_SSL_KEY"
+        label={<DerivedLabel label="GITLAB_REGISTRY_SSL_KEY" source={props.main.derivedFields.gitlabRegistrySSLKey} />}
         disabled={props.main.config.gitlabRegistryDomainMode < 2}
         value={props.main.config.gitlabRegistrySSLKey}
         style={{ margin: 8 }}

@@ -6,6 +6,7 @@ import {
   FormControl, FormControlLabel, FormHelperText, InputAdornment, InputLabel, makeStyles, NativeSelect
 } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
+import DerivedLabel from '../../../DerivedLabel';
 const useStyles = makeStyles(theme => ({
   formControl: {
     margin  : theme.spacing(1),
@@ -47,9 +48,7 @@ const WizardFields = observer((props: any) => {
       <FormControl className={classes.formControl}
         disabled={props.main.config.wizardEnable === 'false'}
       >
-        <InputLabel htmlFor="wizarddomainmode-native-helper">
-              WIZARD_DOMAIN_MODE
-        </InputLabel>
+        <InputLabel htmlFor="wizarddomainmode-native-helper"><DerivedLabel label="WIZARD_DOMAIN_MODE" source={props.main.derivedFields.wizardDomainMode} /></InputLabel>
         <NativeSelect
           value={props.main.config.wizardDomainMode}
           onChange={(event: any) => {
@@ -68,7 +67,7 @@ const WizardFields = observer((props: any) => {
         <FormHelperText>{props.main.config.wizardHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField
-        label="WIZARD_HOST"
+        label={<DerivedLabel label="WIZARD_HOST" source={props.main.derivedFields.wizardHost} />}
         disabled={props.main.config.wizardEnable === 'false'}
         value={props.main.config.wizardHost}
         style={{ margin: 8 }}
@@ -80,7 +79,7 @@ const WizardFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="WIZARD_SSL"
+        label={<DerivedLabel label="WIZARD_SSL" source={props.main.derivedFields.wizardSSL} />}
         disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2}
         value={props.main.config.wizardSSL}
         style={{ margin: 8 }}
@@ -99,7 +98,7 @@ const WizardFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="WIZARD_SSL_KEY"
+        label={<DerivedLabel label="WIZARD_SSL_KEY" source={props.main.derivedFields.wizardSSLKey} />}
         disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2}
         value={props.main.config.wizardSSLKey}
         style={{ margin: 8 }}

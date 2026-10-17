@@ -72,7 +72,15 @@ export default class SyncServer {
     return new Promise(async (resolve, reject) => {
       try {
         await this.token();
-        const res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
+        let res;
+        try {
+          res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
+        } catch (error) {
+          if (error.response?.status !== 404) { throw error; }
+          const suggestions = await axios.get(this.serverAddress + '/config/suggestions', this.getHeaders());
+          this.main.applySuggestions(suggestions.data);
+          return resolve(0);
+        }
         this.main.importEnvData(res.data.data);
         const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
         let skipCount = 0;

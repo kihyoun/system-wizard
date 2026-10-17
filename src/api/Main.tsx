@@ -23,6 +23,7 @@ export default class Main {
     @observable private _syncServer!: SyncServer;
     init = true;
     uploadProgress = false;
+    derivedFields: { [key: string]: string } = {};
     id = uuidv4();
 
     /**
@@ -40,9 +41,45 @@ export default class Main {
     }
 
     @action public generateConfig(_config: any | undefined): void {
+      this.derivedFields = {};
       this._config = new MainConfig(_config);
       this._syncServer = this._syncServer ? this._syncServer : new SyncServer(this);
       this._placeHolder = new MainConfig(_config);
+    }
+
+    @action public applySuggestions(suggestions: any): void {
+      const values = suggestions.config || {};
+      this.generateConfig(values);
+      const config = this._config;
+      config.seedDir = values.seedDir || '';
+      config.gitlabHost = values.gitlabHost || '';
+      config.gitlabRegistryHost = values.gitlabRegistryHost || '';
+      config.gitlabDomainMode = values.gitlabDomainMode || 0;
+      config.gitlabRegistryDomainMode = values.gitlabRegistryDomainMode || 0;
+      config.gitlabExternalUrl = values.gitlabExternalUrl ||
+        (config.gitlabHost ? `${config.gitlabDomainMode > 1 ? 'https' : 'http'}://${config.gitlabHost}` : '');
+      config.gitlabRegistryUrl = values.gitlabRegistryUrl ||
+        (config.gitlabRegistryHost ? `${config.gitlabRegistryDomainMode > 1 ? 'https' : 'http'}://${config.gitlabRegistryHost}` : '');
+      config.gitlabRunnerScale = 0;
+      config.gitlabRunnerToken = '';
+      config.syncEnable = 'true';
+      config.syncHost = values.syncHost || '';
+      config.syncDomainMode = values.syncDomainMode || 0;
+      config.syncUser = this.sync.userName || '';
+      config.syncPass = '';
+      config.wizardEnable = values.wizardHost ? 'true' : 'false';
+      config.wizardHost = values.wizardHost || '';
+      config.wizardDomainMode = values.wizardDomainMode || 0;
+      config.gitlabSSL = values.gitlabSSL || '';
+      config.gitlabSSLKey = values.gitlabSSLKey || '';
+      config.gitlabRegistrySSL = values.gitlabRegistrySSL || '';
+      config.gitlabRegistrySSLKey = values.gitlabRegistrySSLKey || '';
+      config.syncSSL = values.syncSSL || '';
+      config.syncSSLKey = values.syncSSLKey || '';
+      config.wizardSSL = values.wizardSSL || '';
+      config.wizardSSLKey = values.wizardSSLKey || '';
+      this.derivedFields = suggestions.fields || {};
+      this.init = false;
     }
 
     @computed public get placeholder(): MainConfig | undefined {
@@ -82,7 +119,8 @@ export default class Main {
 
       return {
         main   : this._config.asJson,
-        proxies: proxies
+        proxies: proxies,
+        derivedFields: this.derivedFields
       }
     }
 
@@ -115,6 +153,7 @@ export default class Main {
       runInAction(() => this.uploadProgress = true);
       runInAction(() => {
         this.generateConfig(config.main);
+        this.derivedFields = config.derivedFields || {};
 
         if (!this.sync.connected) {
           this.sync.generateConfig();
@@ -148,6 +187,7 @@ export default class Main {
       }
 
       runInAction(() => {
+        this.derivedFields = {};
         this.uploadProgress = true;
         this.init=false;
       });

@@ -20,6 +20,7 @@ import { runInAction } from 'mobx';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import { derivedWarning } from '../DerivedLabel';
 
 const TabPanel = (props: any) => {
   const {
@@ -157,6 +158,11 @@ const FormWizard = observer((props: any) => {
       >
         <Grid item xs={12}>
           <Paper className={classes.paper} elevation={0}>
+            {Object.keys(main.derivedFields).length > 0 && (
+              <Typography role="status" color="textSecondary">
+                * {derivedWarning} Unavailable values are left blank; credentials and runner settings must be supplied manually.
+              </Typography>
+            )}
             <Toolbar>
               <Tabs
                 indicatorColor="primary"
