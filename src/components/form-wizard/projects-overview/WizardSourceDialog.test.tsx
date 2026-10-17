@@ -4,15 +4,17 @@ import { act } from 'react-dom/test-utils';
 import WizardSourceDialog from './WizardSourceDialog';
 
 test('preview is read-only; confirmation imports the previewed manifest', async () => {
+  let finishImport: (value:any) => void = () => undefined;
   const projectRequest = jest.fn().mockResolvedValueOnce({
     manifestHash  : 'previewed',
     sourceRevision: 'source-revision',
     fileCount     : 73,
     repository    : { path: 'root/wizard' }
-  }).mockResolvedValueOnce({ message: 'Pinned Wizard source imported.' });
+  }).mockImplementationOnce(() => new Promise(resolve => { finishImport = resolve; }));
   const root = document.createElement('div'); document.body.appendChild(root);
+  const onClose = jest.fn();
   await act(async () => {
-    ReactDOM.render(<WizardSourceDialog sync={{ projectRequest }} onClose={jest.fn()} />, root);
+    ReactDOM.render(<WizardSourceDialog sync={{ projectRequest }} onClose={onClose} />, root);
   });
   expect(projectRequest).toHaveBeenCalledTimes(1);
   expect(projectRequest).toHaveBeenCalledWith('/projects/wizard/source');
@@ -22,9 +24,41 @@ test('preview is read-only; confirmation imports the previewed manifest', async 
     .find(button => button.textContent === 'Import source') as HTMLButtonElement;
   await act(async () => { confirm.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
   expect(projectRequest).toHaveBeenLastCalledWith('/projects/wizard/source', { manifestHash: 'previewed' });
+  const close = Array.from(document.body.querySelectorAll('button'))
+    .find(button => button.textContent === 'Close') as HTMLButtonElement;
+  expect(close.disabled).toBe(true);
+  act(() => { close.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+  expect(onClose).not.toHaveBeenCalled();
+  await act(async () => { finishImport({ message: 'Pinned Wizard source imported.' }); });
+  expect(close.disabled).toBe(false);
   expect(document.body.textContent).toContain('Pinned Wizard source imported.');
   expect(document.body.textContent).not.toContain('Import source');
   act(() => { ReactDOM.unmountComponentAtNode(root); }); root.remove();
+});
+
+test('pending read-only preview can close and ignores its late response', async () => {
+  let finishPreview: (value:any) => void = () => undefined;
+  const projectRequest = jest.fn(() => new Promise(resolve => { finishPreview = resolve; }));
+  const root = document.createElement('div'); document.body.appendChild(root);
+  const onClose = jest.fn(() => { ReactDOM.unmountComponentAtNode(root); });
+  await act(async () => {
+    ReactDOM.render(<WizardSourceDialog sync={{ projectRequest }} onClose={onClose} />, root);
+  });
+  const close = Array.from(document.body.querySelectorAll('button'))
+    .find(button => button.textContent === 'Close') as HTMLButtonElement;
+  const confirm = Array.from(document.body.querySelectorAll('button'))
+    .find(button => button.textContent === 'Import source') as HTMLButtonElement;
+  expect(close.disabled).toBe(false);
+  expect(confirm.disabled).toBe(true);
+  act(() => { close.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+  expect(onClose).toHaveBeenCalledTimes(1);
+  const errors = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  try {
+    await act(async () => { finishPreview({ repository: { path: 'late-result' } }); });
+    expect(document.body.textContent).not.toContain('late-result');
+    expect(errors).not.toHaveBeenCalled();
+    expect(projectRequest).toHaveBeenCalledTimes(1);
+  } finally { errors.mockRestore(); root.remove(); }
 });
 
 test('failed preview cannot enable import and exposes the actionable safe error', async () => {

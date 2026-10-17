@@ -6,6 +6,7 @@ import {
 export default function WizardSourceDialog(props:any) {
   const [preview, setPreview] = useState<any>();
   const [busy, setBusy] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [message, setMessage] = useState('Loading source preview…');
   const [complete, setComplete] = useState(false);
   useEffect(() => {
@@ -20,16 +21,17 @@ export default function WizardSourceDialog(props:any) {
     return () => { active = false; };
   }, [props.sync]);
   const initialize = async () => {
-    setBusy(true); setMessage('Importing source. Keep this dialog open while the operation completes.');
+    setBusy(true); setImporting(true);
+    setMessage('Importing source. Keep this dialog open while the operation completes.');
     try {
       const result = await props.sync.projectRequest('/projects/wizard/source', { manifestHash: preview.manifestHash });
       setMessage(result.message); setComplete(true);
     } catch (error) {
       setMessage(error.response?.data?.message || error.message ||
         'Source import failed. Close and preview again to retry.');
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setImporting(false); }
   };
-  return <Dialog open onClose={busy ? undefined : props.onClose} aria-labelledby="wizard-source-title">
+  return <Dialog open onClose={importing ? undefined : props.onClose} aria-labelledby="wizard-source-title">
     <DialogTitle id="wizard-source-title">Initialize Wizard source</DialogTitle>
     <DialogContent>
       <DialogContentText>
@@ -48,7 +50,7 @@ export default function WizardSourceDialog(props:any) {
       {message && <p role="status">{message}</p>}
     </DialogContent>
     <DialogActions>
-      <Button disabled={busy} onClick={props.onClose}>Close</Button>
+      <Button disabled={importing} onClick={props.onClose}>Close</Button>
       {!complete && <Button color="primary" disabled={busy || !preview} onClick={initialize}>Import source</Button>}
     </DialogActions>
   </Dialog>;
