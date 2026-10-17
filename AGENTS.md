@@ -1,5 +1,11 @@
 # Repository instructions
 
+## Documentation language
+
+Write and maintain all project documentation in English, including READMEs,
+handbooks, operating guides and generated starter documentation. The maintainer
+confirmed this preference on 2026-10-17. Conversation may remain in German.
+
 ## Immutable System Cube signature
 
 The ASCII System Cube is the maintainer's personal signature and a fixed part
