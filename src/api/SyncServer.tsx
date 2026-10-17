@@ -2,6 +2,7 @@ import {
   action, computed, makeAutoObservable, runInAction
 } from 'mobx';
 import Main from './Main';
+import ProjectConfig from './ProjectConfig';
 import axios from 'axios';
 
 /**
@@ -51,6 +52,31 @@ export default class SyncServer {
     });
   }
 
+  async projectRequest(route:string, data?:any): Promise<any> {
+    await this.token();
+    const headers = { Authorization: `Bearer ${this.accessToken}`, 'Content-Type': 'application/json' };
+    let response = data
+      ? await axios.post(this.serverAddress + route, data, { headers })
+      : await axios.get(this.serverAddress + route, { headers });
+    while (response.data.state === 'running') {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      response = await axios.get(this.serverAddress + '/projects/jobs/' + response.data.id, { headers });
+    }
+    if (response.data.state === 'failed') {
+      const error:any = new Error(response.data.message); error.conflict = response.data.conflict; throw error;
+    }
+    return response.data;
+  }
+
+  async createProject(project:ProjectConfig) {
+    const result = await this.projectRequest('/projects', {
+      projectKey: project.projectKey, namespaceId: project.namespaceId, template: project.template,
+      data: project.content, ci: project.gitlabCi
+    });
+    runInAction(() => { project.repository = result.repository; project.bootstrapPending = false; });
+    return result;
+  }
+
   @action logout() {
     return new Promise((resolve, reject) => {
       this.token().then(() =>
@@ -88,6 +114,15 @@ export default class SyncServer {
         projects.data.forEach((fileinfo:any) => {
           try {
             this.main.importProjectEnvData(fileinfo.data);
+            {
+              const project = Array.from(this.main.projects.values()).pop();
+              if (project) {
+                project.repository = fileinfo.repository || project.repository;
+                project.namespaceId = project.repository?.namespaceId || fileinfo.namespaceId || '';
+                project.bootstrapPending = fileinfo.bootstrapPending || false;
+                project.template = fileinfo.template || project.repository?.template || project.template;
+              }
+            }
           } catch (err) {
             skipCount++;
             console.log(`${fileinfo.filename} is invalid, skipped`);

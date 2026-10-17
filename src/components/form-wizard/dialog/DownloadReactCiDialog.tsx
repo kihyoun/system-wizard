@@ -87,7 +87,7 @@ export default function DownloadReactCiDialog(props:any) {
         aria-labelledby="responsive-dialog-title"
       >
 
-        <DialogTitle id="responsive-dialog-title">Pipeline Configuration for React
+        <DialogTitle id="responsive-dialog-title">Pipeline Configuration
         (.gitlab-ci.yml)</DialogTitle>
         <DialogContent>
           <React.Fragment >
