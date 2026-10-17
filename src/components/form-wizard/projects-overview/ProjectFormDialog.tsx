@@ -35,6 +35,51 @@ const ProjectFormDialog = observer((props: any) => {
   const [projectPlaceholderConfig, setProjectPlaceholderConfig] = useState(new ProjectConfig(props.main));
   const [activeStep, setActiveStep] = useState(0);
 
+  const [busy, setBusy] = useState(false);
+  const [namespaces, setNamespaces] = useState<any[]>([]);
+  const [availability, setAvailability] = useState('unknown');
+  const [availabilityMessage, setAvailabilityMessage] = useState('Connect to Sync to verify availability.');
+  const editing = props.activeProject !== '';
+  const key = projectConfig.projectKey;
+  const namespaceId = projectConfig.namespaceId;
+
+  useEffect(() => {
+    let current = true;
+    if (props.open && props.main.sync.connected) {
+      props.main.sync.projectRequest('/projects/namespaces').then((result:any) => {
+        if (current) setNamespaces(result.namespaces);
+      }).catch(() => { if (current) setAvailabilityMessage('Could not load GitLab namespaces. Check Sync and GitLab.'); });
+    }
+    return () => { current = false; };
+  }, [props.open, props.main.sync.connected]);
+
+  useEffect(() => {
+    let current = true;
+    if (!props.open || editing) return;
+    setAvailability('unknown');
+    if (!/^[a-z0-9]+$/.test(key)) {
+      setAvailabilityMessage('Required: lowercase a-z and digits 0-9 only.'); return;
+    }
+    if (props.main.projects.has(key)) {
+      setAvailability('occupied'); setAvailabilityMessage('Project Key already exists locally.'); return;
+    }
+    if (!namespaceId || !props.main.sync.connected) {
+      setAvailabilityMessage('Connect to Sync and select a namespace.'); return;
+    }
+    setAvailability('checking'); setAvailabilityMessage('Checking GitLab availability…');
+    const timer = setTimeout(() => {
+      props.main.sync.projectRequest('/projects/availability?projectKey=' + encodeURIComponent(key) + '&namespaceId=' + encodeURIComponent(namespaceId))
+        .then((result:any) => {
+          if (!current) return;
+          setAvailability(result.availability);
+          setAvailabilityMessage(result.availability === 'available' ? 'Available in selected namespace.' : 'Repository already exists. Choose another key.');
+        }).catch(() => {
+          if (current) { setAvailability('unknown'); setAvailabilityMessage('Could not verify availability. Check Sync and GitLab.'); }
+        });
+    }, 400);
+    return () => { current = false; clearTimeout(timer); };
+  }, [key, namespaceId, props.open, editing, props.main.sync.connected]);
+
   const [openAlert, setOpenAlert] = useState('');
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openEditSuccess, setOpenEditSuccess] = useState(false);
@@ -77,7 +122,21 @@ const ProjectFormDialog = observer((props: any) => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (busy) return;
+    if (props.activeProject === '' || projectConfig.bootstrapPending) {
+      if (!projectConfig.bootstrapPending && availability !== 'available') return;
+      if (!/^[a-z0-9]+$/.test(projectConfig.projectKey)) return;
+      setBusy(true);
+      try {
+        await props.main.sync.createProject(projectConfig);
+      } catch (error) {
+        if (error.conflict) { setAvailability('occupied'); setAvailabilityMessage('Repository already exists. Choose another key.'); }
+        setOpenAlert(error.response?.data?.message || error.message || 'Project creation failed. Retry Save.');
+        setBusy(false); return;
+      }
+      setBusy(false);
+    }
     runInAction(() => {
       if (props.activeProject === '') {
         if (props.main.projects.has(projectConfig.projectKey)) {
@@ -99,7 +158,7 @@ const ProjectFormDialog = observer((props: any) => {
     <>
       <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')}
         message={(
-          <>Duplicate key {openAlert}. Please choose another key</>
+          <>{openAlert}</>
         )} />
       <Snackbar open={openSuccess} autoHideDuration={6000} onClose={() => setOpenSuccess(false)}
         message={'Project successfully added.'} />
@@ -109,16 +168,18 @@ const ProjectFormDialog = observer((props: any) => {
         transitionDuration={0}
         fullWidth={true}
         maxWidth={'lg'}
-        open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">
+        open={props.open} onClose={() => { if (!busy) props.handleClose(); }} aria-labelledby="form-dialog-title">
         {props.activeProject === '' && <DialogTitle id="form-dialog-title">Create Project Configuration</DialogTitle>
         || <DialogTitle id="form-dialog-title">Edit {projectPlaceholderConfig.projectKey}</DialogTitle>}
         <DialogContent>
           <DialogContentText>
             Configure an application&apos;s Production, Beta and Review App environments.
             NGINX proxies route requests to the application containers.
-            Creating this configuration does not create a GitLab repository.
+            Save creates a private GitLab repository and installs the generated CI configuration.
+            Deployment starts after you add application source with a Dockerfile.
           </DialogContentText>
-          <Grid container>
+          {busy && <p role="status">Creating repository, installing CI and configuring routing… You can continue when setup completes.</p>}
+          <fieldset disabled={busy} style={{ border: 0 }}><Grid container>
             <Grid item xs={3}>
               <Stepper activeStep={activeStep} nonLinear orientation="vertical">
                 {steps.map((step, index) => (
@@ -153,7 +214,9 @@ const ProjectFormDialog = observer((props: any) => {
               </Stepper>
             </Grid>
             <Grid item xs={8}>
-              <MainFields openAlert={(value:string) =>
+              <MainFields editing={editing} availability={availability} message={availabilityMessage}
+                namespaces={namespaces} destination={(namespaces.find((n:any) => String(n.id) === String(namespaceId))?.path || '') + '/' + key}
+                openAlert={(value:string) =>
                 runInAction(() => setOpenAlert(value))
               }
               hidden={activeStep !== 0} config={projectConfig}
@@ -179,13 +242,13 @@ const ProjectFormDialog = observer((props: any) => {
                 config={projectConfig}
                 placeholder={projectPlaceholderConfig} />
             </Grid>
-          </Grid>
+          </Grid></fieldset>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.handleClose} color="primary">
+          <Button disabled={busy} onClick={props.handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleSave} color="primary">
+          <Button disabled={busy || (!editing && availability !== 'available')} onClick={handleSave} color="primary">
             Save
           </Button>
         </DialogActions>
