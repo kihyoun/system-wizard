@@ -3,6 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 import {
   FormLabel,
+  Typography,
   Input,
   makeStyles
 } from '@material-ui/core';
@@ -46,7 +47,14 @@ const GitlabRunnerFields = observer((props: any) => {
 
   return (
     <>
-      <FormLabel component="legend">Number of Gitlab Runners</FormLabel>
+      <Typography variant="body2" paragraph>
+        Leave the count at 0 to use the shared instance runner pool configured under General,
+        when instance runners are enabled for the GitLab project.
+        Only increase it if this application needs additional runner containers.
+      </Typography>
+      <FormLabel id="project-runner-count-label" component="legend">
+        Additional project runners (optional)
+      </FormLabel>
       <Input
         className={classes.input}
         value={props.config.gitlabRunnerScale}
@@ -58,11 +66,13 @@ const GitlabRunnerFields = observer((props: any) => {
           min              : 0,
           max              : 50,
           type             : 'number',
-          'aria-labelledby': 'input-slider'
+          'aria-labelledby': 'project-runner-count-label'
         }}
       />
       <TextField
-        label="GITLAB_RUNNER_TOKEN"
+        label="Token for additional runners"
+        helperText={'Required for additional runners. GitLab determines project access from the token; '
+          + 'this form does not assign runner permissions.'}
         style={{ margin: 8 }}
         value={props.config.gitlabRunnerToken}
         fullWidth

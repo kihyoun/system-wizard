@@ -63,7 +63,7 @@ const ProjectFormDialog = observer((props: any) => {
     label  : 'Review Apps',
     enabled: projectConfig.useReviewHost
   },{
-    label  : 'Gitlab Runner',
+    label  : 'Additional runners (optional)',
     enabled: (projectConfig.gitlabRunnerScale > 0).toString()
   }];
 
@@ -110,10 +110,13 @@ const ProjectFormDialog = observer((props: any) => {
         fullWidth={true}
         maxWidth={'lg'}
         open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">
-        {props.activeProject === '' && <DialogTitle id="form-dialog-title">Create Proxy Configuration</DialogTitle>
+        {props.activeProject === '' && <DialogTitle id="form-dialog-title">Create Project Configuration</DialogTitle>
         || <DialogTitle id="form-dialog-title">Edit {projectPlaceholderConfig.projectKey}</DialogTitle>}
         <DialogContent>
           <DialogContentText>
+            Configure an application&apos;s Production, Beta and Review App environments.
+            NGINX proxies route requests to the application containers.
+            Creating this configuration does not create a GitLab repository.
           </DialogContentText>
           <Grid container>
             <Grid item xs={3}>

@@ -104,7 +104,7 @@ export default function DownloadProjectsDialog(props:any) {
         aria-labelledby="responsive-dialog-title"
       >
 
-        <DialogTitle id="responsive-dialog-title">Save Proxy Configurations</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">Save Project Configurations</DialogTitle>
         <DialogContent>
 
           {[...props.main.projects.values()].map(projectConfig => {

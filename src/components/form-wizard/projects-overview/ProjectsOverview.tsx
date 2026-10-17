@@ -82,7 +82,7 @@ const ProjectsOverview = observer((props:any) => {
           size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell>Proxy Key</TableCell>
+              <TableCell>Project Key</TableCell>
               <TableCell>URL</TableCell>
               <TableCell>Beta URL</TableCell>
               <TableCell>Review App Domain(s)</TableCell>
@@ -193,7 +193,7 @@ const ProjectsOverview = observer((props:any) => {
           className={classes.button}
           startIcon={<PlaylistAddIcon />}
         >
-        Add Proxy
+        Add Project
         </Button>
       </Toolbar>
 

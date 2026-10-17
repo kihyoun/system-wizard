@@ -12,10 +12,10 @@ const MainFields = observer((props: any) => {
   return (
     <>
       <TextField
-        label="PROJECT_NAME"
+        label="Project Key"
         style={{ margin: 8 }}
         value={projectKey}
-        helperText="This must be a unique key"
+        helperText="Unique key for this application's deployment configuration. Use the same key in its pipeline."
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}

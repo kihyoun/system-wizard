@@ -171,7 +171,7 @@ const FormWizard = observer((props: any) => {
                 value={tab}
                 onChange={handleChange}>
                 <Tab label="General" {...a11yProps(0)} />
-                <Tab label="Proxy" {...a11yProps(1)} />
+                <Tab label="Projects" {...a11yProps(1)} />
               </Tabs>
 
               <div className={classes.divider} />
