@@ -56,7 +56,7 @@ export default class MainConfig {
       this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
       this.gitlabRegistryHost = _config?.gitlabRegistryHost || 'registry.example.com';
       this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
-      this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
+      this.gitlabRunnerToken = _config?.gitlabRunnerToken || '';
     });
   }
 
@@ -347,7 +347,7 @@ export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
     case 'WIZARD_DOMAIN_MODE': this.wizardDomainMode = parseInt(Helper.unquote(value), 10); break;
     case 'WIZARD_SSL': this.wizardSSL = Helper.unquote(value).replace(/;/g, ''); break;
     case 'WIZARD_SSL_KEY': this.wizardSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
-    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value) || 'secret'; break;
+    case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value); break;
     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(Helper.unquote(value), 10) || 0; break;
     }
   }

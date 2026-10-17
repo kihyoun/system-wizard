@@ -3,9 +3,12 @@ import TextField from '@material-ui/core/TextField';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import DerivedLabel from '../../../DerivedLabel';
+import Button from '@material-ui/core/Button';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 const StartFields = observer((props: any) => {
   const [init, setInit] = useState(props.main.init);
+  const [showToken, setShowToken] = useState(false);
 
   useEffect(() => {
     if (!props.hidden && init && props.main.init) {
@@ -83,6 +86,7 @@ const StartFields = observer((props: any) => {
       />
       <TextField
         label="Gitlab Runners"
+        helperText="Docker containers in one shared instance runner pool. Push and Restart apply the count."
         fullWidth
         margin="normal"
         style={{ margin: 8 }}
@@ -99,7 +103,15 @@ const StartFields = observer((props: any) => {
         }}
       />
       <TextField
-        label="Secret Runner Token"
+        label="Runner authentication token"
+        type={showToken ? 'text' : 'password'}
+        helperText={'Leave empty for automatic setup on this GitLab instance. '
+          + 'Fetch after setup; Backup includes this secret.'}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">
+            <Button onClick={() => setShowToken(!showToken)}>{showToken ? 'Hide' : 'Show'}</Button>
+          </InputAdornment>
+        }}
         style={{ margin: 8 }}
         value={props.main.config.gitlabRunnerToken}
         fullWidth

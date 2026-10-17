@@ -178,9 +178,6 @@ export default class Main {
     }
 
     public importEnvData(data: any) {
-      console.group('Env File import');
-      console.log('Raw data:', `\n${data}`);
-      console.groupEnd();
 
       if (data.substr(807, 1) !== '$'
         || md5(data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
@@ -213,9 +210,6 @@ export default class Main {
     }
 
     public importProjectEnvData(data:any) {
-      console.group('Project Env File import');
-      console.log('Raw data:', `\n${data}`);
-      console.groupEnd();
 
       if (data.substr(807, 1) !== '$'
         || md5(data.substr(0, 1184)) !== 'bd4a8426355824593a5e21ad759830c1') {
