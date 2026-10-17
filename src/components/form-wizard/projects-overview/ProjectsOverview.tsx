@@ -31,6 +31,7 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import DownloadReactCiDialog from '../dialog/DownloadReactCiDialog';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import WizardSourceDialog from './WizardSourceDialog';
+import WizardBuildDialog from './WizardBuildDialog';
 
 const useStyles = makeStyles({
   table: {
@@ -61,6 +62,7 @@ const ProjectsOverview = observer((props:any) => {
   const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
   const [downloadReactCi, setDownloadReactCi] = useState(false);
   const [wizardSourceOpen, setWizardSourceOpen] = useState(false);
+  const [wizardBuildOpen, setWizardBuildOpen] = useState(false);
 
 
   const handleDelete = () => {
@@ -77,6 +79,7 @@ const ProjectsOverview = observer((props:any) => {
   return (
     <>
       {wizardSourceOpen && <WizardSourceDialog sync={props.main.sync} onClose={() => setWizardSourceOpen(false)} />}
+      {wizardBuildOpen && <WizardBuildDialog sync={props.main.sync} onClose={() => setWizardBuildOpen(false)} />}
       <Snackbar open={openDeleteSuccess} autoHideDuration={6000}
         onClose={() => setOpenDeleteSuccess(false)}
         message={'Project successfully deleted.'} />
@@ -170,6 +173,8 @@ const ProjectsOverview = observer((props:any) => {
                             Importing source does not update the running interface.</p>
                           <Button color="primary" disabled={!props.main.sync.connected}
                             onClick={() => setWizardSourceOpen(true)}>Initialize Wizard source</Button>
+                          <Button color="primary" disabled={!props.main.sync.connected}
+                            onClick={() => setWizardBuildOpen(true)}>Build and verify Wizard</Button>
                         </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
                           systemProject={!!projectConfig.repository?.systemProject}

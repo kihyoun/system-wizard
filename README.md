@@ -99,7 +99,7 @@ Production URL is the real system-interface address from General; the existing
 Wizard keeps running at that address. The entry is managed under General, so
 project edit/delete controls and environment switches are disabled.
 
-The private `root/wizard` repository currently contains a README/CI registration
+The private `root/wizard` repository starts with a README/CI registration
 scaffold. Automatic registration does not import Wizard source, start a pipeline
 or replace the UI.
 
@@ -111,11 +111,11 @@ in place; the source README is stored separately. Conflicting repository files
 are never overwritten. Retry the action after a reported interruption to
 recover the same source import.
 
-This delivery imports source only: managed CI remains disabled, no pipeline is
+The source-import action imports source only: managed CI remains disabled, no pipeline is
 started, and Production, Beta and Review deployments are unchanged. See the
 [source initialization guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_SOURCE.md)
-for prerequisites, state and recovery. Builds and the later manual GitLab
-Production deployment remain subsequent phases of the central workflow issue.
+for prerequisites, state and recovery. The separate build action is described below.
+Review/Beta and the later manual GitLab Production deployment remain subsequent phases.
 Beta and Review remain disabled. Registration is idempotent and survives
 Fetch, Backup/Open, Push and restart. Conflicting local keys or foreign
 repositories are reported without overwriting them.
@@ -124,6 +124,35 @@ This delivery is tracked in [the registration issue](https://github.com/kihyoun/
 Source import, development using the local GitLab, Review/Beta and a controlled
 Production rollout are tracked as the
 [next expansion](https://github.com/kihyoun/system/issues/18).
+
+### Build and verify the imported Wizard
+
+With the matching Phase B controller, expand the managed Wizard row and select
+**Build and verify Wizard**. Its preview identifies the owned repository,
+imported source commit and recipe version. **Enable build pipeline** explicitly
+installs the managed build recipe and starts or recovers its initial pipeline.
+Opening the preview alone does not activate anything. **Refresh status** updates
+the recorded pipeline and required checks. A verified candidate image appears
+only after the controller validates the required job and artifact evidence.
+
+For a pending, installed or temporarily unverifiable operation, review
+**Refresh preview** before using **Resume activation**. A status refresh or
+failed request invalidates the previous preview confirmation. The server still
+enforces ownership, expected content and durable pipeline identity.
+
+An uncertain pipeline-creation outcome offers refresh and administrator
+inspection only. Do not clear its checkpoint or start another activation to
+work around it. Failed verification hides previous artifact claims until
+verification succeeds again. Source initialization is separate from this build
+operation; after enabling CI, use the build/status action rather than repeating
+source import.
+
+This compatibility path uses the existing Node 13/CRA toolchain; it is not the
+supported-version modernization. It does not deploy Production or enable Beta
+or Review. The later Production rollout remains an explicit manual GitLab job.
+See the [managed build guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_BUILD.md)
+and [central build issue](https://github.com/kihyoun/system/issues/33) for scope
+and validation limits.
 
 ## Local development
 
