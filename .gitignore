@@ -23,3 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 /cypress/videos/*
 .docker.env
+/playwright-report
+/test-results

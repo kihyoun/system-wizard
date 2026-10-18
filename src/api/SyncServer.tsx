@@ -1,5 +1,5 @@
 import {
-  action, computed, makeAutoObservable, runInAction
+  makeAutoObservable, runInAction
 } from 'mobx';
 import Main from './Main';
 import ProjectConfig from './ProjectConfig';
@@ -22,7 +22,7 @@ export default class SyncServer {
     this.generateConfig(_config);
   }
 
-  @action generateConfig(_config: any | undefined = undefined): void {
+  generateConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.serverAddress = _config?.serverAddress || this.main.config?.syncHostInfo.url;
       this.userName = _config?.userName || this.main.config?.syncUser;
@@ -32,13 +32,13 @@ export default class SyncServer {
     });
   }
 
-  @action login(username:string, password:string) {
+  login(username:string, password:string) {
     const data = {
       username,
       password
     };
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       axios.post(this.serverAddress + '/login', data).then(res => {
         runInAction(() => {
           this.accessToken = res.data.accessToken;
@@ -83,7 +83,7 @@ export default class SyncServer {
     return result;
   }
 
-  @action logout() {
+  logout() {
     return new Promise((resolve, reject) => {
       this.token().then(() =>
         axios.post(this.serverAddress + '/logout', { t: this.accessToken }, this.getHeaders()).then(res => {
@@ -100,206 +100,136 @@ export default class SyncServer {
     });
   }
 
-  @action fetch() {
-    return new Promise(async (resolve, reject) => {
+  async fetch() {
+    await this.token();
+    let res;
+    try {
+      res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
+    } catch (error) {
+      if (error.response?.status !== 404) { throw error; }
+      const suggestions = await axios.get(this.serverAddress + '/config/suggestions', this.getHeaders());
+      this.main.applySuggestions(suggestions.data);
+      return 0;
+    }
+    this.main.importEnvData(res.data.data);
+    const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
+    let skipCount = 0;
+    this.main.projects.clear();
+    projects.data.forEach((fileinfo:any) => {
       try {
-        await this.token();
-        let res;
-        try {
-          res = await axios.get(this.serverAddress + '/config/main', this.getHeaders());
-        } catch (error) {
-          if (error.response?.status !== 404) { throw error; }
-          const suggestions = await axios.get(this.serverAddress + '/config/suggestions', this.getHeaders());
-          this.main.applySuggestions(suggestions.data);
-          return resolve(0);
-        }
-        this.main.importEnvData(res.data.data);
-        const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
-        let skipCount = 0;
-        this.main.projects.clear();
-        projects.data.forEach((fileinfo:any) => {
-          try {
-            this.main.importProjectEnvData(fileinfo.data);
-            {
-              const project = Array.from(this.main.projects.values()).pop();
-              if (project) {
-                project.repository = fileinfo.repository || project.repository;
-                project.namespaceId = project.repository?.namespaceId || fileinfo.namespaceId || '';
-                project.bootstrapPending = fileinfo.bootstrapPending || false;
-                project.template = fileinfo.template || project.repository?.template || project.template;
-              }
-            }
-          } catch (err) {
-            skipCount++;
-            console.log(`${fileinfo.filename} is invalid, skipped`);
+        this.main.importProjectEnvData(fileinfo.data);
+        {
+          const project = Array.from(this.main.projects.values()).pop();
+          if (project) {
+            project.repository = fileinfo.repository || project.repository;
+            project.namespaceId = project.repository?.namespaceId || fileinfo.namespaceId || '';
+            project.bootstrapPending = fileinfo.bootstrapPending || false;
+            project.template = fileinfo.template || project.repository?.template || project.template;
           }
-        })
-        resolve(skipCount);
-      } catch (err) {
-        reject(err)
+        }
+      } catch {
+        skipCount++;
+        console.log(`${fileinfo.filename} is invalid, skipped`);
       }
-    });
+    })
+    return skipCount;
   }
 
-  @action push() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        this.main.generateZip().then( async (bootstrapperRaw:any) => {
-          const file = new File([bootstrapperRaw], 'bootstrapper.zip');
-          const formData = new FormData();
-          formData.append('bootstrapper.zip',file);
-          await this.token();
-          const res = await axios.post(this.serverAddress + '/config/zip',
-            formData,
-            this.getFileHeaders());
-          resolve(res);
-        });
-      } catch(err) {
-        reject(err)
-      }
-    });
+  async push() {
+    const bootstrapperRaw = await this.main.generateZip();
+    const file = new File([bootstrapperRaw], 'bootstrapper.zip');
+    const formData = new FormData();
+    formData.append('bootstrapper.zip', file);
+    await this.token();
+    return axios.post(this.serverAddress + '/config/zip', formData, this.getFileHeaders());
   }
 
-  @action pushMain() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const raw = this.main.config?.content || '';
-        const file = new File([raw], '.docker.env');
-        const formData = new FormData();
-        formData.append('.docker.env',file);
-        await this.token();
-        const res = await axios.post(this.serverAddress + '/config/main',
-          formData,
-          this.getFileHeaders());
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
-    });
+  async pushMain() {
+    const raw = this.main.config?.content || '';
+    const file = new File([raw], '.docker.env');
+    const formData = new FormData();
+    formData.append('.docker.env',file);
+    await this.token();
+    const res = await axios.post(this.serverAddress + '/config/main',
+      formData,
+      this.getFileHeaders());
+    return res;
   }
 
-  @action restart() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/restart'
-        });
-
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async restart() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/restart'
     });
+
+    const res = await axios.request(options);
+    return res;
   }
 
-  @action registerRunners() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/runners/register'
-        });
-
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async registerRunners() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/runners/register'
     });
+
+    const res = await axios.request(options);
+    return res;
   }
 
-  @action unregisterRunners() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/runners/unregister'
-        });
-
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async unregisterRunners() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/runners/unregister'
     });
+
+    const res = await axios.request(options);
+    return res;
   }
 
-  @action deleteMain() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const res = await axios.delete(this.serverAddress + '/config/main', this.getHeaders());
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
-    });
+  async deleteMain() {
+    await this.token();
+    const res = await axios.delete(this.serverAddress + '/config/main', this.getHeaders());
+    return res;
   }
 
-  @action deleteProjects() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const res = await axios.delete(this.serverAddress + '/config/projects', this.getHeaders());
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
-    });
+  async deleteProjects() {
+    await this.token();
+    const res = await axios.delete(this.serverAddress + '/config/projects', this.getHeaders());
+    return res;
   }
 
-  @action seed() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/seed'
-        });
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async seed() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/seed'
     });
+    const res = await axios.request(options);
+    return res;
   }
 
-  @action harvest() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/harvest'
-        });
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async harvest() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/harvest'
     });
+    const res = await axios.request(options);
+    return res;
   }
-  @action hotPatch() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.token();
-        const options:any = Object.assign(this.getHeaders(), {
-          method: 'PATCH',
-          url   : this.serverAddress + '/command/system/patch'
-        });
-        const res = await axios.request(options);
-        resolve(res);
-      } catch(err) {
-        reject(err)
-      }
+  async hotPatch() {
+    await this.token();
+    const options:any = Object.assign(this.getHeaders(), {
+      method: 'PATCH',
+      url   : this.serverAddress + '/command/system/patch'
     });
+    const res = await axios.request(options);
+    return res;
   }
-  @action token() {
+  token() {
     return new Promise((resolve, reject) => {
       axios.post(this.serverAddress + '/token', { token: this.refreshToken })
         .then((res:any) => {
@@ -312,7 +242,7 @@ export default class SyncServer {
     });
   }
 
-  @computed getFileHeaders() {
+  getFileHeaders() {
     return {
       headers: {
         'Content-Type' : 'multipart/form-data',
@@ -321,7 +251,7 @@ export default class SyncServer {
     };
   }
 
-  @computed getHeaders() {
+  getHeaders() {
     return {
       headers: {
         'Authorization': `Bearer ${this.accessToken}` ,

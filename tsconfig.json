@@ -1,28 +1,32 @@
 {
   "compilerOptions": {
-    "noFallthroughCasesInSwitch": true,
-    "experimentalDecorators": true,
-    "target": "es5",
+    "target": "ES2022",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
     ],
-    "allowJs": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+    "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react",
-    "baseUrl": "."
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": [
+      "vite/client",
+      "vitest/globals"
+    ],
+    "useUnknownInCatchVariables": false
   },
   "include": [
-    "src"
+    "src",
+    "vite.config.ts"
   ]
 }

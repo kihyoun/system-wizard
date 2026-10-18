@@ -1,7 +1,9 @@
+import FileSaver from 'file-saver';
 import {
-  action, computed, makeAutoObservable, runInAction
+  makeAutoObservable, runInAction
 } from 'mobx';
 import Helper from './Helper';
+import {extraEnvironment} from './Environment';
 import JSZip from 'jszip';
 import { HostInfo } from './Main';
 /**
@@ -43,27 +45,28 @@ export default class MainConfig {
   wizardSSL!: string;
   wizardSSLKey!: string;
 
-  @action generateConfig(_config: any | undefined = undefined) {
+  runtimeOptions: {[key: string]: string} = {};
+
+  generateConfig(_config: any | undefined = undefined) {
+    this.runtimeOptions = {...(_config?.runtimeOptions ?? {})};
     this.generateMainConfig(_config);
     this.generateProxyConfig(_config);
     this.generateSyncConfig(_config);
     this.generateWizardConfig(_config);
   }
 
-  @action generateMainConfig(_config: any | undefined = undefined): void {
+  generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.seedDir = _config?.seedDir || '/mnt/seed';
-      this.gitlabHost = _config?.gitlabHost || 'gitlab.example.com';
-      this.gitlabRegistryHost = _config?.gitlabRegistryHost || 'registry.example.com';
-      this.gitlabRunnerScale = _config ? parseInt(_config.gitlabRunnerScale, 10) : 0;
-      this.gitlabRunnerToken = _config?.gitlabRunnerToken || '';
+      this.seedDir = _config?.seedDir ?? '/mnt/seed';
+      this.gitlabHost = _config?.gitlabHost ?? 'gitlab.example.com';
+      this.gitlabRegistryHost = _config?.gitlabRegistryHost ?? 'registry.example.com';
+      this.gitlabRunnerScale = parseInt(_config?.gitlabRunnerScale, 10) || 0;
+      this.gitlabRunnerToken = _config?.gitlabRunnerToken ?? '';
     });
   }
 
-  @action generateProxyConfig(_config: any | undefined = undefined): void {
+  generateProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.gitlabExternalUrl = _config?.gitlabExternalUrl || `https://${this.gitlabHost}`;
-      this.gitlabRegistryUrl = _config?.gitlabRegistryUrl || `https://${this.gitlabRegistryHost}`;
       this.gitlabDomainMode = _config ? parseInt(_config.gitlabDomainMode) || 0 : 2;
       this.gitlabSSL = _config?.gitlabSSL?.replace(/;/g, '')
         || `/ssl/live/${this.gitlabHost}/fullchain.pem`;
@@ -74,15 +77,17 @@ export default class MainConfig {
         || `/ssl/live/${this.gitlabRegistryHost}/fullchain.pem`;
       this.gitlabRegistrySSLKey = _config?.gitlabRegistrySSLKey?.replace(/;/g, '')
         || `/ssl/live/${this.gitlabRegistryHost}/privkey.pem`;
+      this.gitlabExternalUrl = _config?.gitlabExternalUrl ?? this.gitlabExternalUrl;
+      this.gitlabRegistryUrl = _config?.gitlabRegistryUrl ?? this.gitlabRegistryUrl;
     });
   }
 
-  @action generateSyncConfig(_config: any | undefined = undefined): void {
+  generateSyncConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.syncEnable = _config?.syncEnable || 'false';
-      this.syncHost = _config?.syncHost || `sync${this.gitlabHost.replace('gitlab','')}`;
-      this.syncUser = _config?.syncUser || 'admin';
-      this.syncPass = _config?.syncPass || 'admin';
+      this.syncEnable = _config?.syncEnable ?? 'false';
+      this.syncHost = _config?.syncHost ?? `sync${this.gitlabHost.replace('gitlab','')}`;
+      this.syncUser = _config?.syncUser ?? 'admin';
+      this.syncPass = _config?.syncPass ?? 'admin';
       this.syncDomainMode = _config ? parseInt(_config.syncDomainMode) || 0 : 2;
       this.syncSSL = _config?.syncSSL?.replace(/;/g, '')
         || `/ssl/live/${this.syncHost}/fullchain.pem`;
@@ -91,10 +96,10 @@ export default class MainConfig {
     });
   }
 
-  @action generateWizardConfig(_config: any | undefined = undefined): void {
+  generateWizardConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.wizardEnable = _config?.wizardEnable || 'false';
-      this.wizardHost = _config?.wizardHost || `wizard${this.gitlabHost.replace('gitlab','')}`;
+      this.wizardEnable = _config?.wizardEnable ?? 'false';
+      this.wizardHost = _config?.wizardHost ?? `wizard${this.gitlabHost.replace('gitlab','')}`;
       this.wizardDomainMode = _config ? parseInt(_config.wizardDomainMode) || 0 : 2;
       this.wizardSSL = _config?.wizardSSL?.replace(/;/g, '')
         || `/ssl/live/${this.wizardHost}/fullchain.pem`;
@@ -103,7 +108,7 @@ export default class MainConfig {
     });
   }
 
-  @computed get syncHostInfo(): HostInfo {
+  get syncHostInfo(): HostInfo {
     const host = (this.syncDomainMode === 1 || this.syncDomainMode === 3 ? '*.' : '')
         + this.syncHost;
     return {
@@ -118,7 +123,7 @@ export default class MainConfig {
     }
   }
 
-  @computed get wizardHostInfo(): HostInfo {
+  get wizardHostInfo(): HostInfo {
     const host = (this.wizardDomainMode === 1 || this.wizardDomainMode === 3 ? '*.' : '')
         + this.wizardHost;
     return {
@@ -196,6 +201,7 @@ export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
      + wizard
      + (this.wizardEnable === 'true' && wizardSettings || '')
      + (this.wizardEnable === 'true' && this.wizardDomainMode && this.wizardDomainMode > 1 && wizardSSL || '')
+     + '\n# -- Additional runtime configuration\n' + extraEnvironment(this.runtimeOptions)
      + createdOn;
   }
 
@@ -203,7 +209,7 @@ export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
     const zip = new JSZip();
     zip.file('.docker.env', this.content);
     zip.generateAsync({ type: 'blob' }).then(function(content) {
-      saveAs(content, 'docker.env.zip');
+      FileSaver.saveAs(content, 'docker.env.zip');
     });
   }
 
@@ -254,8 +260,9 @@ export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
   gitlabRunnerScale!:number;
   gitlabRunnerToken!:string;
 
-  @computed public get asJson() : any {
+  public get asJson() : any {
     let ret = {
+      runtimeOptions   : {...this.runtimeOptions},
       seedDir          : this.seedDir,
       gitlabExternalUrl: this.gitlabExternalUrl,
       gitlabRegistryUrl: this.gitlabRegistryUrl,
@@ -349,6 +356,7 @@ export WIZARD_SSL_KEY=${Helper.quote(this.wizardSSLKey)}
     case 'WIZARD_SSL_KEY': this.wizardSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value); break;
     case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(Helper.unquote(value), 10) || 0; break;
+    default: this.runtimeOptions[propertyKey] = Helper.unquote(value); break;
     }
   }
 }

@@ -156,63 +156,46 @@ and validation limits.
 
 ## Local development
 
-The existing Wizard has been built and tested with **Node 13.12.0**. Use that
-version with the committed package-lock.json for this legacy toolchain. New
-application templates do not inherit this requirement.
-
-Install dependencies from the lockfile, then start the development server:
+Use Node 24.22.0 and npm 11.19.1 (`.nvmrc`, `engines` and `packageManager`).
+Install the exact dependency graph and start the Vite development server:
 
 ```bash
 npm ci
 npm start
 ```
 
-The development server normally runs at `http://localhost:3000`. Connect it to a
-running Bootstrapper's Sync service to exercise server operations. Follow the
-[handbook build instructions](https://github.com/kihyoun/system/blob/master/docs/HANDBOOK.md#02-prepare-docker-and-build-the-wizard-image)
-if you prefer the documented Node container build.
+Vite serves development at `http://localhost:5173`. Connect to an explicitly
+chosen Bootstrapper Sync endpoint to exercise authenticated operations. The
+[modernization plan](MODERNIZATION.md) records version selection and rollout gates.
 
-### Tests and production build
-
-Run the Jest suite once and build the static production bundle:
+Run the checks and build the production SPA into the existing `build/` directory:
 
 ```bash
-CI=true npm test -- --watch=false --runInBand
+npm run lint
+npm test
 npm run build
-```
-
-The production output is written to `build/`. The current local validation passed
-12 tests across 6 suites and a Node 13 production build. Existing Hook lint and
-Browserslist warnings remain. Those checks are separate from the live GitLab
-starter pipelines verified in the project guide.
-
-Cypress is a separate browser smoke test. With the development server running
-and Cypress's browser/runtime dependencies installed, run:
-
-```bash
+npx playwright install --with-deps chromium
 npm run test:ci
 ```
 
-Its default base URL is `http://localhost:3000` from `cypress.json`. The checked-in
-spec only visits the home page; it does not validate the complete provisioning
-or deployment flow. On a machine used only for Jest/build checks, dependencies
-can be installed with `CYPRESS_INSTALL_BINARY=0 npm ci`; a later Cypress run still
-requires its binary and runtime dependencies.
+Vitest covers configuration and workflow regressions. Playwright checks the
+rendered interface, navigation, backup download and SPA fallback. Set
+`WIZARD_BASE_URL` to check an already running isolated candidate instead of
+starting the local preview server.
 
 ## Container and publishing workflow
 
-The repository Dockerfile builds the Wizard with Node 13.12.0 and serves the
-static result through NGINX on port 80. The Compose file defines the Wizard build
-but does not publish a host port; the Bootstrapper normally supplies routing.
-Updating source alone does not replace an already running Wizard image.
+The Dockerfile uses the same Node/npm versions and locked installation, checks
+lint/tests/types, and serves the built SPA through NGINX on port 80. Updating
+source does not replace the running image. Keep the last verified immutable
+image for recovery and validate separate candidates before Production rollout.
 
-The existing upstream `.gitlab-ci.yml` builds and tests the Wizard, creates review
-apps, deploys to the project's public domain, publishes the Docker Hub image and
-performs repository/platform rollout steps. Those jobs depend on the configured
-registry, credentials, networks and domains. They are distinct from the managed
-CI generated for new applications and were not validated as a complete public
-release by the local starter tests. The separate `Dockerhub` recipe checks out
-a historical fixed commit; use the regular Dockerfile to build this checkout.
+The upstream CI preserves distinct Review, Production, Docker Hub, GitHub mirror
+and platform-update roles. Public domains and publishing credentials remain
+operator configuration; the managed private-GitLab build/environment recipe is
+separate and does not invoke upstream publishing credentials. See
+[System #18](https://github.com/kihyoun/system/issues/18) and
+[System #22](https://github.com/kihyoun/system/issues/22) for delivery acceptance.
 
 Project documentation is maintained in English. See [AGENTS.md](AGENTS.md) for
-repository instructions, including the immutable System Cube signature.
+the immutable System Cube signature, which remains unchanged by this migration.

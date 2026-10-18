@@ -23,13 +23,12 @@
 
 # Review Apps: http://*.system-bootstrapper.com
 # Filepath: ./gitlab-ci.yml
-image: docker:latest
+image: docker:29-cli@sha256:6fae2214c3121a28d5aa639d09032f61310b7c9c75ffbad1025f261a1b621800
 services:
-  - docker:dind
+  - docker:29-dind
 variables:
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
-  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
 stages:
   - build
   - test
@@ -39,8 +38,6 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .npm
-    - cache/Cypress
-    - node_modules
 
 build:
   stage: build
@@ -53,22 +50,20 @@ build:
     - merge_requests
     - master
 
-test:cypress:
+test:browser:
   stage: test
   services:
     - name: $IMAGE_TAG
       alias: alpha-host
-  image: cypress/base:10
+  image: mcr.microsoft.com/playwright:v1.64.1-noble
   script:
     - npm ci
-    - npx cypress cache path
-    - npx cypress cache list
-    - npx cypress run --config baseUrl=http://alpha-host:80
+    - WIZARD_BASE_URL=http://alpha-host:80 npm run test:ci
   artifacts:
     when: always
     paths:
-      - cypress/videos/**/*.mp4
-      - cypress/screenshots/**/*.png
+      - playwright-report/
+      - test-results/
     expire_in: 1 day
   only:
     - merge_requests
@@ -107,6 +102,8 @@ stop:review:
     - merge_requests
 
 deploy:www:
+  when: manual
+  allow_failure: false
   stage: deploy
   environment:
     name: production/www
@@ -123,6 +120,8 @@ deploy:www:
     - master
 
 deploy:dockerhub:
+  when: manual
+  allow_failure: false
   stage: deploy
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
@@ -134,8 +133,10 @@ deploy:dockerhub:
     - master
 
 deploy:github:
+  when: manual
+  allow_failure: false
   stage: deploy
-  image: node:alpine
+  image: node:24.22.0-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
   before_script:
     - 'which ssh-agent || ( apk update && apk add openssh-client git)'
     - eval $(ssh-agent -s)
@@ -153,8 +154,10 @@ deploy:github:
     - master
 
 deploy:system:
+  when: manual
+  allow_failure: false
   stage: deploy:rollout
-  image: node:alpine
+  image: node:24.22.0-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
   before_script:
     - 'which ssh-agent || ( apk update && apk add openssh-client git)'
     - eval $(ssh-agent -s)

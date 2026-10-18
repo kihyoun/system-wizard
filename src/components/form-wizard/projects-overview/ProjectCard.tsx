@@ -1,94 +1,61 @@
+import { makeStyles } from 'tss-react/mui';
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  createStyles,
-  FormControlLabel,
-  Grid,
-  List, ListItem, ListItemText, makeStyles,
-  Switch,
-  Theme,
-  Toolbar
-} from '@material-ui/core';
+import { Card, CardContent, FormControlLabel, Grid, List, ListItem, ListItemText, Switch, Theme, Toolbar } from '@mui/material';
 import { observer } from 'mobx-react';
-import { green } from '@material-ui/core/colors';
-
-const useCardStyles = makeStyles({
-  root  : { minWidth: 275 },
-  bullet: {
-    display  : 'inline-block',
-    margin   : '0 2px',
-    transform: 'scale(0.8)'
-  },
-  title: {
-    fontSize: 14,
-    flexGrow: 1
-  },
-  pos  : { marginBottom: 12 },
-  green: { color: green[500] }
+import { green } from '@mui/material/colors';
+const useCardStyles = makeStyles()({
+    root: { minWidth: 275 },
+    bullet: {
+        display: 'inline-block',
+        margin: '0 2px',
+        transform: 'scale(0.8)'
+    },
+    title: {
+        fontSize: 14,
+        flexGrow: 1
+    },
+    pos: { marginBottom: 12 },
+    green: { color: green[500] }
 });
-
-const useListSyles = makeStyles((theme: Theme) =>
-  createStyles({
+const useListSyles = makeStyles()((theme: Theme) => ({
     root: {
-      backgroundColor: theme.palette.background.paper,
-      overflow       : 'hidden'
+        backgroundColor: theme.palette.background.paper,
+        overflow: 'hidden'
     }
-  })
-);
+}));
 const ProjectCard = observer((props: any) => {
-  const cardClasses = useCardStyles();
-  const listClasses = useListSyles();
-  return (
-    <Grid item xs={4}>
+    const { classes: cardClasses } = useCardStyles();
+    const { classes: listClasses } = useListSyles();
+    return (<Grid size={4}>
       <Card color="primary.main" className={cardClasses.root}>
         <CardContent>
           <Toolbar>
-            <FormControlLabel
-              control={
-                <Switch
-                  disabled={props.systemProject}
-                  checked={props.hostInfo.useHost === 'true'}
-                  onChange={ev => props.handleChange(ev.target.checked)}
-                  name="prodCfg"
-                  color="primary"
-                />
-              }
-              label={props.hostInfo.context}
-            />
+            <FormControlLabel control={<Switch disabled={props.systemProject} checked={props.hostInfo.useHost === 'true'} onChange={ev => props.handleChange(ev.target.checked)} name="prodCfg" color="primary"/>} label={props.hostInfo.context}/>
           </Toolbar>
 
           {props.hostInfo.useHost === 'true' &&
-          <List className={listClasses.root}>
+            <List className={listClasses.root}>
             <ListItem>
-              <ListItemText primary="Host"
-                secondary={props.hostInfo.url} />
+              <ListItemText primary="Host" secondary={props.hostInfo.url}/>
             </ListItem>
             <ListItem>
-              <ListItemText primary="Deployment"
-                secondary={props.systemProject ? 'Managed by Bootstrapper' :
-                  props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
+              <ListItemText primary="Deployment" secondary={props.systemProject ? 'Managed by Bootstrapper' :
+                    props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'}/>
             </ListItem>
             <ListItem>
-              <ListItemText primary="Internal Port"
-                secondary={props.hostInfo.port} />
+              <ListItemText primary="Internal Port" secondary={props.hostInfo.port}/>
             </ListItem>
-            {props.hostInfo.domainMode > 1 && (
-              <>
+            {props.hostInfo.domainMode > 1 && (<>
                 <ListItem>
-                  <ListItemText primary="SSL Certificate Path"
-                    secondary={props.hostInfo.ssl} />
+                  <ListItemText primary="SSL Certificate Path" secondary={props.hostInfo.ssl}/>
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary="SSL Certificate Key" secondary={props.hostInfo.sslKey} />
+                  <ListItemText primary="SSL Certificate Key" secondary={props.hostInfo.sslKey}/>
                 </ListItem>
-              </> )}
-          </List>
-          }
+              </>)}
+          </List>}
         </CardContent>
       </Card>
-    </Grid>
-  );
+    </Grid>);
 });
-
 export default ProjectCard;

@@ -1,22 +1,10 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import PublishIcon from '@material-ui/icons/Publish';
-import {
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography
-} from '@material-ui/core';
-
-export default function PushDialog(props:any) {
-
-  return (
-    <React.Fragment>
-      <Dialog
-        transitionDuration={0}
-        fullWidth={true}
-        maxWidth={'xs'}
-        open={props.open}
-        onClose={()=> props.setOpen(false)}
-        aria-labelledby="responsive-dialog-title"
-      >
+import Button from '@mui/material/Button';
+import PublishIcon from '@mui/icons-material/Publish';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+export default function PushDialog(props: any) {
+    return (<React.Fragment>
+      <Dialog transitionDuration={0} fullWidth={true} maxWidth={'xs'} open={props.open} onClose={() => props.setOpen(false)} aria-labelledby="responsive-dialog-title">
 
         <DialogTitle id="responsive-dialog-title">Warning</DialogTitle>
         <DialogContent>
@@ -31,8 +19,7 @@ export default function PushDialog(props:any) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus disableElevation variant="contained" onClick={props.handlePush}
-            color="secondary" startIcon={<PublishIcon />}>
+          <Button autoFocus disableElevation variant="contained" onClick={props.handlePush} color="secondary" startIcon={<PublishIcon />}>
             Push
           </Button>
           <Button onClick={() => props.setOpen(false)} color="primary" autoFocus>
@@ -40,6 +27,5 @@ export default function PushDialog(props:any) {
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
-  );
+    </React.Fragment>);
 }

@@ -1,18 +1,19 @@
+import { vi } from 'vitest';
 import axios from 'axios';
 import Main from './Main';
 import Helper from './Helper';
 
-jest.mock('axios');
-const get = axios.get as jest.Mock;
+vi.mock('axios');
+const get = axios.get as ReturnType<typeof vi.fn>;
 
 function connected() {
   const main = new Main();
-  (axios.post as jest.Mock).mockResolvedValue({ data: { accessToken: 'test-token' } });
+  (axios.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { accessToken: 'test-token' } });
   main.sync.userName = 'local-test';
   return main;
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 test('a saved configuration wins and is not marked as derived', async () => {
   const main = connected();
@@ -47,7 +48,7 @@ test('missing config loads marked suggestions without generating credentials', a
   expect(main.config!.syncPass).toBe('');
   expect(main.derivedFields.gitlabHost).toBe('Connection hostname');
   expect(main.init).toBe(false);
-  expect((axios.post as jest.Mock).mock.calls.every(call => call[0].endsWith('/token'))).toBe(true);
+  expect((axios.post as ReturnType<typeof vi.fn>).mock.calls.every(call => call[0].endsWith('/token'))).toBe(true);
 });
 
 test('authentication and server errors do not replace the form with guesses', async () => {
@@ -57,4 +58,23 @@ test('authentication and server errors do not replace the form with guesses', as
   await expect(main.sync.fetch()).rejects.toEqual({ response: { status: 401 } });
   expect(main.config!.gitlabHost).toBe(before);
   expect(get).toHaveBeenCalledTimes(1);
+});
+
+test('a failed ZIP generation rejects Push instead of leaving its progress dialog pending', async () => {
+  const main = connected();
+  const failure = new Error('ZIP generation failed');
+  vi.spyOn(main, 'generateZip').mockRejectedValueOnce(failure);
+  await expect(main.sync.push()).rejects.toBe(failure);
+  expect(axios.post).not.toHaveBeenCalled();
+});
+
+test('a failed authenticated upload rejects Push with the server error', async () => {
+  const main = connected();
+  const failure = new Error('Upload rejected');
+  const post = axios.post as ReturnType<typeof vi.fn>;
+  post.mockResolvedValueOnce({ data: { accessToken: 'test-token' } }).mockRejectedValueOnce(failure);
+  await expect(main.sync.push()).rejects.toBe(failure);
+  expect(post.mock.calls.map(call => call[0])).toEqual([
+    main.sync.serverAddress + '/token', main.sync.serverAddress + '/config/zip'
+  ]);
 });
