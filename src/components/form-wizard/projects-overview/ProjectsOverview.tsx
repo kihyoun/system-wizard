@@ -32,6 +32,7 @@ import DownloadReactCiDialog from '../dialog/DownloadReactCiDialog';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import WizardSourceDialog from './WizardSourceDialog';
 import WizardBuildDialog from './WizardBuildDialog';
+import WizardEnvironmentsDialog from './WizardEnvironmentsDialog';
 
 const useStyles = makeStyles({
   table: {
@@ -63,6 +64,7 @@ const ProjectsOverview = observer((props:any) => {
   const [downloadReactCi, setDownloadReactCi] = useState(false);
   const [wizardSourceOpen, setWizardSourceOpen] = useState(false);
   const [wizardBuildOpen, setWizardBuildOpen] = useState(false);
+  const [wizardEnvironmentsOpen, setWizardEnvironmentsOpen] = useState(false);
 
 
   const handleDelete = () => {
@@ -80,6 +82,8 @@ const ProjectsOverview = observer((props:any) => {
     <>
       {wizardSourceOpen && <WizardSourceDialog sync={props.main.sync} onClose={() => setWizardSourceOpen(false)} />}
       {wizardBuildOpen && <WizardBuildDialog sync={props.main.sync} onClose={() => setWizardBuildOpen(false)} />}
+      {wizardEnvironmentsOpen && <WizardEnvironmentsDialog sync={props.main.sync}
+        onClose={() => setWizardEnvironmentsOpen(false)} />}
       <Snackbar open={openDeleteSuccess} autoHideDuration={6000}
         onClose={() => setOpenDeleteSuccess(false)}
         message={'Project successfully deleted.'} />
@@ -160,7 +164,7 @@ const ProjectsOverview = observer((props:any) => {
                           Pipelines</a>{' · '}
                         {projectConfig.repository.systemProject
                           ? 'Existing Wizard interface — configured under General. ' +
-                            'Source can be initialized explicitly; review and rollout are the next expansion.'
+                            'Initialize source, verify a candidate and configure optional Review/Beta explicitly.'
                           : projectConfig.repository.deploymentState === 'awaiting-source'
                             ? 'Repository ready — deployment awaits application source.'
                             : <a href={projectConfig.repository.initialPipeline?.webUrl ||
@@ -169,12 +173,14 @@ const ProjectsOverview = observer((props:any) => {
                       </p>}
                       <Grid container spacing={3}>
                         {projectConfig.repository?.systemProject && <Grid item xs={12}>
-                          <p>Production points to the running system interface. Beta and Review are not enabled.
-                            Importing source does not update the running interface.</p>
+                          <p>Production points to the running system interface. Configure Beta and Review separately.
+                            Importing source and configuring environments preserve the running interface.</p>
                           <Button color="primary" disabled={!props.main.sync.connected}
                             onClick={() => setWizardSourceOpen(true)}>Initialize Wizard source</Button>
                           <Button color="primary" disabled={!props.main.sync.connected}
                             onClick={() => setWizardBuildOpen(true)}>Build and verify Wizard</Button>
+                          <Button color="primary" disabled={!props.main.sync.connected}
+                            onClick={() => setWizardEnvironmentsOpen(true)}>Configure Review and Beta</Button>
                         </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
                           systemProject={!!projectConfig.repository?.systemProject}
