@@ -6,16 +6,23 @@ Write and maintain all project documentation in English, including READMEs,
 handbooks, operating guides and generated starter documentation. The maintainer
 confirmed this preference on 2026-10-17. Conversation may remain in German.
 
-Track new requirements and future expansions in GitHub issues; documentation
-should describe current behavior and link to the issue.
-Create an issue before starting new implementation, then link implementing pull
-requests to it. All issues must be created centrally in `kihyoun/system`, even
-when the implementation belongs to this Wizard repository. Do not create new
-issues in `kihyoun/system-wizard`; link Wizard PRs to the central System issue.
-Current registration: https://github.com/kihyoun/system/issues/19.
-The automatically registered Wizard project represents the existing system interface. Source
-import, Review/Beta and rollout are a later delivery tracked in
-https://github.com/kihyoun/system/issues/18.
+## Public repository content
+
+Only commit documentation another user can reproduce from a fresh checkout and
+infrastructure they configure themselves. Document durable architecture, setup,
+operation and verification with explicit inputs and generic examples.
+
+Keep development status, work plans, chat handoffs, private deployment inventories
+and pipeline/acceptance diaries outside the repository. Do not include project
+issue or pull/merge-request references in source comments, user guides or generated
+documentation. Agent instructions may identify the external tracker. Instructions
+must not depend on the maintainer's existing GitLab state or retained private files.
+
+The upstream requirements tracker is https://github.com/kihyoun/system/issues,
+including Wizard work. Reuse relevant tasks when requested; do not create issues
+for routine documentation cleanup. Deployment workflows may use their own GitLab.
+Read the root README, package scripts and the relevant System component guides
+before changing behavior; inspect current refs and worktree state before edits.
 
 ## Immutable System Cube signature
 

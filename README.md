@@ -5,9 +5,9 @@ System Wizard is the browser interface for
 configuration, GitLab runners, application projects and deployment settings
 through the Bootstrapper's authenticated Sync service.
 
-The existing Wizard uses React 16, TypeScript 4, Create React App 4, MobX and
-Material UI 4. Its build environment is separate from the modern application
-starters it can generate.
+The Wizard uses React 19, TypeScript 6, Vite 8, MobX and Material UI.
+Use the Node/npm versions pinned in `package.json` and `.nvmrc` with the committed
+lockfile. Application starters have their own generated build definitions.
 
 ## Use the Wizard with a Bootstrapper
 
@@ -16,12 +16,13 @@ for installation, first login, runner setup and troubleshooting. A standalone
 Wizard development server does not start Sync, GitLab, the registry or runners.
 
 1. Open **Edit** using the pencil icon next to **Connect**. Enter the Sync server
-   address and credentials from your own Bootstrapper output, then select **Submit**.
+   address and credentials from your own Bootstrapper configuration, then select **Submit**.
    For a fresh local setup, the address is `http://localhost/sync`; after applying
    the documented configuration, it is `http://sync.localhost`.
 2. Select **Synchronize → Fetch** to load the instance's saved settings and projects.
-3. Review changes, use **Backup** to save a local JSON copy, and use **Push** and
-   **Restart** when applying platform configuration changes.
+3. Review changes, use **Backup** to save a local JSON copy, and use **Push** to
+   apply platform configuration changes. A successful ZIP Push automatically restarts
+   the Bootstrapper; wait for the interface to return and reconnect.
 
 **Open/Backup** handle configuration files in the browser. **Push/Fetch** transfer
 configuration to and from the connected instance. **Harvest/Seed** handle
@@ -30,7 +31,16 @@ configuration backup. The existing Seed action also transfers the form's main
 configuration before restoring data, so review the form before invoking it.
 
 Configuration backups contain credentials and runner tokens. Keep them private.
-Sync credentials are separate from the GitLab login.
+Sync credentials are separate from the GitLab login. The controller logs confirm
+that authentication is configured without printing its values. Follow the
+handbook to read your effective credentials locally; saved configuration can
+override the generated first-setup defaults.
+
+Runner count controls independent managers sharing the configured GitLab runner
+registration. Open the runner's detail page in GitLab to see its managers. Manager
+system IDs have separate persistent directories; ordinary container recreation
+reuses them. An offline manager entry can represent retained capacity from an
+earlier pool size and does not by itself require deregistration.
 
 ### First-setup suggestions
 
@@ -81,7 +91,7 @@ build and deployment jobs to succeed before checking an application domain;
 repository creation alone does not confirm a running application. Generated
 source, Dockerfile and CI remain editable. Each starter includes a
 GETTING_STARTED.md with local development commands. React and Angular starters
-use Node 24, independently of the Wizard's Node 13 toolchain.
+use their own pinned Node 24 toolchain.
 
 Repeated Save resumes the same operation instead of creating duplicate projects
 or initial pipelines. Repository and template metadata survive Fetch and JSON
@@ -93,7 +103,7 @@ rename its repository or rewrite committed CI automatically.
 
 ### The default Wizard project
 
-With the matching System update, configured startup automatically registers
+Configured Bootstrapper startup automatically registers
 **wizard** as the first project. Fetch after setup completes to load it. Its
 Production URL is the real system-interface address from General; the existing
 Wizard keeps running at that address. The entry is managed under General, so
@@ -103,7 +113,7 @@ The private `root/wizard` repository starts with a README/CI registration
 scaffold. Automatic registration does not import Wizard source, start a pipeline
 or replace the UI.
 
-With the matching Sync update, expand the Wizard row and select **Initialize
+Expand the Wizard row and select **Initialize
 Wizard source**. The preview identifies the private repository, pinned source
 revision and file count. **Import source** explicitly installs that revision;
 opening the preview alone changes nothing. The original scaffold README stays
@@ -115,19 +125,14 @@ The source-import action imports source only: managed CI remains disabled, no pi
 started, and Production, Beta and Review deployments are unchanged. See the
 [source initialization guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_SOURCE.md)
 for prerequisites, state and recovery. The separate build action is described below.
-Review/Beta and the later manual GitLab Production deployment remain subsequent phases.
-Beta and Review remain disabled. Registration is idempotent and survives
-Fetch, Backup/Open, Push and restart. Conflicting local keys or foreign
-repositories are reported without overwriting them.
-
-This delivery is tracked in [the registration issue](https://github.com/kihyoun/system/issues/19).
-Source import, development using the local GitLab, Review/Beta and a controlled
-Production rollout are tracked as the
-[next expansion](https://github.com/kihyoun/system/issues/18).
+Registration is idempotent and survives Fetch, Backup/Open, Push and restart.
+Conflicting local keys or foreign repositories are reported without overwriting
+them. Review/Beta environments and Production promotion have separate controls;
+source import alone does not enable them.
 
 ### Build and verify the imported Wizard
 
-With the matching Phase B controller, expand the managed Wizard row and select
+Expand the managed Wizard row and select
 **Build and verify Wizard**. Its preview identifies the owned repository,
 imported source commit and recipe version. **Enable build pipeline** explicitly
 installs the managed build recipe and starts or recovers its initial pipeline.
@@ -147,12 +152,13 @@ verification succeeds again. Source initialization is separate from this build
 operation; after enabling CI, use the build/status action rather than repeating
 source import.
 
-This compatibility path uses the existing Node 13/CRA toolchain; it is not the
-supported-version modernization. It does not deploy Production or enable Beta
-or Review. The later Production rollout remains an explicit manual GitLab job.
-See the [managed build guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_BUILD.md)
-and [central build issue](https://github.com/kihyoun/system/issues/33) for scope
-and validation limits.
+The managed build recipe selects a toolchain profile for the imported source;
+the Vite source uses the Node 24/Vite profile. Build verification alone does not
+promote Production. Review/Beta require explicit environment configuration, and
+Production uses the guarded operator plan/apply/rollback workflow. See the
+[managed build guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_BUILD.md),
+[environment guide](https://github.com/kihyoun/system/blob/master/project-bootstrap/wizard-environments/README.md)
+and [Production guide](https://github.com/kihyoun/system/blob/master/project-bootstrap/wizard-production/README.md).
 
 ## Local development
 
@@ -165,8 +171,7 @@ npm start
 ```
 
 Vite serves development at `http://localhost:5173`. Connect to an explicitly
-chosen Bootstrapper Sync endpoint to exercise authenticated operations. The
-[modernization plan](MODERNIZATION.md) records version selection and rollout gates.
+chosen Bootstrapper Sync endpoint to exercise authenticated operations. Use the committed dependency versions and configuration when reproducing builds.
 
 Run the checks and build the production SPA into the existing `build/` directory:
 
@@ -193,9 +198,7 @@ image for recovery and validate separate candidates before Production rollout.
 The upstream CI preserves distinct Review, Production, Docker Hub, GitHub mirror
 and platform-update roles. Public domains and publishing credentials remain
 operator configuration; the managed private-GitLab build/environment recipe is
-separate and does not invoke upstream publishing credentials. See
-[System #18](https://github.com/kihyoun/system/issues/18) and
-[System #22](https://github.com/kihyoun/system/issues/22) for delivery acceptance.
+separate and does not invoke upstream publishing credentials.
 
 Project documentation is maintained in English. See [AGENTS.md](AGENTS.md) for
-the immutable System Cube signature, which remains unchanged by this migration.
+the immutable System Cube signature, which must remain unchanged in generated and imported configuration.
