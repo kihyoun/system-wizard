@@ -185,7 +185,7 @@ const ProjectFormDialog = observer((props: any) => {
           {busy && <p role="status">Creating application, installing CI, configuring routing and starting the pipeline…
             You can continue when setup completes.</p>}
           <fieldset disabled={busy} style={{ border: 0 }}><Grid container>
-            <Grid size={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <Stepper activeStep={activeStep} nonLinear orientation="vertical">
                 {steps.map((step, index) => (<Step key={step.label}>
                     <StepButton onClick={handleStep(index)}>
@@ -205,7 +205,7 @@ const ProjectFormDialog = observer((props: any) => {
                   </Step>))}
               </Stepper>
             </Grid>
-            <Grid size={8}>
+            <Grid size={{ xs: 12, md: 8 }}>
               <MainFields editing={editing} availability={availability} message={availabilityMessage} namespaces={namespaces} destination={(namespaces.find((n: any) => String(n.id) === String(namespaceId))?.path || '') + '/' + key} openAlert={(value: string) => runInAction(() => setOpenAlert(value))} hidden={activeStep !== 0} config={projectConfig} placeholder={projectPlaceholderConfig}/>
               <ProdFields init={props.activeProject === ''} hidden={activeStep !== 1} config={projectConfig} placeholder={projectPlaceholderConfig}/>
               <BetaFields init={props.activeProject === ''} hidden={activeStep !== 2} config={projectConfig} placeholder={projectPlaceholderConfig}/>
