@@ -1,7 +1,5 @@
 import FileSaver from 'file-saver';
 import {
-  action,
-  computed,
   makeAutoObservable,
   observable,
   runInAction
@@ -12,15 +10,16 @@ import JSZip from 'jszip';
 import SyncServer from './SyncServer';
 import { v4 as uuidv4 } from 'uuid';
 import md5 from 'md5';
+import {environment} from './Environment';
 
 /**
  * General Configuration Object
  */
 export default class Main {
-    @observable private _placeHolder!: MainConfig;
-    @observable private _config!: MainConfig;
-    @observable private _projects: Map<string, ProjectConfig>;
-    @observable private _syncServer!: SyncServer;
+    private _placeHolder!: MainConfig;
+    private _config!: MainConfig;
+    private _projects: Map<string, ProjectConfig>;
+    private _syncServer!: SyncServer;
     init = true;
     uploadProgress = false;
     derivedFields: { [key: string]: string } = {};
@@ -40,14 +39,14 @@ export default class Main {
       this._projects = _projects || observable(new Map<string, ProjectConfig>());
     }
 
-    @action public generateConfig(_config: any | undefined): void {
+    public generateConfig(_config: any | undefined): void {
       this.derivedFields = {};
       this._config = new MainConfig(_config);
       this._syncServer = this._syncServer ? this._syncServer : new SyncServer(this);
       this._placeHolder = new MainConfig(_config);
     }
 
-    @action public applySuggestions(suggestions: any): void {
+    public applySuggestions(suggestions: any): void {
       const values = suggestions.config || {};
       this.generateConfig(values);
       const config = this._config;
@@ -83,26 +82,26 @@ export default class Main {
       this.init = false;
     }
 
-    @computed public get placeholder(): MainConfig | undefined {
+    public get placeholder(): MainConfig | undefined {
       return this._placeHolder;
     }
 
-    @computed public get config(): MainConfig | undefined {
+    public get config(): MainConfig | undefined {
       return this._config;
     }
 
-    @computed public get sync(): SyncServer {
+    public get sync(): SyncServer {
       return this._syncServer;
     }
 
-    @action public addProject(project: ProjectConfig) {
+    public addProject(project: ProjectConfig) {
       runInAction(() => {
         this._projects.set(project.projectKey, project);
         project.saved = true;
       });
     }
 
-    @action public saveProject(project: ProjectConfig, oldConfig: ProjectConfig) {
+    public saveProject(project: ProjectConfig, oldConfig: ProjectConfig) {
       runInAction(() => {
         this._projects.delete(oldConfig.projectKey);
         this._projects.set(project.projectKey, project);
@@ -110,11 +109,11 @@ export default class Main {
       });
     }
 
-    @computed get projects(): Map<string, ProjectConfig> {
+    get projects(): Map<string, ProjectConfig> {
       return this._projects;
     }
 
-    @computed public get asJson() {
+    public get asJson() {
       const proxies:any = [];
       this._projects.forEach(config => proxies.push(config.asJson));
 
@@ -166,10 +165,7 @@ export default class Main {
         });
         this.init = false;
         this.uploadProgress = false;
-        console.group('JSON File import');
-        console.log(`Filename: ${file.name}`)
-        console.log('Raw data:', `\n${result}`);
-        console.groupEnd();
+
       });
     }
 
@@ -184,23 +180,18 @@ export default class Main {
         throw new Error('Invalid Configuration');
       }
 
+      const assignments = environment(data);
       runInAction(() => {
         this.derivedFields = {};
         this.uploadProgress = true;
         this.init=false;
       });
       runInAction(() => {
-        const lines = data.split('\n');
-        lines.forEach((line:any) => {
-        // Skip comments
-          if (line.substr(0, 1) === '#' || line.length < 3) {
-            return;
-          }
-          const parts = line.split('=');
-          const value = parts[1];
-          const key = parts[0].split(' ').reverse()[0];
-          this._config.setProperty(key, value);
-        });
+        this._config = new MainConfig();
+        // Domain setters derive URLs. Explicit saved URLs must win afterwards.
+        const ordered = assignments.filter(([key]) => !['GITLAB_EXTERNAL_URL', 'GITLAB_REGISTRY_URL'].includes(key))
+          .concat(assignments.filter(([key]) => ['GITLAB_EXTERNAL_URL', 'GITLAB_REGISTRY_URL'].includes(key)));
+        ordered.forEach(([key, value]) => this._config.setProperty(key, value));
         this.uploadProgress = false;
       });
     }
@@ -216,6 +207,7 @@ export default class Main {
         throw new Error('Invalid Configuration');
       }
 
+      const assignments = environment(data);
       const config = new ProjectConfig(this);
       config.template = 'empty';
       // Legacy ENV omits disabled domain modes. Do not invent HTTPS fields
@@ -228,17 +220,7 @@ export default class Main {
         this.init = false;
       });
       runInAction(() => {
-        const lines = data.split('\n');
-        lines.forEach((line:any)=> {
-        // Skip comments
-          if (line.substr(0, 1) === '#' || line.length < 3) {
-            return;
-          }
-          const parts = line.split('=');
-          const value = parts[1];
-          const key = parts[0].split(' ').reverse()[0];
-          config.setProperty(key, value);
-        });
+        assignments.forEach(([key, value]) => config.setProperty(key, value));
         for (const context of ['prod', 'beta', 'review']) {
           const upper = context.toUpperCase();
           if (!new RegExp('^' + upper + '_DOMAIN_MODE=', 'm').test(data)
@@ -250,6 +232,7 @@ export default class Main {
         if (metadata) {
           config.repository = JSON.parse(decodeURIComponent(metadata.substr('# BOOTSTRAPPER_REPOSITORY='.length)));
         }
+        config.bootstrapperProject = data.split('\n').find((line:string) => line.startsWith('# BOOTSTRAPPER_PROJECT='))?.slice('# BOOTSTRAPPER_PROJECT='.length) || '';
         config.namespaceId = config.repository?.namespaceId || '';
         this.addProject(config);
         this.uploadProgress = false;
@@ -258,7 +241,7 @@ export default class Main {
 
     public exportZip() {
       this.generateZip().then(function(content:any) {
-        saveAs(content, 'bootstrapper.zip');
+        FileSaver.saveAs(content, 'bootstrapper.zip');
       });
     }
 
@@ -282,7 +265,7 @@ export default class Main {
       });
 
       zip.generateAsync({ type: 'blob' }).then(function(content:any) {
-        saveAs(content, 'projects.env.zip');
+        FileSaver.saveAs(content, 'projects.env.zip');
       });
 
     }

@@ -1,17 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
-import * as serviceWorker from './serviceWorker';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const root = document.getElementById('root');
+if (!root)
+    throw new Error('Missing application root.');
+createRoot(root).render(<React.StrictMode><App /></React.StrictMode>);
+// Retire legacy CRA workers so a restored server cannot retain an old interface.
+if ('serviceWorker' in navigator) {
+    void navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => { void registration.unregister(); });
+    });
+}

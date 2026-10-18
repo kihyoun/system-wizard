@@ -1,8 +1,9 @@
 import FileSaver from 'file-saver';
 import {
-  action, computed, makeAutoObservable, runInAction
+  makeAutoObservable, runInAction
 } from 'mobx';
 import Helper from './Helper';
+import {extraEnvironment} from './Environment';
 import Main, { HostInfo } from './Main';
 
 /**
@@ -13,7 +14,8 @@ export default class ProjectConfig {
     namespaceId = '';
     repository: any = undefined;
     bootstrapPending = false;
-    _projectKey!:string;
+    bootstrapperProject = '';
+    _projectKey = '';
 
     get projectKey() {
       return this._projectKey;
@@ -74,7 +76,7 @@ export default class ProjectConfig {
       return this._reviewDomainMode;
     }
     set reviewDomainMode(mode:any) {
-      this._reviewDomainMode = parseInt(mode, 10) || 1;
+      this._reviewDomainMode = parseInt(mode, 10) || 0;
     }
     _reviewDeployMode!:number;
     get reviewDeployMode() {
@@ -103,7 +105,10 @@ export default class ProjectConfig {
       this.generateConfig(_config);
     }
 
-  @action generateConfig(_config: any | undefined = undefined) {
+  runtimeOptions: {[key: string]: string} = {};
+
+  generateConfig(_config: any | undefined = undefined) {
+      this.runtimeOptions = {...(_config?.runtimeOptions ?? {})};
       this.generateMainConfig(_config);
       this.generateProdProxyConfig(_config);
       this.generateBetaProxyConfig(_config);
@@ -111,20 +116,21 @@ export default class ProjectConfig {
       this.generateRunnerConfig(_config);
     }
 
-  @action generateMainConfig(_config: any | undefined = undefined): void {
+  generateMainConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this._projectKey = _config?.projectKey || '';
-      this.namespaceId = _config?.namespaceId || _config?.repository?.namespaceId || '';
+      this._projectKey = _config?.projectKey ?? '';
+      this.namespaceId = _config?.namespaceId ?? _config?.repository?.namespaceId ?? '';
       this.repository = _config?.repository;
+      this.bootstrapperProject = _config?.bootstrapperProject ?? '';
       this.template = _config ? (_config.template || _config.repository?.template || 'empty') : 'react';
-      this.bootstrapPending = _config?.bootstrapPending || false;
+      this.bootstrapPending = _config?.bootstrapPending ?? false;
     });
   }
 
-  @action generateProdProxyConfig(_config: any | undefined = undefined): void {
+  generateProdProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.useProdHost = _config?.useProdHost || 'true';
-      this.prodHost = _config?.prodHost || `www.${this.projectKey}.com`;
+      this.useProdHost = _config?.useProdHost ?? 'true';
+      this.prodHost = _config?.prodHost ?? `www.${this.projectKey}.com`;
       this.prodDomainMode = _config ? parseInt(_config.prodDomainMode, 10) : 2;
       this.prodDeployMode = _config ? parseInt(_config.prodDeployMode, 10) : 1;
       this.prodSSL = _config?.prodSSL?.replace(/;/g, '')
@@ -134,7 +140,7 @@ export default class ProjectConfig {
     });
   }
 
-  @computed get prodHostInfo(): HostInfo {
+  get prodHostInfo(): HostInfo {
     const host = (this.prodDomainMode === 1 || this.prodDomainMode === 3 ? '*.' : '')
         + this.prodHost;
     return {
@@ -149,18 +155,18 @@ export default class ProjectConfig {
     }
   }
 
-  @action generateBetaProxyConfig(_config: any | undefined = undefined): void {
+  generateBetaProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.useBetaHost = _config?.useBetaHost || 'false';
-      this.betaHost = _config?.betaHost || `beta.${this.projectKey}.com`;
+      this.useBetaHost = _config?.useBetaHost ?? 'false';
+      this.betaHost = _config?.betaHost ?? `beta.${this.projectKey}.com`;
       this.betaDomainMode = _config ? parseInt(_config.betaDomainMode, 10) || 0 : 2;
       this.betaDeployMode = _config ? parseInt(_config.betaDeployMode, 10) || 0 : 1;
-      this.betaSSL = _config?.betaSSL || `/ssl/live/${this.betaHost}/fullchain.pem`;
-      this.betaSSLKey = _config?.betaSSLKey || `/ssl/live/${this.betaHost}/privkey.pem`;
+      this.betaSSL = _config?.betaSSL ?? `/ssl/live/${this.betaHost}/fullchain.pem`;
+      this.betaSSLKey = _config?.betaSSLKey ?? `/ssl/live/${this.betaHost}/privkey.pem`;
     });
   }
 
-  @computed get betaHostInfo() : HostInfo {
+  get betaHostInfo() : HostInfo {
     const host = (this.betaDomainMode === 1 || this.betaDomainMode === 3 ? '*.' : '')
         + this.betaHost;
     return {
@@ -175,18 +181,18 @@ export default class ProjectConfig {
     }
   }
 
- @action generateReviewProxyConfig(_config: any | undefined = undefined): void {
+ generateReviewProxyConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
-      this.useReviewHost = _config?.useReviewHost || 'true';
-      this.reviewHost = _config?.reviewHost || `${this.projectKey}.com`;
+      this.useReviewHost = _config?.useReviewHost ?? 'true';
+      this.reviewHost = _config?.reviewHost ?? `${this.projectKey}.com`;
       this.reviewDomainMode = _config ? parseInt(_config.reviewDomainMode, 10) || 0 : 1;
       this.reviewDeployMode = _config ? parseInt(_config.reviewDeployMode, 10) || 0 : 1;
-      this.reviewSSL = _config?.reviewSSL || `/ssl/live/${this.reviewHost}/fullchain.pem`;
-      this.reviewSSLKey = _config?.reviewSSLKey || `/ssl/live/${this.reviewHost}/privkey.pem`;
+      this.reviewSSL = _config?.reviewSSL ?? `/ssl/live/${this.reviewHost}/fullchain.pem`;
+      this.reviewSSLKey = _config?.reviewSSLKey ?? `/ssl/live/${this.reviewHost}/privkey.pem`;
     });
   }
 
-  @computed get reviewHostInfo() : HostInfo{
+  get reviewHostInfo() : HostInfo{
    const host = (this.reviewDomainMode === 1 || this.reviewDomainMode === 3 ? '*.' : '')
      + this.reviewHost;
    return {
@@ -201,10 +207,10 @@ export default class ProjectConfig {
    }
  }
 
-   @action generateRunnerConfig(_config: any | undefined = undefined): void {
+   generateRunnerConfig(_config: any | undefined = undefined): void {
     runInAction(() => {
       this.gitlabRunnerScale = parseInt(_config?.gitlabRunnerScale, 10) || 0;
-      this.gitlabRunnerToken = _config?.gitlabRunnerToken || 'secret-token';
+      this.gitlabRunnerToken = _config?.gitlabRunnerToken ?? '';
     });
   }
    public setProperty(propertyKey: any, value: any){
@@ -229,8 +235,9 @@ export default class ProjectConfig {
      case 'REVIEW_DOMAIN_MODE': this.reviewDomainMode = parseInt(Helper.unquote(value), 10); break;
      case 'REVIEW_SSL': this.reviewSSL = Helper.unquote(value).replace(/;/g, ''); break;
      case 'REVIEW_SSL_KEY': this.reviewSSLKey = Helper.unquote(value).replace(/;/g, ''); break;
-     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value) || 'secret-token'; break;
+     case 'GITLAB_RUNNER_TOKEN': this.gitlabRunnerToken = Helper.unquote(value); break;
      case 'GITLAB_RUNNER_SCALE': this.gitlabRunnerScale = parseInt(Helper.unquote(value), 10) || 0; break;
+    default: this.runtimeOptions[propertyKey] = Helper.unquote(value); break;
      }
    }
 
@@ -292,6 +299,8 @@ export GITLAB_RUNNER_SCALE=${Helper.quote(this.gitlabRunnerScale)}
      + reviewUse + (this.useReviewHost === 'true' && reviewHost || '')
      + (this.reviewDomainMode > 1 && reviewSSL || '')
      + gitlabRunner
+     + extraEnvironment(this.runtimeOptions)
+     + (this.bootstrapperProject ? `# BOOTSTRAPPER_PROJECT=${this.bootstrapperProject}\n` : '')
      + createdOn;
    }
 
@@ -446,13 +455,15 @@ deploy:prod:
      FileSaver.saveAs(file);
    }
 
-  @computed public get asJson() : any {
+  public get asJson() : any {
      return {
        template         : this.template,
        projectKey       : this.projectKey,
        namespaceId      : this.namespaceId,
        repository       : this.repository,
        bootstrapPending : this.bootstrapPending,
+       bootstrapperProject: this.bootstrapperProject,
+       runtimeOptions   : {...this.runtimeOptions},
        useProdHost      : this.useProdHost,
        prodHost         : this.prodHost,
        prodDomainMode   : this.prodDomainMode,
