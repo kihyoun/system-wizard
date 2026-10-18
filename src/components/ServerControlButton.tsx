@@ -8,8 +8,10 @@ import PushDialog from './dialogs/PushDialog';
 export default function ServerControlButton(props: any) {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [push, setPush] = React.useState(false);
+    const [harvestPending, setHarvestPending] = React.useState(false);
+    const harvestActive = React.useRef(false);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
+        if (!harvestActive.current) setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
         setAnchorEl(null);
@@ -92,18 +94,25 @@ export default function ServerControlButton(props: any) {
             handleClose();
         });
     };
-    const handleHarvest = () => {
-        runInAction(async () => {
-            try {
-                props.setOpenSuccess('Starting Harvest...');
-                await props.main.sync.harvest();
-                props.setOpenSuccess('Ready.');
-            }
-            catch (err) {
-                props.setOpenAlert(err.response?.data || err.toString());
-            }
-            handleClose();
-        });
+    const handleHarvest = async () => {
+        if (harvestActive.current) return;
+        harvestActive.current = true;
+        setHarvestPending(true);
+        handleClose();
+        props.setOpenSuccess('');
+        props.setOpenAlert('');
+        props.setLastStatusMessage('Harvest in progress...');
+        try {
+            await props.main.sync.harvest();
+            props.setOpenSuccess('Harvest completed.');
+            props.setLastStatusMessage('Harvest completed.');
+        } catch (error) {
+            props.setOpenAlert(error.response?.data || error.toString());
+            props.setLastStatusMessage('Harvest failed.');
+        } finally {
+            harvestActive.current = false;
+            setHarvestPending(false);
+        }
     };
     const handleRegister = () => {
         runInAction(async () => {
@@ -141,19 +150,20 @@ export default function ServerControlButton(props: any) {
     };
     return (<React.Fragment>
       <PushDialog open={push} setOpen={setPush} handlePush={handlePush} onClose={() => setPush(false)}/>
-      <Button style={{ marginRight: '1ch' }} variant="text" aria-controls="simple-menu" aria-haspopup="true" color={'primary'} component="span" startIcon={<SyncIcon />} onClick={handleClick}>
-        Synchronize
+      <Button disabled={harvestPending} style={{ marginRight: '1ch' }} variant="text" aria-controls="simple-menu" aria-haspopup="true" color={'primary'} component="span" startIcon={<SyncIcon />} onClick={handleClick}>
+        {harvestPending ? 'Harvest in progress...' : 'Synchronize'}
       </Button>
+      {harvestPending && <span role="status">Harvest in progress...</span>}
       <Menu elevation={1} id="simple-menu" anchorEl={anchorEl} transitionDuration={0} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={() => setPush(true)}>Push</MenuItem>
-        <MenuItem onClick={() => handleSeed()}>Seed</MenuItem>
-        <MenuItem onClick={() => handleRestart()}>Restart</MenuItem>
-        <MenuItem onClick={handleFetch}>Fetch</MenuItem>
-        <MenuItem onClick={() => handleReset()}>Reset</MenuItem>
-        <MenuItem onClick={() => handleHotPatch()}>Update</MenuItem>
-        <MenuItem onClick={() => handleRegister()}>Register</MenuItem>
-        <MenuItem onClick={() => handleUnregister()}>Unregister</MenuItem>
-        <MenuItem onClick={() => handleHarvest()}>Harvest</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => setPush(true)}>Push</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleSeed()}>Seed</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleRestart()}>Restart</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={handleFetch}>Fetch</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleReset()}>Reset</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleHotPatch()}>Update</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleRegister()}>Register</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleUnregister()}>Unregister</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleHarvest()}>Harvest</MenuItem>
       </Menu>
     </React.Fragment>);
 }

@@ -4,11 +4,11 @@ import hooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['build/**', 'node_modules/**', 'public/**', 'cypress/**'] },
+  { ignores: ['build/**', 'node_modules/**', 'public/**', 'cypress/**', '.system-bootstrapper/**', 'build-tools/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.{ts,tsx,js}'],
+    files: ['**/*.{ts,tsx,js,cjs}'],
     languageOptions: { globals: { ...globals.browser, ...globals.node, ...globals.vitest } },
     plugins: { 'react-hooks': hooks },
     rules: {
@@ -16,5 +16,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'react-hooks/rules-of-hooks': 'error'
     }
-  }
+  },
+  { files: ['**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } }
 );

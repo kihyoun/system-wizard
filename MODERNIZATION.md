@@ -82,3 +82,23 @@ standard Playwright Chromium runtime libraries.
 These local checks do not establish private GitLab runner/registry, Review,
 Production promotion or rollback acceptance. Those are separate delivery gates
 that must have recorded identities before the tracking issues can be closed.
+
+## Offline recovery adapter
+
+`npm run test:config-export` builds and checks a self-contained Node 24 adapter
+from `scripts/export-configuration.ts` and the exact Wizard models. The output is
+`build-tools/export-configuration.cjs`. It accepts a private JSON file containing
+the authenticated `/config/main` response and `/config/projects` array, then
+writes the same model-generated configuration ZIP with mode 0600 without
+overwriting an existing file. Errors and progress never print configuration.
+This adapter enables the isolated recovery test to exercise Fetch -> Backup
+semantics without copying a dependency cache or adding a browser to its server.
+The container includes it at
+`/opt/system-bootstrapper/test-tools/export-configuration.cjs`, outside the web
+root; it contains code only. The regular browser remains the production export
+interface.
+
+The first own-GitLab pipeline exposed app lint scanning generated server-owned CI
+files. App lint now explicitly excludes `.system-bootstrapper/` and generated
+`build-tools/`; those files are verified by their separate immutable System
+recipe tests. Application, CLI and browser-test lint remain required.

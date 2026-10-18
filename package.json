@@ -16,7 +16,9 @@
     "test:watch": "vitest",
     "test:ci": "playwright test",
     "lint": "eslint .",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "build:config-export": "rolldown scripts/export-configuration.ts --platform node --format cjs --file build-tools/export-configuration.cjs --no-codeSplitting",
+    "test:config-export": "npm run build:config-export && node --test tests/offline/export-configuration.test.cjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -56,6 +58,7 @@
     "@testing-library/react": "16.3.3",
     "@testing-library/jest-dom": "7.0.1",
     "@playwright/test": "1.64.1",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "rolldown": "1.2.14"
   }
 }
