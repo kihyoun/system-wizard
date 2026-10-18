@@ -10,7 +10,7 @@ import FormWizard from './components/form-wizard/FormWizard';
 import Main from './api/Main';
 import AddIcon from '@mui/icons-material/Add';
 import { observer } from 'mobx-react';
-import { blue } from '@mui/material/colors';
+import { blue, pink } from '@mui/material/colors';
 import { grey } from '@mui/material/colors';
 import clsx from 'clsx';
 import Drawer from '@mui/material/Drawer';
@@ -153,6 +153,15 @@ const App = observer(() => {
     const theme = createTheme({
         palette: {
             primary: dark ? grey : blue,
+            secondary: {
+                light: pink.A200,
+                main: pink.A400,
+                dark: pink.A700,
+                contrastText: '#fff'
+            },
+            background: dark
+                ? { default: '#303030', paper: grey[800] }
+                : { default: grey[50], paper: '#fff' },
             mode: dark ? 'dark' : 'light'
         }
     });

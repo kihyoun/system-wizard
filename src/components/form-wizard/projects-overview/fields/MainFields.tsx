@@ -14,7 +14,8 @@ const MainFields = observer((props: any) => {
             const value = event.target.value;
             runInAction(() => { props.config.namespaceId = value; });
         }} slotProps={{
-        select: { native: true }
+        select: { native: true },
+        inputLabel: { shrink: true }
     }}>
       <option value="">Select namespace</option>
       {props.namespaces.map((namespace: any) => <option key={namespace.id} value={namespace.id}>{namespace.path}</option>)}
