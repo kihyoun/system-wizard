@@ -54,7 +54,10 @@ export default class SyncServer {
 
   async projectRequest(route:string, data?:any): Promise<any> {
     await this.token();
-    const headers = { Authorization: `Bearer ${this.accessToken}`, 'Content-Type': 'application/json' };
+    const headers = {
+      Authorization : `Bearer ${this.accessToken}`,
+      'Content-Type': 'application/json'
+    };
     let response = data
       ? await axios.post(this.serverAddress + route, data, { headers })
       : await axios.get(this.serverAddress + route, { headers });
@@ -70,8 +73,11 @@ export default class SyncServer {
 
   async createProject(project:ProjectConfig) {
     const result = await this.projectRequest('/projects', {
-      projectKey: project.projectKey, namespaceId: project.namespaceId, template: project.template,
-      data: project.content, ci: project.gitlabCi
+      projectKey : project.projectKey,
+      namespaceId: project.namespaceId,
+      template   : project.template,
+      data       : project.content,
+      ci         : project.gitlabCi
     });
     runInAction(() => { project.repository = result.repository; project.bootstrapPending = false; });
     return result;

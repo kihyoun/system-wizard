@@ -247,7 +247,9 @@ export default class Main {
           }
         }
         const metadata = data.split('\n').find((line:string) => line.startsWith('# BOOTSTRAPPER_REPOSITORY='));
-        if (metadata) { config.repository = JSON.parse(decodeURIComponent(metadata.substr('# BOOTSTRAPPER_REPOSITORY='.length))); }
+        if (metadata) {
+          config.repository = JSON.parse(decodeURIComponent(metadata.substr('# BOOTSTRAPPER_REPOSITORY='.length)));
+        }
         config.namespaceId = config.repository?.namespaceId || '';
         this.addProject(config);
         this.uploadProgress = false;

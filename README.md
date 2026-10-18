@@ -100,7 +100,22 @@ Wizard keeps running at that address. The entry is managed under General, so
 project edit/delete controls and environment switches are disabled.
 
 The private `root/wizard` repository currently contains a README/CI registration
-scaffold. It does not import Wizard source, start a pipeline or replace the UI.
+scaffold. Automatic registration does not import Wizard source, start a pipeline
+or replace the UI.
+
+With the matching Sync update, expand the Wizard row and select **Initialize
+Wizard source**. The preview identifies the private repository, pinned source
+revision and file count. **Import source** explicitly installs that revision;
+opening the preview alone changes nothing. The original scaffold README stays
+in place; the source README is stored separately. Conflicting repository files
+are never overwritten. Retry the action after a reported interruption to
+recover the same source import.
+
+This delivery imports source only: managed CI remains disabled, no pipeline is
+started, and Production, Beta and Review deployments are unchanged. See the
+[source initialization guide](https://github.com/kihyoun/system/blob/master/docs/WIZARD_SOURCE.md)
+for prerequisites, state and recovery. Builds and the later manual GitLab
+Production deployment remain subsequent phases of the central workflow issue.
 Beta and Review remain disabled. Registration is idempotent and survives
 Fetch, Backup/Open, Push and restart. Conflicting local keys or foreign
 repositories are reported without overwriting them.

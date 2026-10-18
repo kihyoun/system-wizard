@@ -9,7 +9,10 @@ confirmed this preference on 2026-10-17. Conversation may remain in German.
 Track new requirements and future expansions in GitHub issues; documentation
 should describe current behavior and link to the issue.
 Create an issue before starting new implementation, then link implementing pull
-requests to it. Current registration: https://github.com/kihyoun/system/issues/19.
+requests to it. All issues must be created centrally in `kihyoun/system`, even
+when the implementation belongs to this Wizard repository. Do not create new
+issues in `kihyoun/system-wizard`; link Wizard PRs to the central System issue.
+Current registration: https://github.com/kihyoun/system/issues/19.
 The automatically registered Wizard project represents the existing system interface. Source
 import, Review/Beta and rollout are a later delivery tracked in
 https://github.com/kihyoun/system/issues/18.

@@ -10,7 +10,7 @@ import Main, { HostInfo } from './Main';
  */
 export default class ProjectConfig {
     template = 'react';
-    namespaceId = "";
+    namespaceId = '';
     repository: any = undefined;
     bootstrapPending = false;
     _projectKey!:string;
@@ -235,7 +235,8 @@ export default class ProjectConfig {
    }
 
    public get content() : string {
-     const ret = Helper.textLogo + `# BOOTSTRAPPER_REPOSITORY=${encodeURIComponent(JSON.stringify(this.repository || null))}
+     const metadata = encodeURIComponent(JSON.stringify(this.repository || null));
+     const ret = Helper.textLogo + `# BOOTSTRAPPER_REPOSITORY=${metadata}
 PROJECT_NAME=${Helper.quote(this.projectKey)}
 PROJECT_TEMPLATE=${Helper.quote(this.template)}
 PROD_DEPLOY_MODE=${Helper.quote(this.prodDeployMode)}
@@ -446,16 +447,32 @@ deploy:prod:
    }
 
   @computed public get asJson() : any {
-    return {
-      template: this.template, projectKey: this.projectKey, namespaceId: this.namespaceId, repository: this.repository,
-      bootstrapPending: this.bootstrapPending,
-      useProdHost: this.useProdHost, prodHost: this.prodHost, prodDomainMode: this.prodDomainMode,
-      prodDeployMode: this.prodDeployMode, prodSSL: this.prodSSL, prodSSLKey: this.prodSSLKey,
-      useBetaHost: this.useBetaHost, betaHost: this.betaHost, betaDomainMode: this.betaDomainMode,
-      betaDeployMode: this.betaDeployMode, betaSSL: this.betaSSL, betaSSLKey: this.betaSSLKey,
-      useReviewHost: this.useReviewHost, reviewHost: this.reviewHost, reviewDomainMode: this.reviewDomainMode,
-      reviewDeployMode: this.reviewDeployMode, reviewSSL: this.reviewSSL, reviewSSLKey: this.reviewSSLKey,
-      gitlabRunnerToken: this.gitlabRunnerToken, gitlabRunnerScale: this.gitlabRunnerScale
-    };
-  }
+     return {
+       template         : this.template,
+       projectKey       : this.projectKey,
+       namespaceId      : this.namespaceId,
+       repository       : this.repository,
+       bootstrapPending : this.bootstrapPending,
+       useProdHost      : this.useProdHost,
+       prodHost         : this.prodHost,
+       prodDomainMode   : this.prodDomainMode,
+       prodDeployMode   : this.prodDeployMode,
+       prodSSL          : this.prodSSL,
+       prodSSLKey       : this.prodSSLKey,
+       useBetaHost      : this.useBetaHost,
+       betaHost         : this.betaHost,
+       betaDomainMode   : this.betaDomainMode,
+       betaDeployMode   : this.betaDeployMode,
+       betaSSL          : this.betaSSL,
+       betaSSLKey       : this.betaSSLKey,
+       useReviewHost    : this.useReviewHost,
+       reviewHost       : this.reviewHost,
+       reviewDomainMode : this.reviewDomainMode,
+       reviewDeployMode : this.reviewDeployMode,
+       reviewSSL        : this.reviewSSL,
+       reviewSSLKey     : this.reviewSSLKey,
+       gitlabRunnerToken: this.gitlabRunnerToken,
+       gitlabRunnerScale: this.gitlabRunnerScale
+     };
+   }
 }

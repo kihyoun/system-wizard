@@ -9,12 +9,17 @@ const MainFields = observer((props: any) => {
     <TextField label="Project Key" value={props.config.projectKey} fullWidth margin="normal"
       disabled={props.editing} error={!props.editing && props.availability !== 'available'}
       helperText={props.editing ? 'Existing keys are preserved.' : props.message}
-      onChange={event => { const value = event.target.value; runInAction(() => { props.config._projectKey = value; }); }} />
+      onChange={event => {
+        const value = event.target.value; runInAction(() => { props.config._projectKey = value; });
+      }} />
     <TextField select label="GitLab namespace" fullWidth margin="normal" value={props.config.namespaceId}
       disabled={props.editing} SelectProps={{ native: true }}
-      onChange={event => { const value = event.target.value; runInAction(() => { props.config.namespaceId = value; }); }}>
+      onChange={event => {
+        const value = event.target.value; runInAction(() => { props.config.namespaceId = value; });
+      }}>
       <option value="">Select namespace</option>
-      {props.namespaces.map((namespace:any) => <option key={namespace.id} value={namespace.id}>{namespace.path}</option>)}
+      {props.namespaces.map((namespace:any) =>
+        <option key={namespace.id} value={namespace.id}>{namespace.path}</option>)}
     </TextField>
     <p>{props.destination}</p>
     <TextField select label="Application template" fullWidth margin="normal" value={props.config.template}

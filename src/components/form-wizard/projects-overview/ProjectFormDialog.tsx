@@ -48,7 +48,9 @@ const ProjectFormDialog = observer((props: any) => {
     if (props.open && props.main.sync.connected) {
       props.main.sync.projectRequest('/projects/namespaces').then((result:any) => {
         if (current) setNamespaces(result.namespaces);
-      }).catch(() => { if (current) setAvailabilityMessage('Could not load GitLab namespaces. Check Sync and GitLab.'); });
+      }).catch(() => {
+        if (current) setAvailabilityMessage('Could not load GitLab namespaces. Check Sync and GitLab.');
+      });
     }
     return () => { current = false; };
   }, [props.open, props.main.sync.connected]);
@@ -68,13 +70,17 @@ const ProjectFormDialog = observer((props: any) => {
     }
     setAvailability('checking'); setAvailabilityMessage('Checking GitLab availability…');
     const timer = setTimeout(() => {
-      props.main.sync.projectRequest('/projects/availability?projectKey=' + encodeURIComponent(key) + '&namespaceId=' + encodeURIComponent(namespaceId))
+      props.main.sync.projectRequest('/projects/availability?projectKey=' + encodeURIComponent(key) +
+        '&namespaceId=' + encodeURIComponent(namespaceId))
         .then((result:any) => {
           if (!current) return;
           setAvailability(result.availability);
-          setAvailabilityMessage(result.availability === 'available' ? 'Available in selected namespace.' : 'Repository already exists. Choose another key.');
+          setAvailabilityMessage(result.availability === 'available' ? 'Available in selected namespace.' :
+            'Repository already exists. Choose another key.');
         }).catch(() => {
-          if (current) { setAvailability('unknown'); setAvailabilityMessage('Could not verify availability. Check Sync and GitLab.'); }
+          if (current) {
+            setAvailability('unknown'); setAvailabilityMessage('Could not verify availability. Check Sync and GitLab.');
+          }
         });
     }, 400);
     return () => { current = false; clearTimeout(timer); };
@@ -131,7 +137,9 @@ const ProjectFormDialog = observer((props: any) => {
       try {
         await props.main.sync.createProject(projectConfig);
       } catch (error) {
-        if (error.conflict) { setAvailability('occupied'); setAvailabilityMessage('Repository already exists. Choose another key.'); }
+        if (error.conflict) {
+          setAvailability('occupied'); setAvailabilityMessage('Repository already exists. Choose another key.');
+        }
         setOpenAlert(error.response?.data?.message || error.message || 'Project creation failed. Retry Save.');
         setBusy(false); return;
       }
@@ -179,7 +187,8 @@ const ProjectFormDialog = observer((props: any) => {
             React, Angular and general web templates include source and Dockerfile; Save starts their first pipeline.
             Empty repositories wait for your application source.
           </DialogContentText>
-          {busy && <p role="status">Creating application, installing CI, configuring routing and starting the pipeline… You can continue when setup completes.</p>}
+          {busy && <p role="status">Creating application, installing CI, configuring routing and starting the pipeline…
+            You can continue when setup completes.</p>}
           <fieldset disabled={busy} style={{ border: 0 }}><Grid container>
             <Grid item xs={3}>
               <Stepper activeStep={activeStep} nonLinear orientation="vertical">
@@ -216,12 +225,13 @@ const ProjectFormDialog = observer((props: any) => {
             </Grid>
             <Grid item xs={8}>
               <MainFields editing={editing} availability={availability} message={availabilityMessage}
-                namespaces={namespaces} destination={(namespaces.find((n:any) => String(n.id) === String(namespaceId))?.path || '') + '/' + key}
+                namespaces={namespaces} destination={
+                  (namespaces.find((n:any) => String(n.id) === String(namespaceId))?.path || '') + '/' + key}
                 openAlert={(value:string) =>
-                runInAction(() => setOpenAlert(value))
-              }
-              hidden={activeStep !== 0} config={projectConfig}
-              placeholder={projectPlaceholderConfig} />
+                  runInAction(() => setOpenAlert(value))
+                }
+                hidden={activeStep !== 0} config={projectConfig}
+                placeholder={projectPlaceholderConfig} />
               <ProdFields
                 init={props.activeProject === ''}
                 hidden={activeStep !== 1}

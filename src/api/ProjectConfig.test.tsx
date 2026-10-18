@@ -5,12 +5,27 @@ import md5 from 'md5';
 test('repository, deployment modes and certificates survive ENV and JSON round trips', () => {
   const main = new Main();
   const project = new ProjectConfig(main, {
-    projectKey: 'sample', useProdHost: 'false', useBetaHost: 'true', useReviewHost: 'true',
-    betaHost: 'beta.localhost', reviewHost: 'review.localhost', betaDomainMode: 0,
-    reviewDomainMode: 3, prodDeployMode: 0, betaDeployMode: 0, reviewDeployMode: 1,
-    reviewSSL: '/ssl/custom/fullchain.pem', reviewSSLKey: '/ssl/custom/key.pem',
-    repository: {id: 42, namespaceId: 1, path: 'root/sample', defaultBranch: 'main',
-      webUrl: 'http://gitlab.localhost/root/sample', deploymentState: 'awaiting-source'}
+    projectKey      : 'sample',
+    useProdHost     : 'false',
+    useBetaHost     : 'true',
+    useReviewHost   : 'true',
+    betaHost        : 'beta.localhost',
+    reviewHost      : 'review.localhost',
+    betaDomainMode  : 0,
+    reviewDomainMode: 3,
+    prodDeployMode  : 0,
+    betaDeployMode  : 0,
+    reviewDeployMode: 1,
+    reviewSSL       : '/ssl/custom/fullchain.pem',
+    reviewSSLKey    : '/ssl/custom/key.pem',
+    repository      : {
+      id             : 42,
+      namespaceId    : 1,
+      path           : 'root/sample',
+      defaultBranch  : 'main',
+      webUrl         : 'http://gitlab.localhost/root/sample',
+      deploymentState: 'awaiting-source'
+    }
   });
   const content = project.content;
   expect(content.substr(807, 1)).toBe('$');
@@ -33,7 +48,7 @@ test('repository, deployment modes and certificates survive ENV and JSON round t
 
 test('legacy keys remain importable without renaming', () => {
   const main = new Main();
-  const project = new ProjectConfig(main, {projectKey: 'old-project'});
+  const project = new ProjectConfig(main, { projectKey: 'old-project' });
   main.importProjectEnvData(project.content);
   expect(main.projects.has('old-project')).toBe(true);
 });
@@ -41,7 +56,14 @@ test('legacy keys remain importable without renaming', () => {
 test('application template and canonical generated CI survive Fetch and JSON', () => {
   const main = new Main();
   const ci = 'canonical template CI';
-  const project = new ProjectConfig(main, {projectKey:'reactapp', template:'react', repository:{template:'react', generatedCi:ci}});
+  const project = new ProjectConfig(main, {
+    projectKey: 'reactapp',
+    template  : 'react',
+    repository: {
+      template   : 'react',
+      generatedCi: ci
+    }
+  });
   main.importProjectEnvData(project.content);
   const imported = main.projects.get('reactapp')!;
   expect(imported.template).toBe('react');

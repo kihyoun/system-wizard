@@ -66,7 +66,8 @@ const ProjectCard = observer((props: any) => {
             </ListItem>
             <ListItem>
               <ListItemText primary="Deployment"
-                secondary={props.systemProject ? 'Managed by Bootstrapper' : props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
+                secondary={props.systemProject ? 'Managed by Bootstrapper' :
+                  props.hostInfo.deployMode === 0 ? 'Manual' : 'Auto'} />
             </ListItem>
             <ListItem>
               <ListItemText primary="Internal Port"

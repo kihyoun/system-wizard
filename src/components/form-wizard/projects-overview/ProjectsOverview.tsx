@@ -30,6 +30,7 @@ import { runInAction } from 'mobx';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import DownloadReactCiDialog from '../dialog/DownloadReactCiDialog';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import WizardSourceDialog from './WizardSourceDialog';
 
 const useStyles = makeStyles({
   table: {
@@ -59,6 +60,7 @@ const ProjectsOverview = observer((props:any) => {
   const [activeProject, setActiveProject] = useState('');
   const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
   const [downloadReactCi, setDownloadReactCi] = useState(false);
+  const [wizardSourceOpen, setWizardSourceOpen] = useState(false);
 
 
   const handleDelete = () => {
@@ -69,9 +71,12 @@ const ProjectsOverview = observer((props:any) => {
       setOpenDeleteSuccess(true)
     });
   };
+  const projects = [...props.main.projects.values()].sort((a:ProjectConfig, b:ProjectConfig) =>
+    Number(!!b.repository?.systemProject) - Number(!!a.repository?.systemProject));
 
   return (
     <>
+      {wizardSourceOpen && <WizardSourceDialog sync={props.main.sync} onClose={() => setWizardSourceOpen(false)} />}
       <Snackbar open={openDeleteSuccess} autoHideDuration={6000}
         onClose={() => setOpenDeleteSuccess(false)}
         message={'Project successfully deleted.'} />
@@ -90,7 +95,7 @@ const ProjectsOverview = observer((props:any) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {[...props.main.projects.values()].sort((a:ProjectConfig, b:ProjectConfig) => Number(!!b.repository?.systemProject) - Number(!!a.repository?.systemProject)).map( (projectConfig:ProjectConfig) => (
+            {projects.map((projectConfig:ProjectConfig) => (
               <React.Fragment key={projectConfig.projectKey}>
                 <TableRow
                   className={rowClasses.root}
@@ -146,30 +151,44 @@ const ProjectsOverview = observer((props:any) => {
                   <TableCell colSpan={5}>
                     <Collapse in={cellOpen === projectConfig.projectKey} timeout="auto" unmountOnExit>
                       {projectConfig.repository && <p>
-                        <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">Repository</a>{' · '}
-                        <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Pipelines</a>{' · '}
+                        <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">
+                          Repository</a>{' · '}
+                        <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">
+                          Pipelines</a>{' · '}
                         {projectConfig.repository.systemProject
-                          ? 'Existing Wizard interface — configured under General. Source import, review and rollout are the next expansion.'
+                          ? 'Existing Wizard interface — configured under General. ' +
+                            'Source can be initialized explicitly; review and rollout are the next expansion.'
                           : projectConfig.repository.deploymentState === 'awaiting-source'
-                          ? 'Repository ready — deployment awaits application source.'
-                          : <a href={projectConfig.repository.initialPipeline?.webUrl || projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">Application generated — check build and deployment status</a>}
+                            ? 'Repository ready — deployment awaits application source.'
+                            : <a href={projectConfig.repository.initialPipeline?.webUrl ||
+                              projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">
+                              Application generated — check build and deployment status</a>}
                       </p>}
                       <Grid container spacing={3}>
                         {projectConfig.repository?.systemProject && <Grid item xs={12}>
-                          <p>Production points to the running system interface. Beta and Review are not enabled. This repository currently contains a registration scaffold; it does not update the interface.</p>
+                          <p>Production points to the running system interface. Beta and Review are not enabled.
+                            Importing source does not update the running interface.</p>
+                          <Button color="primary" disabled={!props.main.sync.connected}
+                            onClick={() => setWizardSourceOpen(true)}>Initialize Wizard source</Button>
                         </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo}
                           systemProject={!!projectConfig.repository?.systemProject}
-                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
-                            projectConfig.useProdHost = checked.toString()); }} />
+                          handleChange={(checked:boolean) => {
+                            if (!projectConfig.repository?.systemProject) runInAction(() =>
+                              projectConfig.useProdHost = checked.toString());
+                          }} />
                         <ProjectCard hostInfo={projectConfig.betaHostInfo}
                           systemProject={!!projectConfig.repository?.systemProject}
-                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
-                            projectConfig.useBetaHost = checked.toString()); }} />
+                          handleChange={(checked:boolean) => {
+                            if (!projectConfig.repository?.systemProject) runInAction(() =>
+                              projectConfig.useBetaHost = checked.toString());
+                          }} />
                         <ProjectCard hostInfo={projectConfig.reviewHostInfo}
                           systemProject={!!projectConfig.repository?.systemProject}
-                          handleChange={(checked:boolean) => { if (!projectConfig.repository?.systemProject) runInAction(() =>
-                            projectConfig.useReviewHost = checked.toString()); }} />
+                          handleChange={(checked:boolean) => {
+                            if (!projectConfig.repository?.systemProject) runInAction(() =>
+                              projectConfig.useReviewHost = checked.toString());
+                          }} />
                       </Grid>
                     </Collapse>
                   </TableCell>
