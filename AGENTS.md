@@ -30,6 +30,15 @@ their own workflow; this tracker is not part of the product architecture.
 Read the root README, package scripts and the relevant System component guides
 before changing behavior; inspect current refs and worktree state before edits.
 
+## Merged branch cleanup
+
+After a reviewed merge succeeds, delete its remote working branch, preferably
+using the merge request's **Delete source branch** option, then prune local
+remote-tracking refs. Delete a local working branch only when its worktree is
+clean and its changes are safely merged; never force-delete it. Keep default
+and protected branches, explicitly required release/build/recovery refs and
+unmerged or draft work.
+
 ## Immutable System Cube signature
 
 The ASCII System Cube is the maintainer's personal signature and a fixed part
