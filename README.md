@@ -221,6 +221,12 @@ must be verified independently; jobs never discover or trust them with keyscan.
 Failures remain visible and retryable. The job forwards no tags, side branches
 or deletions and never force-pushes or rewrites `origin`.
 
+Unit/model and browser checks remain usable independently of optional mirror
+success. Before a reviewed source-to-delivery handoff, verify successful
+`build:source` and `test:browser` jobs for the exact merged source commit. A mirror
+failure remains visible and retryable; it does not itself block private delivery
+or authorize Production promotion.
+
 Keep source-primary history distinct from a managed delivery repository's private
 scaffold, configuration and deployment ancestry. Transfer reviewed source changes
 deliberately without overwriting managed files or receipts; record the mapping
