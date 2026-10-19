@@ -200,5 +200,35 @@ and platform-update roles. Public domains and publishing credentials remain
 operator configuration; the managed private-GitLab build/environment recipe is
 separate and does not invoke upstream publishing credentials.
 
+### GitLab source-primary workflow
+
+A clean source repository can explicitly select `.gitlab/primary.yml` in its
+GitLab **CI/CD configuration file** setting. This runs lint, unit tests,
+TypeScript/Vite build and signed configuration-export checks, then Playwright
+against that exact build artifact in a disposable loopback preview. The existing
+`.gitlab-ci.yml` publishing jobs and private managed delivery recipe stay separate.
+This source pipeline never deploys Production, Review or Beta or updates System's
+Wizard gitlink automatically.
+
+Its opt-in `deploy:github` job forwards the exact successful protected default-
+branch push commit to one configured existing GitHub branch, after both required
+checks. Set `GITHUB_BACKUP_ENABLED=true`, `GITHUB_BACKUP_SOURCE_PROJECT`,
+`GITHUB_BACKUP_REMOTE` and `GITHUB_BACKUP_BRANCH` as reviewed protected variables.
+Supply the write-enabled repository deploy key as protected file variable
+`GITHUB_SSH_PRIVATE_KEY` (an existing multiline key is also supported) and verified
+GitHub host keys as protected file variable `GITHUB_SSH_KNOWN_HOSTS`. Host keys
+must be verified independently; jobs never discover or trust them with keyscan.
+Failures remain visible and retryable. The job forwards no tags, side branches
+or deletions and never force-pushes or rewrites `origin`.
+
+Keep source-primary history distinct from a managed delivery repository's private
+scaffold, configuration and deployment ancestry. Transfer reviewed source changes
+deliberately without overwriting managed files or receipts; record the mapping
+between the merged source commit and delivery commit privately. The managed
+delivery pipeline then supplies its own build/test/image evidence for the separate
+manual Production promotion. See the
+[primary/backup guide](https://github.com/kihyoun/system/blob/master/docs/GITLAB_GITHUB_BACKUP.md)
+for history, credentials, serialization, gitlink ordering and recovery policies.
+
 Project documentation is maintained in English. See [AGENTS.md](AGENTS.md) for
 the immutable System Cube signature, which must remain unchanged in generated and imported configuration.

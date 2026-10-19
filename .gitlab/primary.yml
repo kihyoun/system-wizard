@@ -1,0 +1,65 @@
+# Select this file explicitly for a clean source-primary project. The legacy
+# publishing pipeline and private managed delivery recipe remain separate.
+image: node:24.22.0-bookworm@sha256:14078204b6bb268c107ceff6d3c43f45a888105e5c2b18b14c32b3409d93a1b0
+default:
+  tags: [docker]
+  interruptible: true
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
+    - when: never
+stages: [check, test, backup]
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+cache:
+  key:
+    files: [package-lock.json]
+  paths: [.npm/]
+build:source:
+  stage: check
+  timeout: 15 minutes
+  allow_failure: false
+  script:
+    - npm ci --no-audit --no-fund
+    - npm run lint
+    - npm test
+    - npm run build
+    - npm run test:config-export
+  artifacts:
+    expire_in: 1 day
+    paths: [build/, build-tools/]
+test:browser:
+  stage: test
+  timeout: 15 minutes
+  allow_failure: false
+  needs:
+    - job: build:source
+      artifacts: true
+  script:
+    - npm ci --no-audit --no-fund
+    - npx playwright install --with-deps chromium
+    - sh .gitlab/test-browser.sh
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths: [playwright-report/, test-results/]
+deploy:github:
+  stage: backup
+  timeout: 10 minutes
+  interruptible: false
+  allow_failure: false
+  cache: []
+  resource_group: 'github-backup-$CI_PROJECT_ID'
+  needs:
+    - job: build:source
+      artifacts: false
+    - job: test:browser
+      artifacts: false
+  rules:
+    - if: '$GITHUB_BACKUP_ENABLED == "true" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
+  script:
+    - sh .gitlab/github-backup-ci.sh
