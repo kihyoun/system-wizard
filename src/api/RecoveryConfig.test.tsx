@@ -5,6 +5,7 @@ import Main from './Main';
 import MainConfig from './MainConfig';
 import Helper from './Helper';
 import {environment, shellQuote, shellValue} from './Environment';
+import {websiteSetupDefaults} from './WebsiteConfig';
 
 const signed = (body: string) => Helper.textLogo + body;
 const assertSignature = (data: string) => {
@@ -75,7 +76,7 @@ FUTURE_RUNTIME_OPTION='preserve=unknown'
   expect(main.config!.syncDomainMode).toBe(2);
   expect(main.config!.wizardDomainMode).toBe(2);
   const jsonCopy = new MainConfig(JSON.parse(JSON.stringify(main.asJson.main)));
-  expect(assignments(jsonCopy.content)).toEqual(assignments(input));
+  expect(assignments(jsonCopy.content)).toEqual({...websiteSetupDefaults, ...assignments(input)});
   assertSignature(main.config!.content);
   assertSignature(jsonCopy.content);
 });

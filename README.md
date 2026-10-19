@@ -15,6 +15,12 @@ Start with the [handbook](https://github.com/kihyoun/system/blob/master/docs/HAN
 for installation, first login, runner setup and troubleshooting. A standalone
 Wizard development server does not start Sync, GitLab, the registry or runners.
 
+The default **Overview** page introduces the platform and links to setup guides.
+Select **Wizard** in the main navigation or **Open Wizard** to configure an
+instance. `/configuration` remains a direct entry to the Wizard workspace.
+Switching between Overview, Wizard and the footer's Privacy/Imprint views preserves the
+current connection, configuration and in-progress form state in the browser.
+
 1. Open **Edit** using the pencil icon next to **Connect**. Enter the Sync server
    address and credentials from your own Bootstrapper configuration, then select **Submit**.
    For a fresh local setup, the address is `http://localhost/sync`; after applying
@@ -35,6 +41,31 @@ Sync credentials are separate from the GitLab login. The controller logs confirm
 that authentication is configured without printing its values. Follow the
 handbook to read your effective credentials locally; saved configuration can
 override the generated first-setup defaults.
+
+### Public website and legal information
+
+Use **Wizard → General → Website** to edit the public operator name, postal
+address, contact email and optional privacy-notice URL, access-log retention and
+additional privacy text. The initial name (`Max Mustermann`), address and contact
+email (`kontakt@example.com`) are actual setup examples as well as input
+placeholders. Replace or explicitly clear them; until then, published legal pages
+label these examples. Optional fields stay empty unless supplied. An explicitly
+saved empty value remains empty after Open, Fetch or recovery.
+
+These settings travel through ordinary JSON/ZIP Backup, Open, Fetch and Push as
+`WIZARD_OPERATOR_NAME`, `WIZARD_OPERATOR_ADDRESS`, `WIZARD_OPERATOR_EMAIL`,
+`WIZARD_PRIVACY_NOTICE_URL`, `WIZARD_ACCESS_LOG_RETENTION` and `WIZARD_PRIVACY_TEXT`
+in the main configuration. They are public information, separate from Sync
+credentials and runner tokens. A successful Push applies the saved configuration
+and publishes the supported fields through the Bootstrapper's normal startup.
+
+The footer's **Privacy** and **Imprint** pages read only `/privacy-instance.json`
+from the same website, when opened. The matching Bootstrapper generates this
+allowlisted public file on persistent storage and mounts its directory read-only
+at `/usr/share/nginx/wizard-public`; it never serves the full configuration.
+Use compatible Wizard and Bootstrapper versions for this publishing workflow.
+A standalone Wizard without that mount shows the generic missing-information
+message. No operator identity, retention period or legal compliance is inferred.
 
 Runner count controls independent managers sharing the configured GitLab runner
 registration. Open the runner's detail page in GitLab to see its managers. Manager

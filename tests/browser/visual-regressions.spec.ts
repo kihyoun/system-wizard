@@ -73,6 +73,7 @@ function connectionGroup(page: Page, name: 'Connect' | 'Disconnect') {
 }
 
 async function connect(page: Page) {
+  await page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true }).click();
   await connectionGroup(page, 'Connect').getByRole('button').first().click();
   const dialog = page.getByRole('dialog', { name: 'Connect', exact: true });
   await dialog.getByLabel('Server Address', { exact: true }).fill(syncOrigin);
@@ -150,6 +151,7 @@ async function expectSeparatedProjectNavigation(dialog: Locator, namespace: Loca
 test('light canvas separates white panels and connected controls retain the established red accent', async ({ page }) => {
   const unexpected = await mockSync(page);
   await page.goto('/');
+  await page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true }).click();
   const connectButton = page.getByRole('button', { name: 'Connect', exact: true });
   const generalTab = page.getByRole('tab', { name: 'General', exact: true });
   await expect(page.locator('body')).toHaveCSS('background-color', lightCanvas);
@@ -172,6 +174,45 @@ test('light canvas separates white panels and connected controls retain the esta
   await page.mouse.move(0, 0);
   await expect(connectButton).toBeVisible();
   await expect(connectButton).toHaveCSS('background-color', blue);
+  expect(unexpected).toEqual([]);
+});
+
+test('workspace connection, draft configuration and selected tab survive Overview and Privacy navigation', async ({ page }) => {
+  const unexpected = await mockSync(page);
+  await page.route('**/privacy-instance.json', route => route.fulfill({ json: {
+    operatorName: 'Published Operator', operatorAddress: 'A published address', contactEmail: 'public@example.test',
+    privacyNoticeUrl: 'javascript:alert(1)', accessLogRetention: '', additionalPrivacyText: '<script>not executable</script>',
+    SYNC_PASS: 'not-public', accessToken: 'not-public'
+  } }));
+  await page.goto('/');
+  await connect(page);
+  await fetchConfiguration(page);
+  await page.getByLabel('GITLAB_HOST', { exact: true }).fill('gitlab.unsaved.test');
+  await page.getByRole('tab', { name: 'Website', exact: true }).click();
+  await page.getByLabel('Operator name', { exact: true }).fill('Unsaved Operator');
+  await page.getByRole('tab', { name: 'Overview', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeHidden();
+  await expect(page.locator('#main-panel-overview')).not.toContainText('gitlab.unsaved.test');
+
+  const footer = page.getByRole('navigation', { name: 'Footer navigation' });
+  await footer.getByRole('button', { name: 'Privacy', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Privacy', exact: true })).toBeVisible();
+  await expect(page.getByText('Published Operator', { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Read the operator’s additional privacy notice', exact: true })).toHaveCount(0);
+  await expect(page.locator('main').getByText('Unsaved Operator', { exact: true })).toHaveCount(0);
+  await expect(page.locator('main').getByText('not-public', { exact: true })).toHaveCount(0);
+  await footer.getByRole('button', { name: 'Imprint', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Imprint', exact: true })).toBeVisible();
+  await footer.getByRole('button', { name: 'Wizard', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Operator name', { exact: true })).toHaveValue('Unsaved Operator');
+  await page.getByRole('tab', { name: 'Projects', exact: true }).click();
+  await page.getByRole('tab', { name: 'Overview', exact: true }).click();
+  await page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true }).click();
+  await expect(page.getByRole('tab', { name: 'Projects', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('tab', { name: 'General', exact: true }).click();
+  await expect(page.getByLabel('GITLAB_HOST', { exact: true })).toHaveValue('gitlab.unsaved.test');
   expect(unexpected).toEqual([]);
 });
 
