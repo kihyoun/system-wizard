@@ -18,9 +18,15 @@ issue or pull/merge-request references in source comments, user guides or genera
 documentation. Agent instructions may identify the external tracker. Instructions
 must not depend on the maintainer's existing GitLab state or retained private files.
 
-The upstream requirements tracker is https://github.com/kihyoun/system/issues,
-including Wizard work. Reuse relevant tasks when requested; do not create issues
-for routine documentation cleanup. Deployment workflows may use their own GitLab.
+The maintainer-selected GitLab-primary workflow uses the central requirements
+tracker at https://gitlab.system-bootstrapper.com/system-bootstrapper/system/-/issues,
+including Wizard work, and GitLab merge requests in the affected source project.
+Confirm activation from the operator's external cutover record; these instructions
+do not establish that the cutover has passed acceptance. After activation, create
+new tasks there. GitHub is the public code mirror and historical tracker, not a
+parallel issue/merge destination. Reuse relevant tasks when requested; do not
+create issues for routine documentation cleanup. Deployment operators may select
+their own workflow; this tracker is not part of the product architecture.
 Read the root README, package scripts and the relevant System component guides
 before changing behavior; inspect current refs and worktree state before edits.
 

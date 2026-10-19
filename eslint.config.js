@@ -17,5 +17,5 @@ export default tseslint.config(
       'react-hooks/rules-of-hooks': 'error'
     }
   },
-  { files: ['**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } }
+  { files: ['**/*.cjs', '.gitlab/*.js'], rules: { '@typescript-eslint/no-require-imports': 'off' } }
 );
