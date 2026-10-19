@@ -6,6 +6,7 @@ import Helper from './Helper';
 import {extraEnvironment} from './Environment';
 import JSZip from 'jszip';
 import { HostInfo } from './Main';
+import { websiteSetupDefaults } from './WebsiteConfig';
 /**
  * General Configuration Object
  */
@@ -49,6 +50,9 @@ export default class MainConfig {
 
   generateConfig(_config: any | undefined = undefined) {
     this.runtimeOptions = {...(_config?.runtimeOptions ?? {})};
+    for (const [key, example] of Object.entries(websiteSetupDefaults)) {
+      this.runtimeOptions[key] = this.runtimeOptions[key] ?? example;
+    }
     this.generateMainConfig(_config);
     this.generateProxyConfig(_config);
     this.generateSyncConfig(_config);

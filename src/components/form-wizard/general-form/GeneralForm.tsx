@@ -7,6 +7,7 @@ import { observer } from 'mobx-react';
 import { runInAction } from 'mobx';
 import SyncServerFields from './fields/SyncServerFields';
 import WizardFields from './fields/WizardFields';
+import WebsiteFields from './fields/WebsiteFields';
 const useStyles = makeStyles()(theme => ({
     paper: {
         padding: theme.spacing(2),
@@ -49,6 +50,9 @@ const GeneralForm = observer((props: any) => {
         }, {
             label: 'Wizard',
             enabled: !wizardInit
+        }, {
+            label: 'Website',
+            enabled: true
         }];
     const handleStep = (step: number) => () => {
         runInAction(() => {
@@ -75,10 +79,10 @@ const GeneralForm = observer((props: any) => {
         });
     };
     return (<Paper className={classes.paper} elevation={0}>
-      <Grid container sx={{
+      <Grid container spacing={3} sx={{
         justifyContent: "center"
     }}>
-        <Grid size={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
             {steps.map((step, index) => (<Step key={step.label}>
                 <StepButton onClick={handleStep(index)}>
@@ -97,11 +101,12 @@ const GeneralForm = observer((props: any) => {
               </Step>))}
           </Stepper>
         </Grid>
-        <Grid size={7}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <StartFields init={startInit} hidden={activeStep !== 0} main={props.main}/>
           <SSLSettingsFields init={sslInit} hidden={activeStep !== 1} main={props.main}/>
           <SyncServerFields init={syncInit} hidden={activeStep !== 2} main={props.main}/>
           <WizardFields init={wizardInit} hidden={activeStep !== 3} main={props.main}/>
+          <WebsiteFields hidden={activeStep !== 4} main={props.main}/>
         </Grid>
       </Grid>
     </Paper>);

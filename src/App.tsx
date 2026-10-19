@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import { Button, ButtonGroup, Link, Snackbar, Theme } from '@mui/material';
+import { Box, Button, ButtonGroup, Link, Snackbar, Tab, Tabs, Theme, useMediaQuery } from '@mui/material';
 import DarkModeSwitch from './DarkModeSwitch';
 import FormWizard from './components/form-wizard/FormWizard';
 import Main from './api/Main';
@@ -37,6 +37,10 @@ import moment from 'moment';
 import ServerControlButton from './components/ServerControlButton';
 import EditIcon from '@mui/icons-material/Edit';
 import Helper from './api/Helper';
+import Overview from './components/Overview';
+import Privacy from './components/Privacy';
+import Imprint from './components/Imprint';
+import { usePublicSiteInfo } from './components/legal/PublicSiteInfo';
 const drawerWidth = 240;
 const useStyles = makeStyles<{
     progress: number;
@@ -45,8 +49,10 @@ const useStyles = makeStyles<{
     root: {},
     paper: {
         padding: theme.spacing(2),
-        margin: 'auto',
-        maxWidth: 1900
+        margin: '0 auto',
+        width: '100%',
+        maxWidth: 1900,
+        marginBottom: theme.spacing(2)
     },
     divider: { flexGrow: 1 },
     progressBar: {
@@ -73,10 +79,6 @@ const useDrawerStyles = makeStyles()((theme: Theme) => ({
     },
     menuButton: { marginRight: theme.spacing(2) },
     hide: { display: 'none' },
-    drawer: {
-        width: drawerWidth,
-        flexShrink: 0
-    },
     drawerPaper: { width: drawerWidth },
     drawerHeader: {
         display: 'flex',
@@ -88,19 +90,11 @@ const useDrawerStyles = makeStyles()((theme: Theme) => ({
     },
     content: {
         flexGrow: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
         padding: theme.spacing(3),
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen
-        }),
-        marginLeft: -drawerWidth
-    },
-    contentShift: {
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen
-        }),
-        marginLeft: 0
+        [theme.breakpoints.down('sm')]: { padding: theme.spacing(1.5) }
     }
 }));
 const App = observer(() => {
@@ -109,6 +103,9 @@ const App = observer(() => {
     }, []);
     const { classes: drawerClasses } = useDrawerStyles();
     const [dark, setDark] = useState(false);
+    const [view, setView] = useState<'overview' | 'wizard' | 'privacy' | 'imprint'>(() =>
+        window.location.pathname.replace(/\/$/, '') === '/configuration' ? 'wizard' : 'overview');
+    const publicSite = usePublicSiteInfo(view === 'privacy' || view === 'imprint');
     const handleDarkMode = (event: any) => {
         setDark(event.target.checked);
     };
@@ -151,6 +148,7 @@ const App = observer(() => {
         setOpen(false);
     };
     const theme = createTheme({
+        typography: { fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
         palette: {
             primary: dark ? grey : blue,
             secondary: {
@@ -165,6 +163,19 @@ const App = observer(() => {
             mode: dark ? 'dark' : 'light'
         }
     });
+    const compact = useMediaQuery(theme.breakpoints.down('md'));
+    const wizardActive = view === 'wizard';
+    const desktopDrawerOpen = wizardActive && open && !compact;
+    const showView = (nextView: typeof view, focusNavigation = false) => {
+        setView(nextView);
+        window.scrollTo({ top: 0 });
+        if (focusNavigation) window.requestAnimationFrame(() => {
+            document.getElementById(nextView === 'privacy' || nextView === 'imprint' ? `${nextView}-heading` : `main-tab-${nextView}`)?.focus();
+        });
+    };
+    useEffect(() => {
+        if (compact) setOpen(false);
+    }, [compact]);
     const { classes } = useStyles({
         progress: progress,
         theme: theme
@@ -220,21 +231,21 @@ const App = observer(() => {
           <Grid size={12}>
 
             <div className={drawerClasses.root}>
-              <AppBar elevation={0} position="fixed" className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: open })}>
+              <AppBar elevation={0} position="fixed" className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: desktopDrawerOpen })}>
                 <Toolbar>
-                  <IconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
+                  {wizardActive && <IconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
                     <MenuIcon />
-                  </IconButton>
-                  <Typography variant="h6" noWrap>
-            System Bootstrapper Control Panel
+                  </IconButton>}
+                  <Typography variant="h6" noWrap sx={{ minWidth: 0, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                    {wizardActive ? 'System Bootstrapper Control Panel' : 'System Bootstrapper'}
                   </Typography>
                   <div className={classes.divider}/>
                   <DarkModeSwitch handleChange={handleDarkMode}/>
                 </Toolbar>
               </AppBar>
-              <Drawer className={drawerClasses.drawer} variant="persistent" anchor="left" open={open} classes={{ paper: drawerClasses.drawerPaper }}>
+              {wizardActive && <Drawer variant={compact ? 'temporary' : 'persistent'} anchor="left" open={open} onClose={handleDrawerClose} sx={{ width: desktopDrawerOpen ? drawerWidth : 0, flexShrink: 0 }} classes={{ paper: drawerClasses.drawerPaper }}>
                 <div className={drawerClasses.drawerHeader}>
-                  <IconButton onClick={handleDrawerClose}>
+                  <IconButton onClick={handleDrawerClose} aria-label="Close server drawer">
                     {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                   </IconButton>
                 </div>
@@ -254,12 +265,23 @@ const App = observer(() => {
                   </ListItemButton>
                 </List>
 
-              </Drawer>
-              <main className={clsx(drawerClasses.content, { [drawerClasses.contentShift]: open })}>
+              </Drawer>}
+              <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', flexGrow: 1, minWidth: 0 }}>
+              <main className={drawerClasses.content}>
                 <div className={drawerClasses.drawerHeader}/>
+                <Paper elevation={0} className={classes.paper} sx={{ py: 0 }}>
+                  <Tabs value={view === 'overview' || view === 'wizard' ? view : false} onChange={(_event, nextView: 'overview' | 'wizard') => showView(nextView)} aria-label="Main navigation" indicatorColor="secondary" textColor="inherit">
+                    <Tab value="overview" label="Overview" id="main-tab-overview" aria-controls="main-panel-overview" />
+                    <Tab value="wizard" label="Wizard" id="main-tab-wizard" aria-controls="main-panel-wizard" />
+                  </Tabs>
+                </Paper>
+                <div role="tabpanel" hidden={view !== 'overview'} id="main-panel-overview" aria-labelledby="main-tab-overview">
+                  <Overview onOpenWizard={() => showView('wizard', true)} />
+                </div>
+                <div role="tabpanel" hidden={!wizardActive} inert={!wizardActive} id="main-panel-wizard" aria-labelledby="main-tab-wizard">
                 <Paper elevation={0} className={classes.paper}>
-                  <Toolbar>
-                    <Typography variant="h6">
+                  <Toolbar sx={{ gap: 1, flexWrap: 'wrap', px: { xs: 0, sm: 2 } }}>
+                    <Typography variant="h6" sx={{ overflowWrap: 'anywhere' }}>
                       {getServerName(activeServer)}
                     </Typography>
 
@@ -268,10 +290,10 @@ const App = observer(() => {
             <ServerControlButton setOpenAlert={(value: string) => setOpenAlert(value)} setOpenSuccess={(value: string) => setOpenSuccess(value)} setLastStatusMessage={(value: string) => setLastStatusMessage(value)} main={activeServer}/>}
 
                     <ButtonGroup variant={'contained'} disableElevation>
-                      <Button component="span" color={connected ? 'secondary' : 'primary'} onClick={handleServerDialog}>
+                      <Button aria-label="Edit connection" color={connected ? 'secondary' : 'primary'} onClick={handleServerDialog}>
                         <EditIcon />
                       </Button>
-                      <Button color={connected ? 'secondary' : 'primary'} component="span" startIcon={connected ? <LockIcon /> : <LockOpenIcon />} onClick={() => handleSubmit(activeServer.config?.syncPass)}>
+                      <Button color={connected ? 'secondary' : 'primary'} startIcon={connected ? <LockIcon /> : <LockOpenIcon />} onClick={() => handleSubmit(activeServer.config?.syncPass)}>
                         {connected ? 'Disconnect' : 'Connect'}
                       </Button>
                     </ButtonGroup>
@@ -289,12 +311,27 @@ const App = observer(() => {
                     </Paper>
                   </>)}
                 <FormWizard main={activeServer} setOpenAlert={setOpenAlert} setOpenSuccess={setOpenSuccess}/>
+                </div>
+                {view === 'privacy' && <section aria-labelledby="privacy-heading">
+                  <Privacy {...publicSite} />
+                </section>}
+                {view === 'imprint' && <section aria-labelledby="imprint-heading">
+                  <Imprint {...publicSite} />
+                </section>}
               </main>
+                <Box component="footer" sx={{ mt: 'auto', py: 3, px: 2, textAlign: 'center', bgcolor: '#0d47a1', color: '#fff' }}>
+                    <Box component="nav" aria-label="Footer navigation" sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 3, mb: 2 }}>
+                      {(['overview', 'wizard', 'privacy', 'imprint'] as const).map(destination => (<Link key={destination} component="button" type="button" id={`footer-${destination}`} color="inherit" underline="hover" aria-current={view === destination ? 'page' : undefined} onClick={() => showView(destination, true)}>
+                        {destination === 'overview' ? 'Overview' : destination === 'wizard' ? 'Wizard' : destination === 'privacy' ? 'Privacy' : 'Imprint'}
+                      </Link>))}
+                    </Box>
+                    <Link href="https://github.com/kihyoun/system" color="inherit" sx={{ textDecorationColor: 'rgba(255,255,255,0.7)' }}>System Bootstrapper on GitHub</Link>
+                </Box>
+              </Box>
             </div>
           </Grid>
         </Grid>
       </div>
-      Visit <Link href="https://github.com/kihyoun/system">System Bootstrapper on Github</Link>
 
     </ThemeProvider>);
 });

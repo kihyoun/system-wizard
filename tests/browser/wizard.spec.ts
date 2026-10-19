@@ -7,6 +7,8 @@ test('configuration UI survives navigation and produces an importable signed bac
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+  await page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true }).click();
   await expect(page.getByText('System Bootstrapper Control Panel')).toBeVisible();
   await page.getByRole('tab', { name: 'Projects', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Add Project', exact: true })).toBeVisible();
@@ -30,5 +32,7 @@ test('configuration UI survives navigation and produces an importable signed bac
   await page.screenshot({ path: 'test-results/wizard-modernized.png', fullPage: true });
   await page.goto('/configuration');
   await expect(page.getByText('System Bootstrapper Control Panel')).toBeVisible();
+  await expect(page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'General', exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
