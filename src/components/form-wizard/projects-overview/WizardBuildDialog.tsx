@@ -46,6 +46,8 @@ export default function WizardBuildDialog(props: any) {
         return () => { generation.current++; };
     }, [props.sync]);
     const request = async (action: string) => {
+        if (action === 'activate' && preview?.mode === 'source-primary')
+            return;
         const current = generation.current;
         setOperation(action);
         setPreviewFresh(false);
@@ -61,6 +63,9 @@ export default function WizardBuildDialog(props: any) {
                 if (action === 'preview') {
                     setPreview(result);
                     setPreviewFresh(true);
+                }
+                else if (preview?.mode === 'source-primary' && result.sourceRevision) {
+                    setPreview((previous: any) => ({...previous, sourceRevision: result.sourceRevision}));
                 }
             }
         }
@@ -81,22 +86,33 @@ export default function WizardBuildDialog(props: any) {
         }
     };
     const busy = operation !== '';
+    const sourcePrimary = preview?.mode === 'source-primary';
     const resumable = ['pending', 'verification-failed', 'recipe-installed'].includes(build?.phase);
     const pipelineUrl = /^https?:\/\//i.test(build?.pipeline?.webUrl || '') ? build.pipeline.webUrl : undefined;
+    const repositoryUrl = /^https?:\/\//i.test(preview?.repository?.webUrl || '') ? preview.repository.webUrl : undefined;
+    const status = sourcePrimary && build?.phase === 'pending'
+        ? 'The current default branch has no verified native delivery pipeline yet. Check the pipeline in GitLab and refresh status.'
+        : sourcePrimary && build?.phase === 'verification-failed'
+            ? 'Native pipeline evidence could not be verified. Check GitLab and refresh status. Production is unchanged.'
+            : phases[build?.phase] || 'Build status is unavailable. Refresh status.';
     return <Dialog open onClose={operation === 'activate' ? undefined : props.onClose} aria-labelledby="wizard-build-title">
-    <DialogTitle id="wizard-build-title">Build and verify Wizard</DialogTitle>
+    <DialogTitle id="wizard-build-title">{sourcePrimary ? 'Native Wizard build status' : 'Build and verify Wizard'}</DialogTitle>
     <DialogContent>
-      <DialogContentText>
+      {sourcePrimary ? <DialogContentText>
+        Merge requests and default-branch pushes run the checks and image build in this repository.
+        Refresh reads their native pipeline evidence; it does not import source or start another pipeline.
+        Production promotion stays explicit.
+      </DialogContentText> : <DialogContentText>
         Preview the managed build recipe, then explicitly enable checks for the imported Wizard source.
-        This uses the existing legacy Node 13 toolchain; its modernization is still required.
         It builds and verifies a candidate only. Production is not deployed or replaced.
-      </DialogContentText>
-      {preview && <DialogContentText>
-        Repository: {preview.repository.path}<br />Imported commit: {preview.importCommit}<br />
-        Recipe version: {preview.version}
       </DialogContentText>}
-      {build && <p role="status">{phases[build.phase] || 'Build status is unavailable. Refresh status.'}</p>}
+      {preview && <DialogContentText>
+        Repository: {preview.repository.path}<br />
+        {sourcePrimary ? <>Source revision: {preview.sourceRevision}</> : <>Imported commit: {preview.importCommit}<br />Recipe version: {preview.version}</>}
+      </DialogContentText>}
+      {build && <p role="status">{status}</p>}
       {build?.message && <p>{build.message}</p>}
+      {sourcePrimary && repositoryUrl && <p><a href={repositoryUrl} target="_blank" rel="noopener noreferrer">Open source repository</a></p>}
       {pipelineUrl && <p><a href={pipelineUrl} target="_blank" rel="noopener noreferrer">Open pipeline</a></p>}
       {build?.checks && <ul>{Object.keys(build.checks).map(name => <li key={name}>
         {name}: {build.checks[name]}
@@ -110,7 +126,7 @@ export default function WizardBuildDialog(props: any) {
       <Button disabled={operation === 'activate'} onClick={props.onClose}>Close</Button>
       {preview && <Button disabled={busy} onClick={() => request('preview')}>Refresh preview</Button>}
       {preview && <Button disabled={busy} onClick={() => request('status')}>Refresh status</Button>}
-      {preview && (!build || resumable) && <Button color="primary" disabled={busy || !previewFresh} onClick={() => request('activate')}>{build ? 'Resume activation' : 'Enable build pipeline'}</Button>}
+      {preview && !sourcePrimary && (!build || resumable) && <Button color="primary" disabled={busy || !previewFresh} onClick={() => request('activate')}>{build ? 'Resume activation' : 'Enable build pipeline'}</Button>}
     </DialogActions>
   </Dialog>;
 }

@@ -82,3 +82,19 @@ test('failed preview cannot enable import and exposes the actionable safe error'
     act(() => { unmountFrom(root); });
     root.remove();
 });
+test('a source-primary preview opens the canonical repository without offering source import', async () => {
+    const projectRequest = vi.fn().mockResolvedValue({
+        mode: 'source-primary', canInitialize: false, sourceRevision: 'reviewed-source',
+        repository: {path: 'team/wizard', webUrl: 'https://gitlab.example.test/team/wizard'}
+    });
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    try {
+        await act(async () => { renderInto(<WizardSourceDialog sync={{projectRequest}} onClose={vi.fn()}/>, root); });
+        expect(document.body.textContent).toContain('No source import or extra repository is required');
+        expect(document.body.textContent).not.toContain('Import source');
+        expect(document.body.textContent).not.toContain('Files:');
+        expect(document.body.querySelector('a')?.getAttribute('href')).toBe('https://gitlab.example.test/team/wizard');
+        expect(projectRequest.mock.calls).toEqual([['/projects/wizard/source']]);
+    } finally { act(() => { unmountFrom(root); }); root.remove(); }
+});

@@ -129,8 +129,10 @@ const ProjectsOverview = observer((props: any) => {
                         <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">
                           Pipelines</a>{' · '}
                         {projectConfig.repository.systemProject
-                    ? 'Existing Wizard interface — configured under General. ' +
-                        'Initialize source, verify a candidate and configure optional Review/Beta explicitly.'
+                    ? projectConfig.repository.managementMode === 'source-primary'
+                        ? 'Canonical Wizard repository — develop, review and build here. Production promotion remains explicit.'
+                        : 'Existing Wizard interface — configured under General. ' +
+                            'Initialize source, verify a candidate and configure optional Review/Beta explicitly.'
                     : projectConfig.repository.deploymentState === 'awaiting-source'
                         ? 'Repository ready — deployment awaits application source.'
                         : <a href={projectConfig.repository.initialPipeline?.webUrl ||
@@ -140,9 +142,11 @@ const ProjectsOverview = observer((props: any) => {
                       <Grid container spacing={3}>
                         {projectConfig.repository?.systemProject && <Grid size={12}>
                           <p>Production points to the running system interface. Configure Beta and Review separately.
-                            Importing source and configuring environments preserve the running interface.</p>
-                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardSourceOpen(true)}>Initialize Wizard source</Button>
-                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardBuildOpen(true)}>Build and verify Wizard</Button>
+                            {projectConfig.repository.managementMode === 'source-primary'
+                                ? ' Native pipeline checks and environment configuration preserve the running interface.'
+                                : ' Importing source and configuring environments preserve the running interface.'}</p>
+                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardSourceOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? 'Wizard source' : 'Initialize Wizard source'}</Button>
+                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardBuildOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? 'Native build status' : 'Build and verify Wizard'}</Button>
                           <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardEnvironmentsOpen(true)}>Configure Review and Beta</Button>
                         </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo} systemProject={!!projectConfig.repository?.systemProject} handleChange={(checked: boolean) => {

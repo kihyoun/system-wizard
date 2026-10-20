@@ -117,3 +117,27 @@ test('the managed row offers environment setup only while connected and opens a 
         request.mockRestore();
     }
 });
+test('the canonical source-primary row offers source and native status instead of import or activation', () => {
+    const main = new Main();
+    const project = new ProjectConfig(main, {
+        projectKey: 'wizard', template: 'wizard', prodHost: 'wizard.example.test',
+        repository: {systemProject: true, managementMode: 'source-primary', path: 'team/wizard',
+            webUrl: 'https://gitlab.example.test/team/wizard', pipelineUrl: 'https://gitlab.example.test/team/wizard/-/pipelines'}
+    });
+    main.projects.set('wizard', project);
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    try {
+        act(() => { renderInto(<ProjectsOverview main={main}/>, root); });
+        const row = root.querySelector('tbody tr')!;
+        act(() => { row.dispatchEvent(new MouseEvent('click', {bubbles: true})); });
+        expect(root.textContent).toContain('Canonical Wizard repository');
+        expect(root.textContent).toContain('Wizard source');
+        expect(root.textContent).toContain('Native build status');
+        expect(root.textContent).not.toContain('Initialize Wizard source');
+        expect(root.textContent).not.toContain('Build and verify Wizard');
+        const restored = new Main();
+        restored.importProjectEnvData(project.content);
+        expect(restored.projects.get('wizard')!.repository.managementMode).toBe('source-primary');
+    } finally { act(() => { unmountFrom(root); }); root.remove(); }
+});
