@@ -8,7 +8,8 @@ test('Overview works before login and keyboard navigation opens the existing Wiz
   });
   await page.goto('/');
   await expect(page.getByText('System Bootstrapper', { exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Build Your Web Projects, Not Your Infrastructure', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Getting Started', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeHidden();
   await expect(page.getByRole('tab', { name: 'Privacy', exact: true })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Read the handbook', exact: true }))
@@ -31,7 +32,17 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       contactEmail: 'kontakt@example.com', privacyNoticeUrl: '', accessLogRetention: '', additionalPrivacyText: ''
     } }));
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+    const title = page.getByRole('heading', { level: 1, name: 'Build Your Web Projects, Not Your Infrastructure', exact: true });
+    await expect(title).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 2, name: 'Getting Started', exact: true })).toBeVisible();
+    const titleLayout = await title.evaluate(heading => {
+      const box = heading.getBoundingClientRect();
+      return { withinViewport: box.left >= 0 && box.right <= innerWidth,
+        textFits: heading.scrollWidth <= heading.clientWidth + 1 };
+    });
+    expect(titleLayout.withinViewport).toBe(true);
+    expect(titleLayout.textFits).toBe(true);
     await expect(page.getByRole('button', { name: 'Open Wizard', exact: true }))
       .toHaveCSS('background-color', 'rgb(245, 0, 87)');
     await page.screenshot({ path: test.info().outputPath(`overview-${viewport.width}.png`), fullPage: true, animations: 'disabled' });

@@ -31,7 +31,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
         <Grid size={{ xs: 12, md: 7 }}>
         <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.14em' }}>System Bootstrapper · Open source</Typography>
         <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 2, fontWeight: 700, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: '-0.04em' }}>
-          Getting Started
+          Build Your Web Projects, Not Your Infrastructure
         </Typography>
         <Typography variant="h6" component="p" sx={{ mb: 2, maxWidth: 760 }}>
           Build your web projects. Bring your development tools together.
@@ -71,7 +71,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
       </Paper>
 
       <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 } }} aria-labelledby="overview-steps-heading">
-        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>From setup to your first project</Typography>
+        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>Getting Started</Typography>
         <Grid component="ol" container spacing={3} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {steps.map((step, index) => (<Grid component="li" key={step.title} size={{ xs: 12, md: 4 }}>
             <Box aria-hidden="true" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1 }}>0{index + 1}</Box>
