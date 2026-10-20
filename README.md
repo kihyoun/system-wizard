@@ -140,9 +140,11 @@ Production URL is the real system-interface address from General; the existing
 Wizard keeps running at that address. The entry is managed under General, so
 project edit/delete controls and environment switches are disabled.
 
-The private `root/wizard` repository starts with a README/CI registration
+A newly registered managed repository starts with a README/CI registration
 scaffold. Automatic registration does not import Wizard source, start a pipeline
-or replace the UI.
+or replace the UI. An operator can instead explicitly adopt an existing private
+Wizard source project using the source-primary workflow below; this keeps source,
+reviews, builds and image delivery in the same repository.
 
 Expand the Wizard row and select **Initialize
 Wizard source**. The preview identifies the private repository, pinned source
@@ -226,10 +228,11 @@ lint/tests/types, and serves the built SPA through NGINX on port 80. Updating
 source does not replace the running image. Keep the last verified immutable
 image for recovery and validate separate candidates before Production rollout.
 
-The upstream CI preserves distinct Review, Production, Docker Hub, GitHub mirror
-and platform-update roles. Public domains and publishing credentials remain
-operator configuration; the managed private-GitLab build/environment recipe is
-separate and does not invoke upstream publishing credentials.
+The legacy publishing CI preserves its distinct Review, Production, Docker Hub,
+GitHub mirror and platform-update roles. Public domains and publishing credentials
+remain operator configuration. The source-primary workflow below builds and
+checks images in the canonical project without invoking legacy upstream
+publishing credentials.
 
 ### GitLab source-primary workflow
 
@@ -237,9 +240,9 @@ A clean source repository can explicitly select `.gitlab/primary.yml` in its
 GitLab **CI/CD configuration file** setting. This runs lint, unit tests,
 TypeScript/Vite build and signed configuration-export checks, then Playwright
 against that exact build artifact in a disposable loopback preview. The existing
-`.gitlab-ci.yml` publishing jobs and private managed delivery recipe stay separate.
-This source pipeline never deploys Production, Review or Beta or updates System's
-Wizard gitlink automatically.
+`.gitlab-ci.yml` publishing jobs remain available independently. With image
+delivery disabled, the source-primary pipeline needs only its ordinary Node/browser
+runner. It never deploys Production or updates System's Wizard gitlink automatically.
 
 Its opt-in `deploy:github` job forwards the exact successful protected default-
 branch push commit to one configured existing GitHub branch, after both required
@@ -252,20 +255,57 @@ must be verified independently; jobs never discover or trust them with keyscan.
 Failures remain visible and retryable. The job forwards no tags, side branches
 or deletions and never force-pushes or rewrites `origin`.
 
-Unit/model and browser checks remain usable independently of optional mirror
-success. Before a reviewed source-to-delivery handoff, verify successful
-`build:source` and `test:browser` jobs for the exact merged source commit. A mirror
-failure remains visible and retryable; it does not itself block private delivery
-or authorize Production promotion.
+Unit/model, browser and image checks run independently of optional mirror
+success. Verify successful `build:source` and `test:browser` jobs for the exact
+merged commit. A mirror failure remains visible and retryable; it never authorizes
+Production promotion or changes the active image.
 
-Keep source-primary history distinct from a managed delivery repository's private
-scaffold, configuration and deployment ancestry. Transfer reviewed source changes
-deliberately without overwriting managed files or receipts; record the mapping
-between the merged source commit and delivery commit privately. The managed
-delivery pipeline then supplies its own build/test/image evidence for the separate
-manual Production promotion. See the
-[primary/backup guide](https://github.com/kihyoun/system/blob/master/docs/GITLAB_GITHUB_BACKUP.md)
-for history, credentials, serialization, gitlink ordering and recovery policies.
+### Build and deliver from the same project
+
+Use one private GitLab project as the canonical Wizard repository for source,
+issues, merge requests, tests and container images. No second copy of the source
+repository is required. The optional GitHub mirror forwards the same reviewed
+history; it is not a separate delivery input.
+
+Select `.gitlab/primary.yml` as the project's CI configuration path and enable its
+container registry. Source and mirror jobs select a runner with both `docker` and
+`wizard-source-primary` tags. Image jobs use the `docker` tag and need an explicitly
+trusted Docker executor with access to the host Docker socket. That access can
+control the host; use a runner dedicated to trusted project code.
+
+Set the non-secret project variable `WIZARD_DELIVERY_ENABLED=true` to add
+`build:wizard` and `test:wizard` to ordinary merge-request and default-branch push
+pipelines. With the variable absent or different, only the existing source checks
+and optional mirror run. Keep the successful-pipeline merge requirement enabled.
+There is no extra API-triggered or branch-only delivery pipeline.
+
+`build:wizard` checks the locked source in a pinned Node/Vite build, publishes an
+immutable registry digest and records its source commit and pipeline identity in
+`build-evidence.json`. `test:wizard` starts that exact image and a Playwright
+browser in an internal disposable Docker network, checks navigation and the
+configuration ZIP/Cube signature, and saves `wizard-evidence.json` and browser
+artifacts. Each job records its own bounded cleanup in `cleanup.json`; no global
+Docker prune or platform restart belongs to these jobs. The GitHub mirror waits
+for these checks when delivery is enabled.
+
+An administrator must explicitly bind this project to a compatible Bootstrapper
+as a source-primary managed Wizard; selecting a CI file alone does not transfer
+ownership or authorize deployment. Production promotion remains a deliberate
+plan/apply operation using evidence from the exact successful default-branch push
+pipeline, its immutable image digest and the retained rollback checkpoint. A merge
+or image build does not replace the running Wizard.
+
+Review and Beta remain optional manual jobs. Configure
+`SYSTEM_WIZARD_ENVIRONMENT_IMAGE` with the provisioned immutable helper image ID,
+`SYSTEM_WIZARD_ENVIRONMENT_OPERATION` with its recorded operation identity, and
+`WIZARD_REVIEW_HOST` / `WIZARD_BETA_HOST` with the explicitly reserved HTTPS hosts.
+The controller independently verifies those values against its canonical project
+receipt; CI variables alone cannot grant ownership. Same-project merge-request
+pipelines offer `deploy:review` / `stop:review`; default-branch push pipelines offer
+`deploy:beta` / `stop:beta`. Candidate jobs remain absent until their opt-in settings
+are present. They preserve the ordinary Production interface and never promote it. See the
+[Production guide](https://github.com/kihyoun/system/blob/master/project-bootstrap/wizard-production/README.md)
+for independent verification and promotion.
 
 Project documentation is maintained in English. See [AGENTS.md](AGENTS.md) for
 the immutable System Cube signature, which must remain unchanged in generated and imported configuration.
