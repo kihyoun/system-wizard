@@ -139,3 +139,20 @@ test('a pending read-only preview can close and its late response is ignored', a
         errors.mockRestore();
     }
 });
+test.each(['pending', 'verification-failed', undefined])('native %s status never offers legacy activation and refresh stays read-only', async phase => {
+    const projectRequest = vi.fn().mockResolvedValueOnce({
+        mode: 'source-primary', sourceRevision: 'native-source',
+        repository: {path: 'team/wizard', webUrl: 'https://gitlab.example.test/team/wizard'},
+        build: phase ? {mode: 'source-primary', phase} : undefined
+    }).mockRejectedValueOnce(new Error('Temporary evidence lookup failure.'));
+    await act(async () => { renderInto(<WizardBuildDialog sync={{projectRequest}} onClose={vi.fn()}/>, root); });
+    expect(document.body.textContent).toContain('it does not import source or start another pipeline');
+    expect(document.body.textContent).not.toContain('Node 13');
+    expect(button('Enable build pipeline')).toBeUndefined();
+    expect(button('Resume activation')).toBeUndefined();
+    await click('Refresh status');
+    expect(button('Enable build pipeline')).toBeUndefined();
+    expect(button('Resume activation')).toBeUndefined();
+    expect(document.body.textContent).toContain('Native pipeline evidence could not be verified');
+    expect(projectRequest.mock.calls).toEqual([['/projects/wizard/build'], ['/projects/wizard/build/status']]);
+});

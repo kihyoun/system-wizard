@@ -290,7 +290,10 @@ for these checks when delivery is enabled.
 
 An administrator must explicitly bind this project to a compatible Bootstrapper
 as a source-primary managed Wizard; selecting a CI file alone does not transfer
-ownership or authorize deployment. Production promotion remains a deliberate
+ownership or authorize deployment. After Fetch, the managed project row offers
+**Wizard source** and **Native build status**. These read the canonical repository
+and native pipeline evidence; legacy source import and build activation are
+unavailable for an adopted project. Production promotion remains a deliberate
 plan/apply operation using evidence from the exact successful default-branch push
 pipeline, its immutable image digest and the retained rollback checkpoint. A merge
 or image build does not replace the running Wizard.
