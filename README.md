@@ -244,6 +244,15 @@ against that exact build artifact in a disposable loopback preview. The existing
 delivery disabled, the source-primary pipeline needs only its ordinary Node/browser
 runner. It never deploys Production or updates System's Wizard gitlink automatically.
 
+Source-primary jobs and the managed image/browser builds install the committed
+[Mozilla CA bundle](.system-bootstrapper/build-v1/ca/cacert-2026-10-20.crt)
+using the versioned `node24-vite8-ca-v4` recipe. Its image-only refresh verifies
+the bundle checksum and removes obsolete OpenSSL certificate hash links before
+installing the reviewed trust store. Node uses that store through
+`NODE_OPTIONS=--use-openssl-ca`. The source browser job repeats the refresh after
+Playwright installs operating-system dependencies, which can recreate old trust
+links. Run the refresh only inside disposable CI/build images, never on the host OS.
+
 Its opt-in `deploy:github` job forwards the exact successful protected default-
 branch push commit to one configured existing GitHub branch, after both required
 checks. Set `GITHUB_BACKUP_ENABLED=true`, `GITHUB_BACKUP_SOURCE_PROJECT`,
