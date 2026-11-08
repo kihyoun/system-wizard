@@ -1,5 +1,7 @@
 # System Wizard
 
+**You build it, you own it**
+
 System Wizard is the browser interface for
 [System Bootstrapper](https://github.com/kihyoun/system). It manages platform
 configuration, GitLab runners, application projects and deployment settings
@@ -16,9 +18,12 @@ for installation, first login, runner setup and troubleshooting. A standalone
 Wizard development server does not start Sync, GitLab, the registry or runners.
 
 The default **Overview** page introduces the platform and links to setup guides.
+Select **Docs** in the top toolbar to read and search the integrated handbook,
+including Quick Start, installation and configuration guides. Docs works without
+a Sync connection; `/docs#docs/getting-started` opens its first chapter directly.
 Select **Wizard** in the main navigation or **Open Wizard** to configure an
 instance. `/configuration` remains a direct entry to the Wizard workspace.
-Switching between Overview, Wizard and the footer's Privacy/Imprint views preserves the
+Switching between Overview, Wizard, Docs and the footer's Privacy/Imprint views preserves the
 current connection, configuration and in-progress form state in the browser.
 
 1. Open **Edit** using the pencil icon next to **Connect**. Enter the Sync server

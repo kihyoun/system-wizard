@@ -1,6 +1,6 @@
 import ListItemButton from '@mui/material/ListItemButton';
 import { makeStyles } from 'tss-react/mui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
@@ -38,10 +38,20 @@ import ServerControlButton from './components/ServerControlButton';
 import EditIcon from '@mui/icons-material/Edit';
 import Helper from './api/Helper';
 import Overview from './components/Overview';
+import Docs from './components/Docs';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import Privacy from './components/Privacy';
 import Imprint from './components/Imprint';
 import { usePublicSiteInfo } from './components/legal/PublicSiteInfo';
 const drawerWidth = 240;
+type MainView = 'overview' | 'wizard' | 'docs' | 'privacy' | 'imprint';
+const viewFromLocation = (): MainView => {
+    const path = window.location.pathname.replace(/\/$/, '');
+    if (path === '/privacy' || path === '/imprint') return path.slice(1) as MainView;
+    if (window.location.hash.startsWith('#docs/') || path === '/docs') return 'docs';
+    return path === '/configuration' ? 'wizard' : 'overview';
+};
 const useStyles = makeStyles<{
     progress: number;
     theme: Theme;
@@ -103,8 +113,25 @@ const App = observer(() => {
     }, []);
     const { classes: drawerClasses } = useDrawerStyles();
     const [dark, setDark] = useState(false);
-    const [view, setView] = useState<'overview' | 'wizard' | 'privacy' | 'imprint'>(() =>
-        window.location.pathname.replace(/\/$/, '') === '/configuration' ? 'wizard' : 'overview');
+    const [view, setView] = useState<MainView>(viewFromLocation);
+    const headerRef = useRef<HTMLElement>(null);
+    const [headerHeight, setHeaderHeight] = useState(112);
+    useEffect(() => {
+        const syncView = () => setView(viewFromLocation());
+        window.addEventListener('popstate', syncView);
+        window.addEventListener('hashchange', syncView);
+        return () => {
+            window.removeEventListener('popstate', syncView);
+            window.removeEventListener('hashchange', syncView);
+        };
+    }, []);
+    useEffect(() => {
+        const header = headerRef.current;
+        if (!header) return;
+        const observer = new ResizeObserver(() => setHeaderHeight(header.getBoundingClientRect().height));
+        observer.observe(header);
+        return () => observer.disconnect();
+    }, []);
     const publicSite = usePublicSiteInfo(view === 'privacy' || view === 'imprint');
     const handleDarkMode = (event: any) => {
         setDark(event.target.checked);
@@ -164,9 +191,14 @@ const App = observer(() => {
         }
     });
     const compact = useMediaQuery(theme.breakpoints.down('md'));
+    const barSurface = { bgcolor: dark ? 'background.paper' : 'primary.main', backgroundImage: 'none', color: '#fff' };
     const wizardActive = view === 'wizard';
     const desktopDrawerOpen = wizardActive && open && !compact;
-    const showView = (nextView: typeof view, focusNavigation = false) => {
+    const showView = (nextView: MainView, focusNavigation = false) => {
+        const destination = nextView === 'overview' ? '/' : nextView === 'wizard' ? '/configuration' : nextView === 'docs' ? '/docs#docs/getting-started' : `/${nextView}`;
+        if (`${window.location.pathname}${window.location.hash}` !== destination) {
+            window.history.pushState(null, '', destination);
+        }
         setView(nextView);
         window.scrollTo({ top: 0 });
         if (focusNavigation) window.requestAnimationFrame(() => {
@@ -231,19 +263,25 @@ const App = observer(() => {
           <Grid size={12}>
 
             <div className={drawerClasses.root}>
-              <AppBar elevation={0} position="fixed" className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: desktopDrawerOpen })}>
-                <Toolbar>
-                  {wizardActive && <IconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
+              <AppBar ref={headerRef} elevation={0} position="fixed" sx={barSurface} className={clsx(drawerClasses.appBar, { [drawerClasses.appBarShift]: desktopDrawerOpen })}>
+                <Toolbar sx={{ flexWrap: 'wrap', columnGap: 1, py: { xs: 1, md: 0 } }}>
+                  {wizardActive && <IconButton color="inherit" aria-label="open drawer" aria-controls={open ? "server-drawer" : undefined} aria-expanded={open} onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
                     <MenuIcon />
                   </IconButton>}
-                  <Typography variant="h6" noWrap sx={{ minWidth: 0, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                  <Typography variant="h6" noWrap sx={{ minWidth: 0, flex: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     {wizardActive ? 'System Bootstrapper Control Panel' : 'System Bootstrapper'}
                   </Typography>
-                  <div className={classes.divider}/>
-                  <DarkModeSwitch handleChange={handleDarkMode}/>
+                  <Box component="nav" aria-label="Main navigation" sx={{ order: { xs: 3, md: 2 }, width: { xs: '100%', md: 'auto' }, minWidth: 0 }}>
+                    <Tabs value={view === 'overview' || view === 'wizard' || view === 'docs' ? view : false} onChange={(_event, nextView: MainView) => showView(nextView)} aria-label="Main navigation" indicatorColor="secondary" textColor="inherit" sx={{ minHeight: 44, '& .MuiTab-root': { minHeight: 44, minWidth: 0, px: { xs: 1.5, sm: 2 }, fontSize: '0.8125rem' } }}>
+                      <Tab value="overview" label="Overview" id="main-tab-overview" aria-controls="main-panel-overview" />
+                      <Tab value="wizard" label="Wizard" icon={<ViewInArIcon fontSize="small" />} iconPosition="start" id="main-tab-wizard" aria-controls="main-panel-wizard" />
+                      <Tab value="docs" label="Docs" icon={<MenuBookIcon fontSize="small" />} iconPosition="start" id="main-tab-docs" aria-controls="main-panel-docs" />
+                    </Tabs>
+                  </Box>
+                  <Box sx={{ order: { xs: 2, md: 3 }, flexShrink: 0 }}><DarkModeSwitch handleChange={handleDarkMode}/></Box>
                 </Toolbar>
               </AppBar>
-              {wizardActive && <Drawer variant={compact ? 'temporary' : 'persistent'} anchor="left" open={open} onClose={handleDrawerClose} sx={{ width: desktopDrawerOpen ? drawerWidth : 0, flexShrink: 0 }} classes={{ paper: drawerClasses.drawerPaper }}>
+              {wizardActive && <Drawer id="server-drawer" variant={compact ? 'temporary' : 'persistent'} anchor="left" open={open} onClose={handleDrawerClose} sx={{ width: desktopDrawerOpen ? drawerWidth : 0, flexShrink: 0 }} classes={{ paper: drawerClasses.drawerPaper }}>
                 <div className={drawerClasses.drawerHeader}>
                   <IconButton onClick={handleDrawerClose} aria-label="Close server drawer">
                     {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -268,13 +306,7 @@ const App = observer(() => {
               </Drawer>}
               <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', flexGrow: 1, minWidth: 0 }}>
               <main className={drawerClasses.content}>
-                <div className={drawerClasses.drawerHeader}/>
-                <Paper elevation={0} className={classes.paper} sx={{ py: 0 }}>
-                  <Tabs value={view === 'overview' || view === 'wizard' ? view : false} onChange={(_event, nextView: 'overview' | 'wizard') => showView(nextView)} aria-label="Main navigation" indicatorColor="secondary" textColor="inherit">
-                    <Tab value="overview" label="Overview" id="main-tab-overview" aria-controls="main-panel-overview" />
-                    <Tab value="wizard" label="Wizard" id="main-tab-wizard" aria-controls="main-panel-wizard" />
-                  </Tabs>
-                </Paper>
+                <Box aria-hidden="true" sx={{ height: `${headerHeight}px`, flexShrink: 0, mb: 2 }} />
                 <div role="tabpanel" hidden={view !== 'overview'} id="main-panel-overview" aria-labelledby="main-tab-overview">
                   <Overview onOpenWizard={() => showView('wizard', true)} />
                 </div>
@@ -312,6 +344,9 @@ const App = observer(() => {
                   </>)}
                 <FormWizard main={activeServer} setOpenAlert={setOpenAlert} setOpenSuccess={setOpenSuccess}/>
                 </div>
+                <div role="tabpanel" hidden={view !== 'docs'} id="main-panel-docs" aria-labelledby="main-tab-docs">
+                  {view === 'docs' && <Docs />}
+                </div>
                 {view === 'privacy' && <section aria-labelledby="privacy-heading">
                   <Privacy {...publicSite} />
                 </section>}
@@ -319,10 +354,10 @@ const App = observer(() => {
                   <Imprint {...publicSite} />
                 </section>}
               </main>
-                <Box component="footer" sx={{ mt: 'auto', py: 3, px: 2, textAlign: 'center', bgcolor: '#0d47a1', color: '#fff' }}>
+                <Box component="footer" sx={{ mt: 'auto', py: 3, px: 2, textAlign: 'center', ...barSurface }}>
                     <Box component="nav" aria-label="Footer navigation" sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 3, mb: 2 }}>
-                      {(['overview', 'wizard', 'privacy', 'imprint'] as const).map(destination => (<Link key={destination} component="button" type="button" id={`footer-${destination}`} color="inherit" underline="hover" aria-current={view === destination ? 'page' : undefined} onClick={() => showView(destination, true)}>
-                        {destination === 'overview' ? 'Overview' : destination === 'wizard' ? 'Wizard' : destination === 'privacy' ? 'Privacy' : 'Imprint'}
+                      {(['overview', 'wizard', 'docs', 'privacy', 'imprint'] as const).map(destination => (<Link key={destination} component="button" type="button" id={`footer-${destination}`} color="inherit" underline="hover" aria-current={view === destination ? 'page' : undefined} onClick={() => showView(destination, true)}>
+                        {destination === 'overview' ? 'Overview' : destination === 'wizard' ? 'Wizard' : destination === 'docs' ? 'Docs' : destination === 'privacy' ? 'Privacy' : 'Imprint'}
                       </Link>))}
                     </Box>
                     <Link href="https://github.com/kihyoun/system" color="inherit" sx={{ textDecorationColor: 'rgba(255,255,255,0.7)' }}>System Bootstrapper on GitHub</Link>

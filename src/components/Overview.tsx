@@ -6,20 +6,20 @@ const documentation = 'https://github.com/kihyoun/system/blob/master/';
 const steps = [
     {
         title: 'Prepare your platform',
-        description: 'Start with an Ubuntu host and mounted persistent storage. The handbook guides you through checkout, Docker and the first startup.',
-        link: 'docs/HANDBOOK.md#0-getting-started',
+        description: 'Start with an Ubuntu host and choose where to keep persistent service data. The handbook guides you through checkout, Docker and the first startup.',
+        link: '#docs/getting-started',
         label: 'Follow the handbook'
     },
     {
         title: 'Connect and configure',
         description: 'Open the Wizard and enter your Sync address and credentials. Fetch the saved settings, then review your services, domains and runner count.',
-        link: 'docs/HANDBOOK.md#06-open-edit-and-enter-the-connection-details-first',
+        link: '#docs/configuration',
         label: 'Read the connection guide'
     },
     {
         title: 'Create your first project',
         description: 'Choose an application starter and configure its environments. Follow the build and test results before a deliberate production rollout.',
-        link: 'docs/PROJECT_BOOTSTRAP_GUIDE.md',
+        link: '#docs/projects',
         label: 'Explore application projects'
     }
 ];
@@ -31,7 +31,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
         <Grid size={{ xs: 12, md: 7 }}>
         <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.14em' }}>System Bootstrapper · Open source</Typography>
         <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 2, fontWeight: 700, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: '-0.04em' }}>
-          Build Your Web Projects, Not Your Infrastructure
+          You build it, you own it
         </Typography>
         <Typography variant="h6" component="p" sx={{ mb: 2, maxWidth: 760 }}>
           Build your web projects. Bring your development tools together.
@@ -45,7 +45,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
           <Button variant="contained" color="secondary" disableElevation endIcon={<ArrowForwardIcon />} onClick={onOpenWizard}>
             Open Wizard
           </Button>
-          <Button component="a" href={`${documentation}docs/HANDBOOK.md`} startIcon={<MenuBookIcon />} sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>
+          <Button component="a" href="#docs/getting-started" startIcon={<MenuBookIcon />} sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>
             Read the handbook
           </Button>
         </Stack>
@@ -77,7 +77,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
             <Box aria-hidden="true" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1 }}>0{index + 1}</Box>
             <Typography component="h3" variant="h6" sx={{ mb: 1 }}>{step.title}</Typography>
             <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>{step.description}</Typography>
-            <Link href={`${documentation}${step.link}`} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{step.label}</Link>
+            <Link href={step.link} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{step.label}</Link>
           </Grid>))}
         </Grid>
       </Paper>
@@ -91,7 +91,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
               <li><Typography><strong>Build and deliver applications.</strong> Start with React, Angular, a general web project or an empty repository, then work with editable source and CI.</Typography></li>
               <li><Typography><strong>Keep a path back.</strong> Back up configuration separately and retain your persistent storage. Harvest and Seed provide service-data snapshots for recovery.</Typography></li>
             </Stack>
-            <Link href={`${documentation}docs/RECOVERY_CONTRACT.md`} underline="hover" sx={{ display: 'inline-block', mt: 3, color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>Understand persistence and recovery</Link>
+            <Link href="#docs/recovery" underline="hover" sx={{ display: 'inline-block', mt: 3, color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>Understand persistence and recovery</Link>
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>

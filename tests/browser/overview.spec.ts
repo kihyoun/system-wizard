@@ -8,12 +8,12 @@ test('Overview works before login and keyboard navigation opens the existing Wiz
   });
   await page.goto('/');
   await expect(page.getByText('System Bootstrapper', { exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1, name: 'Build Your Web Projects, Not Your Infrastructure', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'You build it, you own it', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Getting Started', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeHidden();
   await expect(page.getByRole('tab', { name: 'Privacy', exact: true })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Read the handbook', exact: true }))
-    .toHaveAttribute('href', 'https://github.com/kihyoun/system/blob/master/docs/HANDBOOK.md');
+    .toHaveAttribute('href', '#docs/getting-started');
   const navigation = page.getByRole('tablist', { name: 'Main navigation' });
   await navigation.getByRole('tab', { name: 'Overview', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
@@ -32,7 +32,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       contactEmail: 'kontakt@example.com', privacyNoticeUrl: '', accessLogRetention: '', additionalPrivacyText: ''
     } }));
     await page.goto('/');
-    const title = page.getByRole('heading', { level: 1, name: 'Build Your Web Projects, Not Your Infrastructure', exact: true });
+    const title = page.getByRole('heading', { level: 1, name: 'You build it, you own it', exact: true });
     await expect(title).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.getByRole('heading', { level: 2, name: 'Getting Started', exact: true })).toBeVisible();
@@ -46,7 +46,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
     await expect(page.getByRole('button', { name: 'Open Wizard', exact: true }))
       .toHaveCSS('background-color', 'rgb(245, 0, 87)');
     await page.screenshot({ path: test.info().outputPath(`overview-${viewport.width}.png`), fullPage: true, animations: 'disabled' });
-    for (const destination of ['Overview', 'Wizard', 'Privacy', 'Imprint']) {
+    for (const destination of ['Overview', 'Wizard', 'Docs', 'Privacy', 'Imprint']) {
       if (destination !== 'Overview') {
         await page.getByRole('navigation', { name: 'Footer navigation' })
           .getByRole('button', { name: destination, exact: true }).click();
@@ -61,6 +61,8 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
         await page.screenshot({ path: test.info().outputPath(`website-settings-${viewport.width}.png`), fullPage: true, animations: 'disabled' });
       }
       const footer = page.getByRole('contentinfo');
+      expect(await footer.evaluate(element => getComputedStyle(element).backgroundColor))
+        .toBe(await page.getByRole('banner').evaluate(element => getComputedStyle(element).backgroundColor));
       const github = footer.getByRole('link', { name: 'System Bootstrapper on GitHub', exact: true });
       await github.scrollIntoViewIfNeeded();
       await expect(github).toBeVisible();
