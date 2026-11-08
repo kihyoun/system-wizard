@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, TextField } from '@mui/material';
 type EnvironmentName = 'review' | 'beta';
@@ -50,6 +51,7 @@ function validatePreview(result: any) {
     }
 }
 export default function WizardEnvironmentsDialog(props: any) {
+    const { t } = useI18n();
     const [preview, setPreview] = useState<any>();
     const [settings, setSettings] = useState<Settings>();
     const [environments, setEnvironments] = useState<any>();
@@ -163,47 +165,38 @@ export default function WizardEnvironmentsDialog(props: any) {
             });
     };
     return <Dialog open fullWidth maxWidth="sm" onClose={operation === 'activate' ? undefined : props.onClose} aria-labelledby="wizard-environments-title">
-    <DialogTitle id="wizard-environments-title">Wizard Review and Beta environments</DialogTitle>
+    <DialogTitle id="wizard-environments-title">{t("Wizard Review and Beta environments")}</DialogTitle>
     <DialogContent>
       <DialogContentText>
-        Configure optional HTTPS environments for the verified Wizard candidate.
-        Production stays configured under General.
-        Each environment uses manual deploy and stop jobs in the local GitLab pipeline.
-      </DialogContentText>
+        {t("Configure optional HTTPS environments for the verified Wizard candidate. Production stays configured under General. Each environment uses manual deploy and stop jobs in the local GitLab pipeline.")}</DialogContentText>
       <DialogContentText>
-        Review supports one active merge request at a time. Stop the current MR in GitLab before deploying
-        a different MR to the same host. Stop active deployments before changing environment settings.
-        Hostnames and certificate coverage must be verified; unavailable environments stay disabled.
-      </DialogContentText>
-      {environments && !statusFailed && <p role="status">{phaseText[environments.phase] ||
-                'Environment recipe status is unavailable. Refresh status.'}</p>}
+        {t("Review supports one active merge request at a time. Stop the current MR in GitLab before deploying a different MR to the same host. Stop active deployments before changing environment settings. Hostnames and certificate coverage must be verified; unavailable environments stay disabled.")}</DialogContentText>
+      {environments && !statusFailed && <p role="status">{t(phaseText[environments.phase] ||
+                'Environment recipe status is unavailable. Refresh status.')}</p>}
       {statusFailed && <p role="status">
-        Environment status is unverified. Refresh status and obtain a fresh preview.
-      </p>}
+        {t("Environment status is unverified. Refresh status and obtain a fresh preview.")}</p>}
       {mustRefreshStatus && <p role="status">
-        Refresh status before confirming another update. Do not retry an uncertain write.
-      </p>}
-      {preview?.capabilities.reasons?.length > 0 && <ul>{preview.capabilities.reasons.map((reason: string) => <li key={reason}>{reason}</li>)}</ul>}
+        {t("Refresh status before confirming another update. Do not retry an uncertain write.")}</p>}
+      {preview?.capabilities.reasons?.length > 0 && <ul>{preview.capabilities.reasons.map((reason: string) => <li key={reason}>{t(reason)}</li>)}</ul>}
       {settings && names.map(name => <fieldset key={name} style={{ marginBottom: '1em' }}>
         <legend>{labels[name]}</legend>
-        <FormControlLabel label={'Enable ' + labels[name]} control={<Checkbox checked={settings[name].enabled} disabled={!editable} onChange={event => change(name, 'enabled', event.target.checked)} slotProps={{
-                input: { 'aria-label': 'Enable ' + labels[name] }
+        <FormControlLabel label={t('Enable ' + labels[name])} control={<Checkbox checked={settings[name].enabled} disabled={!editable} onChange={event => change(name, 'enabled', event.target.checked)} slotProps={{
+                input: { 'aria-label': t('Enable ' + labels[name]) }
             }}/>}/>
-        <TextField id={'wizard-' + name + '-host'} fullWidth margin="dense" label={labels[name] + ' host'} value={settings[name].host} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'host', event.target.value)}/>
-        <TextField id={'wizard-' + name + '-ssl'} fullWidth margin="dense" label={labels[name] + ' HTTPS certificate path'} value={settings[name].ssl} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'ssl', event.target.value)}/>
-        <TextField id={'wizard-' + name + '-ssl-key'} fullWidth margin="dense" label={labels[name] + ' HTTPS private key path'} value={settings[name].sslKey} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'sslKey', event.target.value)}/>
+        <TextField id={'wizard-' + name + '-host'} fullWidth margin="dense" label={t(labels[name] + ' host')} value={settings[name].host} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'host', event.target.value)}/>
+        <TextField id={'wizard-' + name + '-ssl'} fullWidth margin="dense" label={t(labels[name] + ' HTTPS certificate path')} value={settings[name].ssl} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'ssl', event.target.value)}/>
+        <TextField id={'wizard-' + name + '-ssl-key'} fullWidth margin="dense" label={t(labels[name] + ' HTTPS private key path')} value={settings[name].sslKey} disabled={!editable || !settings[name].enabled} onChange={event => change(name, 'sslKey', event.target.value)}/>
       </fieldset>)}
       {reserved && !editable && !busy && <p>
-        Saved settings are locked until a fresh preview confirms that an update is safe.
-      </p>}
-      {message && <p role="status">{message}</p>}
+        {t("Saved settings are locked until a fresh preview confirms that an update is safe.")}</p>}
+      {message && <p role="status">{t(message)}</p>}
     </DialogContent>
     <DialogActions>
-      <Button disabled={operation === 'activate'} onClick={props.onClose}>Close</Button>
-      <Button disabled={busy} onClick={() => request('preview')}>Refresh preview</Button>
-      {preview && <Button disabled={busy} onClick={() => request('status')}>Refresh status</Button>}
+      <Button disabled={operation === 'activate'} onClick={props.onClose}>{t("Close")}</Button>
+      <Button disabled={busy} onClick={() => request('preview')}>{t("Refresh preview")}</Button>
+      {preview && <Button disabled={busy} onClick={() => request('status')}>{t("Refresh status")}</Button>}
       {preview && <Button color="primary" disabled={!confirmEnabled} onClick={() => request('activate')}>
-        {update ? 'Update environments' : reserved ? 'Resume environment setup' : 'Enable environments'}
+        {update ? t("Update environments") : reserved ? t("Resume environment setup") : t("Enable environments")}
       </Button>}
     </DialogActions>
   </Dialog>;

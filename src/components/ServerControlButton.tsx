@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -6,6 +7,7 @@ import SyncIcon from '@mui/icons-material/Sync';
 import { runInAction } from 'mobx';
 import PushDialog from './dialogs/PushDialog';
 export default function ServerControlButton(props: any) {
+    const { t } = useI18n();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [push, setPush] = React.useState(false);
     const [harvestPending, setHarvestPending] = React.useState(false);
@@ -151,18 +153,18 @@ export default function ServerControlButton(props: any) {
     return (<React.Fragment>
       <PushDialog open={push} setOpen={setPush} handlePush={handlePush} onClose={() => setPush(false)}/>
       <Button disabled={harvestPending} style={{ marginRight: '1ch' }} variant="text" aria-controls="simple-menu" aria-haspopup="true" color={'primary'} component="span" startIcon={<SyncIcon />} onClick={handleClick}>
-        {harvestPending ? 'Harvest in progress...' : 'Synchronize'}
+        {harvestPending ? t("Harvest in progress...") : t("Synchronize")}
       </Button>
-      {harvestPending && <span role="status">Harvest in progress...</span>}
+      {harvestPending && <span role="status">{t("Harvest in progress...")}</span>}
       <Menu elevation={1} id="simple-menu" anchorEl={anchorEl} transitionDuration={0} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem disabled={harvestPending} onClick={() => setPush(true)}>Push</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => setPush(true)}>{t("Push")}</MenuItem>
         <MenuItem disabled={harvestPending} onClick={() => handleSeed()}>Seed</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={() => handleRestart()}>Restart</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={handleFetch}>Fetch</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={() => handleReset()}>Reset</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={() => handleHotPatch()}>Update</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={() => handleRegister()}>Register</MenuItem>
-        <MenuItem disabled={harvestPending} onClick={() => handleUnregister()}>Unregister</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleRestart()}>{t("Restart")}</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={handleFetch}>{t("Fetch")}</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleReset()}>{t("Reset")}</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleHotPatch()}>{t("Update")}</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleRegister()}>{t("Register")}</MenuItem>
+        <MenuItem disabled={harvestPending} onClick={() => handleUnregister()}>{t("Unregister")}</MenuItem>
         <MenuItem disabled={harvestPending} onClick={() => handleHarvest()}>Harvest</MenuItem>
       </Menu>
     </React.Fragment>);

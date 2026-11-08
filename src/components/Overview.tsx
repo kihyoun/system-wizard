@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import { Box, Button, Grid, Link, Paper, Stack, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -25,29 +26,20 @@ const steps = [
 ];
 
 export default function Overview({ onOpenWizard }: { onOpenWizard: () => void }) {
+    const { t } = useI18n();
     return (<Stack spacing={3} sx={{ maxWidth: 1200, mx: 'auto' }}>
       <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 5 }, borderTop: 4, borderColor: 'secondary.main' }}>
        <Grid container spacing={{ xs: 3, md: 5 }} sx={{ alignItems: 'center' }}>
         <Grid size={{ xs: 12, md: 7 }}>
-        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.14em' }}>System Bootstrapper · Open source</Typography>
+        <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.14em' }}>{t("System Bootstrapper · Open source")}</Typography>
         <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 2, fontWeight: 700, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: '-0.04em' }}>
           You build it, you own it
         </Typography>
-        <Typography variant="h6" component="p" sx={{ mb: 2, maxWidth: 760 }}>
-          Build your web projects. Bring your development tools together.
-        </Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 850, lineHeight: 1.75 }}>
-          System Bootstrapper brings GitLab, runners, a container registry and deployment routing
-          onto infrastructure you control. This Wizard helps you configure that platform and turn
-          an application idea into a project with source, CI and environments.
-        </Typography>
+        <Typography variant="h6" component="p" sx={{ mb: 2, maxWidth: 760 }}>{t("Build your web projects. Bring your development tools together.")}</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 850, lineHeight: 1.75 }}>{t("System Bootstrapper brings GitLab, runners, a container registry and deployment routing onto infrastructure you control. This Wizard helps you configure that platform and turn an application idea into a project with source, CI and environments.")}</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3, alignItems: { sm: 'center' } }}>
-          <Button variant="contained" color="secondary" disableElevation endIcon={<ArrowForwardIcon />} onClick={onOpenWizard}>
-            Open Wizard
-          </Button>
-          <Button component="a" href="#docs/getting-started" startIcon={<MenuBookIcon />} sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>
-            Read the handbook
-          </Button>
+          <Button variant="contained" color="secondary" disableElevation endIcon={<ArrowForwardIcon />} onClick={onOpenWizard}>{t("Open Wizard")}</Button>
+          <Button component="a" href="#docs/getting-started" startIcon={<MenuBookIcon />} sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Read the handbook")}</Button>
         </Stack>
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>
@@ -64,20 +56,20 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
                 <text x="126" y="190" fontSize="13" letterSpacing="1">BOOTSTRAPPER</text>
               </g>
             </Box>
-            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.09em' }}>Your tools. Your infrastructure.</Typography>
+            <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.09em' }}>{t("Your tools. Your infrastructure.")}</Typography>
           </Box>
         </Grid>
        </Grid>
       </Paper>
 
       <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 } }} aria-labelledby="overview-steps-heading">
-        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>Getting Started</Typography>
+        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>{t("Getting Started")}</Typography>
         <Grid component="ol" container spacing={3} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {steps.map((step, index) => (<Grid component="li" key={step.title} size={{ xs: 12, md: 4 }}>
             <Box aria-hidden="true" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1 }}>0{index + 1}</Box>
-            <Typography component="h3" variant="h6" sx={{ mb: 1 }}>{step.title}</Typography>
-            <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>{step.description}</Typography>
-            <Link href={step.link} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{step.label}</Link>
+            <Typography component="h3" variant="h6" sx={{ mb: 1 }}>{t(step.title)}</Typography>
+            <Typography color="text.secondary" sx={{ mb: 2, lineHeight: 1.7 }}>{t(step.description)}</Typography>
+            <Link href={step.link} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t(step.label)}</Link>
           </Grid>))}
         </Grid>
       </Paper>
@@ -85,24 +77,20 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 7 }}>
           <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 }, height: '100%' }} aria-labelledby="overview-capabilities-heading">
-            <Typography component="h2" variant="h5" id="overview-capabilities-heading" sx={{ mb: 2 }}>Make room for your ideas</Typography>
+            <Typography component="h2" variant="h5" id="overview-capabilities-heading" sx={{ mb: 2 }}>{t("Make room for your ideas")}</Typography>
             <Stack component="ul" spacing={2} sx={{ pl: 2, mb: 0 }}>
-              <li><Typography><strong>Configure your toolchain.</strong> Manage GitLab, the registry, runner managers and service routing from one interface.</Typography></li>
-              <li><Typography><strong>Build and deliver applications.</strong> Start with React, Angular, a general web project or an empty repository, then work with editable source and CI.</Typography></li>
-              <li><Typography><strong>Keep a path back.</strong> Back up configuration separately and retain your persistent storage. Harvest and Seed provide service-data snapshots for recovery.</Typography></li>
+              <li><Typography><strong>{t("Configure your toolchain.")}</strong>{' '}{t("Manage GitLab, the registry, runner managers and service routing from one interface.")}</Typography></li>
+              <li><Typography><strong>{t("Build and deliver applications.")}</strong>{' '}{t("Start with React, Angular, a general web project or an empty repository, then work with editable source and CI.")}</Typography></li>
+              <li><Typography><strong>{t("Keep a path back.")}</strong>{' '}{t("Back up configuration separately and retain your persistent storage. Harvest and Seed provide service-data snapshots for recovery.")}</Typography></li>
             </Stack>
-            <Link href="#docs/recovery" underline="hover" sx={{ display: 'inline-block', mt: 3, color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>Understand persistence and recovery</Link>
+            <Link href="#docs/recovery" underline="hover" sx={{ display: 'inline-block', mt: 3, color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Understand persistence and recovery")}</Link>
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>
           <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 }, height: '100%' }} aria-labelledby="overview-vision-heading">
-            <Typography component="h2" variant="h5" id="overview-vision-heading" sx={{ mb: 2 }}>Built to evolve</Typography>
-            <Typography color="text.secondary" sx={{ lineHeight: 1.75, mb: 2 }}>
-              The long-term goal is a platform that can build and validate its next generation.
-              Today’s explicit Wizard source, build and promotion steps provide a foundation;
-              complete autonomous renewal remains a vision.
-            </Typography>
-            <Link href={`${documentation}README.md`} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>Explore the project and architecture</Link>
+            <Typography component="h2" variant="h5" id="overview-vision-heading" sx={{ mb: 2 }}>{t("Built to evolve")}</Typography>
+            <Typography color="text.secondary" sx={{ lineHeight: 1.75, mb: 2 }}>{t("The long-term goal is a platform that can build and validate its next generation. Today’s explicit Wizard source, build and promotion steps provide a foundation; complete autonomous renewal remains a vision.")}</Typography>
+            <Link href={`${documentation}README.md`} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Explore the project and architecture")}</Link>
           </Paper>
         </Grid>
       </Grid>

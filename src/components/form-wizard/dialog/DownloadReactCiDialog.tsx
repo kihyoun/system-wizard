@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
@@ -38,6 +39,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     }
 }));
 export default function DownloadReactCiDialog(props: any) {
+    const { t } = useI18n();
     const [open, setOpen] = useState(true);
     const theme = useTheme();
     const [clipboard, setClipboard] = useState(false);
@@ -69,8 +71,7 @@ export default function DownloadReactCiDialog(props: any) {
     return (<div>
       <Dialog transitionDuration={0} fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose} aria-labelledby="responsive-dialog-title">
 
-        <DialogTitle id="responsive-dialog-title">Pipeline Configuration
-        (.gitlab-ci.yml)</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{t("Pipeline Configuration (.gitlab-ci.yml)")}</DialogTitle>
         <DialogContent>
           <React.Fragment>
             <div className={classes.toolbarWrapper}>
@@ -81,7 +82,7 @@ export default function DownloadReactCiDialog(props: any) {
                 ? 'Copy the contents into Clipboard'
                 : 'Copy successful.';
             return (<Zoom key={fab.color} in={clipboard === Boolean(index)} timeout={transitionDuration} style={{ transitionDelay: `${clipboard === Boolean(index) ? transitionDuration.exit : 0}ms` }} unmountOnExit>
-                      <Tooltip title={tooltip} aria-label={tooltip}>
+                      <Tooltip title={t(tooltip)} aria-label={t(tooltip)}>
                         <Button size="small" onClick={() => {
                     const copyListener = (e: any) => {
                         e?.clipboardData?.setData('text/plain', project.gitlabCi);
@@ -92,7 +93,7 @@ export default function DownloadReactCiDialog(props: any) {
                     document.execCommand('copy');
                     document.removeEventListener('copy', copyListener);
                     setClipboard(true);
-                }} aria-label={tooltip} className={fab.className} color={fab.color} startIcon={fab.icon}>{index === 0 && 'Copy & Paste' || 'Done'}
+                }} aria-label={t(tooltip)} className={fab.className} color={fab.color} startIcon={fab.icon}>{index === 0 && t("Copy & Paste") || t("Done")}
                         </Button>
                       </Tooltip>
                     </Zoom>);
@@ -108,11 +109,9 @@ export default function DownloadReactCiDialog(props: any) {
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => project.exportGitlabCi()} color="primary" startIcon={<GetAppIcon />}>
-            Download
-          </Button>
+            {t("Download")}</Button>
           <Button onClick={handleClose} color="primary" autoFocus>
-            Close
-          </Button>
+            {t("Close")}</Button>
         </DialogActions>
       </Dialog>
     </div>);

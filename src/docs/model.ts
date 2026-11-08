@@ -1,18 +1,51 @@
 import content from './content.json';
+import german from './locales/de.json';
+import { translate, type Locale } from '../i18n';
 
-export const chapters = content.chapters;
-export type Chapter = (typeof chapters)[number];
+export type Chapter = { id: string; title: string; group: string; source: string; sourceStart?: number;
+  prerequisite: string; outcome: string; markdown: string; headings: { title: string; anchor: string; level: number }[] };
+export const chapters: Chapter[] = content.chapters;
 export const images: Record<string, string> = content.images;
+type Translation = { sourceSha256: string; markdown: string };
+const translations = german.chapters as Record<string, Translation>;
 
 export function headingSlug(text: string): string {
   return text.toLowerCase().replace(/`/g, '').replace(/[^\p{L}\p{N}_\- ]/gu, '').replace(/ /g, '-');
 }
 
-export function docsLocation(hash = window.location.hash): { chapter: Chapter; anchor: string } {
+export function markdownHeadings(markdown: string) {
+  const result: { title: string; anchor: string; level: number; offset: number }[] = [];
+  const counts = new Map<string, number>();
+  let fence = '', offset = 0;
+  for (const line of markdown.split(/(?<=\n)/)) {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(line)?.[1]?.[0];
+    if (marker) fence = fence === marker ? '' : fence || marker;
+    const heading = !fence && /^(#{1,6}) (.+?)\s*$/.exec(line);
+    if (heading) {
+      const base = headingSlug(heading[2]), count = counts.get(base) ?? 0;
+      counts.set(base, count + 1);
+      result.push({ title: heading[2], anchor: base + (count ? `-${count}` : ''), level: heading[1].length, offset });
+    }
+    offset += line.length;
+  }
+  return result;
+}
+
+const germanChapters: Chapter[] = chapters.map(chapter => {
+  const markdown = translations[chapter.id]?.markdown ?? chapter.markdown;
+  const original = chapter.headings.length ? chapter.headings : markdownHeadings(chapter.markdown);
+  const headings = markdownHeadings(markdown).map((heading, index) => ({ ...heading, anchor: original[index]?.anchor ?? heading.anchor }));
+  return { ...chapter, title: translate(chapter.title, 'de'), group: translate(chapter.group, 'de'),
+    prerequisite: translate(chapter.prerequisite, 'de'), outcome: translate(chapter.outcome, 'de'), markdown, headings };
+});
+
+export function localizedChapters(locale: Locale): Chapter[] { return locale === 'de' ? germanChapters : chapters; }
+
+export function docsLocation(hash = window.location.hash, catalog: Chapter[] = chapters): { chapter: Chapter; anchor: string } {
   const [, id, ...anchor] = hash.split('/');
   let decodedAnchor = '';
   try { decodedAnchor = decodeURIComponent(anchor.join('/')); } catch { /* Ignore malformed browser fragments. */ }
-  return { chapter: chapters.find(chapter => chapter.id === id) ?? chapters[0], anchor: decodedAnchor };
+  return { chapter: catalog.find(chapter => chapter.id === id) ?? catalog[0], anchor: decodedAnchor };
 }
 
 export function docsHref(id: string, anchor = ''): string {
@@ -47,12 +80,11 @@ export function plainText(markdown: string): string {
   return markdown.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[`#*>|]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-const searchable = chapters.map(chapter => ({ chapter, text: plainText(chapter.markdown) }));
-
-export function searchDocs(query: string) {
+export function searchDocs(query: string, catalog: Chapter[] = chapters) {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length) return [];
-  return searchable.flatMap(({ chapter, text }) => {
+  return catalog.flatMap(chapter => {
+    const text = plainText(chapter.markdown);
     const haystack = `${chapter.title} ${text}`.toLowerCase();
     if (!terms.every(term => haystack.includes(term))) return [];
     const start = Math.max(0, text.toLowerCase().indexOf(terms[0]) - 75);

@@ -1,15 +1,20 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import Docs from '../Docs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import Docs, { DocsNavigation } from '../Docs';
+import App from '../../App';
 import CodeBlock from './CodeBlock';
 import Markdown from './Markdown';
 import { chapters } from '../../docs/model';
 
-beforeEach(() => window.history.replaceState({}, '', '/docs#docs/getting-started'));
+beforeEach(() => {
+  localStorage.clear(); window.history.replaceState({}, '', '/docs#docs/getting-started');
+  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
+});
+afterEach(() => vi.unstubAllGlobals());
 
 describe('Docs reader', () => {
   it('shows prerequisites, expected results, chapter navigation and history-selected content', () => {
-    render(<Docs />);
+    render(<><DocsNavigation /><Docs /></>);
     expect(screen.getByRole('heading', { level: 1, name: '0. Getting Started' })).toHaveFocus();
     expect(screen.getByText('Before you begin')).toBeVisible();
     expect(screen.getByText('Expected result')).toBeVisible();
@@ -32,12 +37,14 @@ describe('Docs reader', () => {
     expect(screen.getByRole('heading', { name: '0. Getting Started', level: 1 })).toBeVisible();
   });
 
-  it('provides a dismissible chapter drawer', async () => {
-    render(<Docs />);
-    fireEvent.click(screen.getByRole('button', { name: 'Chapters' }));
-    expect(screen.getByRole('button', { name: 'Close chapters' })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Close chapters' }));
-    expect(await screen.findByRole('button', { name: 'Chapters' })).toHaveAttribute('aria-expanded', 'false');
+  it('uses the shared app drawer for wider, collapsible chapter navigation', async () => {
+    render(<App />);
+    expect(screen.getByRole('navigation', { name: 'Documentation chapters' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Close docs drawer' }));
+    const open = await screen.findByRole('button', { name: 'Open docs drawer' });
+    expect(open).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(open);
+    expect(screen.getByRole('button', { name: 'Close docs drawer' })).toBeVisible();
   });
 
   it('renders safe Markdown tables, inline code and local links', () => {

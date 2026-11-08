@@ -26,6 +26,28 @@ instance. `/configuration` remains a direct entry to the Wizard workspace.
 Switching between Overview, Wizard, Docs and the footer's Privacy/Imprint views preserves the
 current connection, configuration and in-progress form state in the browser.
 
+The toolbar's **EN | DE** switch selects English or German for the interface and
+all handbook chapters. The preference is stored only in this browser; changing
+it preserves the current configuration, connection and chapter. Commands,
+configuration keys, file paths, code examples and operator-supplied information
+are displayed unchanged. Docs uses the same collapsible application sidebar as
+the Wizard, with a wider chapter list.
+
+Application text uses stable, pinned `i18next` and `react-i18next` releases with
+local translation resources. Material UI's built-in component text uses its
+documented `deDE` / `enUS` theme locales. Translation lookup, interpolation and
+plural selection stay in i18next; the original guide files remain the English
+documentation source.
+
+The original repository guides remain English. German reader translations live
+in `src/docs/locales/de/`; their `sources.json` records the reviewed English
+chapter hashes. After editing a guide, regenerate the English reader from the
+System checkout, review the corresponding German translation and update its
+source hash. Run `npm run docs:compile` to update the bundled German catalog.
+`npm run docs:check` rejects missing or stale translations and changes to commands,
+inline code, link destinations, heading structure or table structure. The normal
+production build runs this check.
+
 1. Open **Edit** using the pencil icon next to **Connect**. Enter the Sync server
    address and credentials from your own Bootstrapper configuration, then select **Submit**.
    For a fresh local setup, the address is `http://localhost/sync`; after applying

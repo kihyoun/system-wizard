@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -12,6 +13,7 @@ const useStyles = makeStyles()(theme => ({
     input: { width: 42 }
 }));
 const GitlabRunnerFields = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [init, setInit] = useState(props.init);
     const handleInputChange = (event: any) => {
@@ -38,13 +40,9 @@ const GitlabRunnerFields = observer((props: any) => {
         return null;
     return (<>
       <Typography variant="body2">
-        Leave the count at 0 to use the shared instance runner pool configured under General,
-        when instance runners are enabled for the GitLab project.
-        Only increase it if this application needs additional runner containers.
-      </Typography>
+        {t("Leave the count at 0 to use the shared instance runner pool configured under General, when instance runners are enabled for the GitLab project. Only increase it if this application needs additional runner containers.")}</Typography>
       <FormLabel id="project-runner-count-label" component="legend">
-        Additional project runners (optional)
-      </FormLabel>
+        {t("Additional project runners (optional)")}</FormLabel>
       <Input className={classes.input} value={props.config.gitlabRunnerScale} margin="dense" onChange={e => handleInputChange(e)} onBlur={() => handleBlur()} inputProps={{
             step: 1,
             min: 0,
@@ -52,8 +50,7 @@ const GitlabRunnerFields = observer((props: any) => {
             type: 'number',
             'aria-labelledby': 'project-runner-count-label'
         }}/>
-      <TextField label="Token for additional runners" helperText={'Required for additional runners. GitLab determines project access from the token; '
-            + 'this form does not assign runner permissions.'} style={{ margin: 8 }} value={props.config.gitlabRunnerToken} fullWidth margin="normal" onChange={event => {
+      <TextField label={t("Token for additional runners")} helperText={t('Required for additional runners. GitLab determines project access from the token; this form does not assign runner permissions.')} style={{ margin: 8 }} value={props.config.gitlabRunnerToken} fullWidth margin="normal" onChange={event => {
             runInAction(() => (props.config.gitlabRunnerToken = event.target.value));
         }} slotProps={{
         inputLabel: { shrink: true }

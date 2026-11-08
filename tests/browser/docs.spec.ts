@@ -67,13 +67,13 @@ test('long chapters fit mobile and desktop with accessible chapter selection', a
     expect(searchBounds!.y + searchBounds!.height).toBeLessThan(900);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     if (width === 320) {
-      await page.getByRole('button', { name: 'Chapters', exact: true }).click();
-      await expect(page.getByRole('dialog', { name: 'Docs chapters' })).toBeVisible();
+      await page.getByRole('button', { name: 'Open docs drawer', exact: true }).click();
+      await expect(page.getByRole('navigation', { name: 'Documentation chapters' })).toBeVisible();
       await page.keyboard.press('Escape');
-      await expect(page.getByRole('dialog', { name: 'Docs chapters' })).toBeHidden();
-      await expect(page.getByRole('button', { name: 'Chapters', exact: true })).toBeFocused();
-      await page.getByRole('button', { name: 'Chapters', exact: true }).click();
-      await page.getByRole('dialog', { name: 'Docs chapters' }).getByRole('link', { name: '4. GitLab runners', exact: true }).click();
+      await expect(page.getByRole('navigation', { name: 'Documentation chapters' })).toBeHidden();
+      await expect(page.getByRole('button', { name: 'Open docs drawer', exact: true })).toBeFocused();
+      await page.getByRole('button', { name: 'Open docs drawer', exact: true }).click();
+      await page.getByRole('navigation', { name: 'Documentation chapters' }).getByRole('link', { name: '4. GitLab runners', exact: true }).click();
       await expect(page.getByRole('heading', { name: '4. GitLab runners', exact: true })).toBeFocused();
     }
   }

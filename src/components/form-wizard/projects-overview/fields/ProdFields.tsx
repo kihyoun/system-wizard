@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -13,6 +14,7 @@ const useStyles = makeStyles()(theme => ({
     positionStart: { marginRight: 0 }
 }));
 const ProdFields = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [init, setInit] = useState(props.init);
     useEffect(() => {
@@ -27,7 +29,7 @@ const ProdFields = observer((props: any) => {
       <FormControlLabel control={<Switch checked={props.config.useProdHost === 'true'} onChange={event => {
                 runInAction(() => props.config.useProdHost
                     = event.target.checked ? 'true' : 'false');
-            }} name="prodCfg" color="primary"/>} label="Enable Production Environment"/>
+            }} name="prodCfg" color="primary"/>} label={t("Enable Production Environment")}/>
       <TextField disabled={props.config.useProdHost === 'false'} label="PROD_HOST" style={{ margin: 8 }} value={props.config.prodHost} fullWidth margin="normal" onChange={event => {
             runInAction(() => (props.config.prodHost = event.target.value));
         }} slotProps={{
@@ -35,16 +37,15 @@ const ProdFields = observer((props: any) => {
     }}/>
       <FormControl className={classes.formControl} disabled={props.config.useProdHost === 'false'}>
         <InputLabel htmlFor="proddeploymode-native-helper">
-              Deployment
-        </InputLabel>
+              {t("Deployment")}</InputLabel>
         <NativeSelect value={parseInt(props.config.prodDeployMode)} onChange={(event: any) => {
             runInAction(() => (props.config.prodDeployMode = event.target.value));
         }} inputProps={{
             name: 'prodDeployMode',
             id: 'prodDeployMode-native-helper'
         }}>
-          <option value={0} aria-label="Manual">Manual</option>
-          <option value={1}>Auto</option>
+          <option value={0} aria-label={t("Manual")}>{t("Manual")}</option>
+          <option value={1}>{t("Auto")}</option>
         </NativeSelect>
       </FormControl>
 
@@ -58,18 +59,17 @@ const ProdFields = observer((props: any) => {
             name: 'prodDomainMode',
             id: 'prodDomainMode-native-helper'
         }}>
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={1}>Wildcard HTTP</option>
-          <option value={2}>SSL encrypted</option>
-          <option value={3}>Wildcard SSL encrypted</option>
+          <option aria-label={t("Default (unencrypted)")} value={0}>
+                {t("Default, HTTP")}</option>
+          <option value={1}>{t("Wildcard HTTP")}</option>
+          <option value={2}>{t("SSL encrypted")}</option>
+          <option value={3}>{t("Wildcard SSL encrypted")}</option>
         </NativeSelect>
         <FormHelperText>{props.config.prodHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField label="PROD_SSL" disabled={props.config.useProdHost === 'false' || props.config.prodDomainMode < 2} value={props.config.prodSSL} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.config.prodSSL = event.target.value));
-        }} helperText="Path to Registry SSL Certificate" slotProps={{
+        }} helperText={t("Path to Registry SSL Certificate")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">
@@ -78,7 +78,7 @@ const ProdFields = observer((props: any) => {
     }}/>
       <TextField label="PROD_SSL_KEY" disabled={props.config.useProdHost === 'false' || props.config.prodDomainMode < 2} value={props.config.prodSSLKey} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.config.prodSSLKey = event.target.value));
-        }} helperText="Path to SSL Key" slotProps={{
+        }} helperText={t("Path to SSL Key")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">

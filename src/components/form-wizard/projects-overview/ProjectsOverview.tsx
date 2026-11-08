@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useState } from 'react';
 import Table from '@mui/material/Table';
@@ -38,6 +39,7 @@ const useStyles = makeStyles()({
 });
 const useRowStyles = makeStyles()({ root: { '& > *': { borderBottom: 'unset' } } });
 const ProjectsOverview = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const { classes: rowClasses } = useRowStyles();
     const [open, setOpen] = useState(false);
@@ -62,16 +64,16 @@ const ProjectsOverview = observer((props: any) => {
       {wizardSourceOpen && <WizardSourceDialog sync={props.main.sync} onClose={() => setWizardSourceOpen(false)}/>}
       {wizardBuildOpen && <WizardBuildDialog sync={props.main.sync} onClose={() => setWizardBuildOpen(false)}/>}
       {wizardEnvironmentsOpen && <WizardEnvironmentsDialog sync={props.main.sync} onClose={() => setWizardEnvironmentsOpen(false)}/>}
-      <Snackbar open={openDeleteSuccess} autoHideDuration={6000} onClose={() => setOpenDeleteSuccess(false)} message={'Project successfully deleted.'}/>
+      <Snackbar open={openDeleteSuccess} autoHideDuration={6000} onClose={() => setOpenDeleteSuccess(false)} message={t("Project successfully deleted.")}/>
       {downloadReactCi && <DownloadReactCiDialog main={props.main} project={activeProject} setClose={() => setDownloadReactCi(false)}/>}
       <TableContainer component={Paper} elevation={0}>
-        <Table className={classes.table} size="small" aria-label="a dense table">
+        <Table className={classes.table} size="small" aria-label={t("a dense table")}>
           <TableHead>
             <TableRow>
-              <TableCell>Project Key</TableCell>
+              <TableCell>{t("Project Key")}</TableCell>
               <TableCell>URL</TableCell>
-              <TableCell>Beta URL</TableCell>
-              <TableCell>Review App Domain(s)</TableCell>
+              <TableCell>{t("Beta URL")}</TableCell>
+              <TableCell>{t("Review App Domain(s)")}</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -80,16 +82,16 @@ const ProjectsOverview = observer((props: any) => {
                 <TableRow className={rowClasses.root} onClick={() => setCellOpen(cellOpen !== projectConfig.projectKey ? projectConfig.projectKey : '')}>
                   <TableCell component="th" scope="row">
                     {projectConfig.projectKey}
-                    {projectConfig.repository?.systemProject && ' · System interface'}
+                    {projectConfig.repository?.systemProject && t(" · System interface")}
                   </TableCell>
                   <TableCell>{projectConfig.useProdHost === 'true' && projectConfig.prodHostInfo.url || '-'}</TableCell>
                   <TableCell>{projectConfig.useBetaHost === 'true' && projectConfig.betaHostInfo.url || '-'}</TableCell>
                   <TableCell>{projectConfig.useReviewHost === 'true'
                 && projectConfig.reviewHostInfo.url || '-'}</TableCell>
                   <TableCell>
-                    <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
+                    <ButtonGroup variant="text" color="primary" aria-label={t("text primary button group")}>
 
-                      <IconButton aria-label="edit" disabled={!!projectConfig.repository?.systemProject} onClick={event => {
+                      <IconButton aria-label={t("edit")} disabled={!!projectConfig.repository?.systemProject} onClick={event => {
                 setActiveProject(projectConfig.projectKey);
                 setOpen(true);
                 event.stopPropagation();
@@ -97,7 +99,7 @@ const ProjectsOverview = observer((props: any) => {
             }}>
                         <EditIcon />
                       </IconButton>
-                      <IconButton aria-label="delete" disabled={!!projectConfig.repository?.systemProject} onClick={event => {
+                      <IconButton aria-label={t("delete")} disabled={!!projectConfig.repository?.systemProject} onClick={event => {
                 setActiveProject(projectConfig.projectKey);
                 setOpenDelete(true);
                 event.stopPropagation();
@@ -105,7 +107,7 @@ const ProjectsOverview = observer((props: any) => {
             }}>
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton aria-label="export" onClick={event => {
+                      <IconButton aria-label={t("export")} onClick={event => {
                 runInAction(() => {
                     setActiveProject(projectConfig.projectKey);
                     setDownloadReactCi(true);
@@ -125,29 +127,27 @@ const ProjectsOverview = observer((props: any) => {
                     <Collapse in={cellOpen === projectConfig.projectKey} timeout="auto" unmountOnExit>
                       {projectConfig.repository && <p>
                         <a href={projectConfig.repository.webUrl} target="_blank" rel="noopener noreferrer">
-                          Repository</a>{' · '}
+                          {t("Repository")}</a>{' · '}
                         <a href={projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">
-                          Pipelines</a>{' · '}
+                          {t("Pipelines")}</a>{' · '}
                         {projectConfig.repository.systemProject
                     ? projectConfig.repository.managementMode === 'source-primary'
-                        ? 'Canonical Wizard repository — develop, review and build here. Production promotion remains explicit.'
-                        : 'Existing Wizard interface — configured under General. ' +
-                            'Initialize source, verify a candidate and configure optional Review/Beta explicitly.'
+                        ? t("Canonical Wizard repository — develop, review and build here. Production promotion remains explicit.")
+                        : t("Existing Wizard interface — configured under General. Initialize source, verify a candidate and configure optional Review/Beta explicitly.")
                     : projectConfig.repository.deploymentState === 'awaiting-source'
-                        ? 'Repository ready — deployment awaits application source.'
+                        ? t("Repository ready — deployment awaits application source.")
                         : <a href={projectConfig.repository.initialPipeline?.webUrl ||
                                 projectConfig.repository.pipelineUrl} target="_blank" rel="noopener noreferrer">
-                              Application generated — check build and deployment status</a>}
+                              {t("Application generated — check build and deployment status")}</a>}
                       </p>}
                       <Grid container spacing={3}>
                         {projectConfig.repository?.systemProject && <Grid size={12}>
-                          <p>Production points to the running system interface. Configure Beta and Review separately.
-                            {projectConfig.repository.managementMode === 'source-primary'
-                                ? ' Native pipeline checks and environment configuration preserve the running interface.'
-                                : ' Importing source and configuring environments preserve the running interface.'}</p>
-                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardSourceOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? 'Wizard source' : 'Initialize Wizard source'}</Button>
-                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardBuildOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? 'Native build status' : 'Build and verify Wizard'}</Button>
-                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardEnvironmentsOpen(true)}>Configure Review and Beta</Button>
+                          <p>{t("Production points to the running system interface. Configure Beta and Review separately.")}{' '}{projectConfig.repository.managementMode === 'source-primary'
+                                ? t(" Native pipeline checks and environment configuration preserve the running interface.")
+                                : t(" Importing source and configuring environments preserve the running interface.")}</p>
+                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardSourceOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? t("Wizard source") : t("Initialize Wizard source")}</Button>
+                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardBuildOpen(true)}>{projectConfig.repository.managementMode === 'source-primary' ? t("Native build status") : t("Build and verify Wizard")}</Button>
+                          <Button color="primary" disabled={!props.main.sync.connected} onClick={() => setWizardEnvironmentsOpen(true)}>{t("Configure Review and Beta")}</Button>
                         </Grid>}
                         <ProjectCard hostInfo={projectConfig.prodHostInfo} systemProject={!!projectConfig.repository?.systemProject} handleChange={(checked: boolean) => {
                 if (!projectConfig.repository?.systemProject)
@@ -170,19 +170,16 @@ const ProjectsOverview = observer((props: any) => {
         </Table>
       </TableContainer>
       <Dialog transitionDuration={0} open={openDelete} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogTitle id="alert-dialog-title">Delete {activeProject}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{t("Delete")}{' '}{activeProject}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-           Are you sure?
-          </DialogContentText>
+           {t("Are you sure?")}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDelete(false)} color="primary">
-            Disagree
-          </Button>
+            {t("Disagree")}</Button>
           <Button onClick={handleDelete} color="primary" autoFocus>
-            Agree
-          </Button>
+            {t("Agree")}</Button>
         </DialogActions>
       </Dialog>
 
@@ -192,8 +189,7 @@ const ProjectsOverview = observer((props: any) => {
             setActiveProject('');
             setOpen(true);
         }} className={classes.button} startIcon={<PlaylistAddIcon />}>
-        Add Project
-        </Button>
+        {t("Add Project")}</Button>
       </Toolbar>
 
       <ProjectFormDialog open={open} activeProject={activeProject} main={props.main} handleClose={() => setOpen(false)}/>
