@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 const phases: {
@@ -16,6 +17,7 @@ const phases: {
         'Refresh status or review a fresh preview before resuming. Server ownership and pipeline checkpoints still apply.'
 };
 export default function WizardBuildDialog(props: any) {
+    const { t } = useI18n();
     const [preview, setPreview] = useState<any>();
     const [build, setBuild] = useState<any>();
     const [previewFresh, setPreviewFresh] = useState(false);
@@ -96,37 +98,32 @@ export default function WizardBuildDialog(props: any) {
             ? 'Native pipeline evidence could not be verified. Check GitLab and refresh status. Production is unchanged.'
             : phases[build?.phase] || 'Build status is unavailable. Refresh status.';
     return <Dialog open onClose={operation === 'activate' ? undefined : props.onClose} aria-labelledby="wizard-build-title">
-    <DialogTitle id="wizard-build-title">{sourcePrimary ? 'Native Wizard build status' : 'Build and verify Wizard'}</DialogTitle>
+    <DialogTitle id="wizard-build-title">{sourcePrimary ? t("Native Wizard build status") : t("Build and verify Wizard")}</DialogTitle>
     <DialogContent>
       {sourcePrimary ? <DialogContentText>
-        Merge requests and default-branch pushes run the checks and image build in this repository.
-        Refresh reads their native pipeline evidence; it does not import source or start another pipeline.
-        Production promotion stays explicit.
-      </DialogContentText> : <DialogContentText>
-        Preview the managed build recipe, then explicitly enable checks for the imported Wizard source.
-        It builds and verifies a candidate only. Production is not deployed or replaced.
-      </DialogContentText>}
+        {t("Merge requests and default-branch pushes run the checks and image build in this repository. Refresh reads their native pipeline evidence; it does not import source or start another pipeline. Production promotion stays explicit.")}</DialogContentText> : <DialogContentText>
+        {t("Preview the managed build recipe, then explicitly enable checks for the imported Wizard source. It builds and verifies a candidate only. Production is not deployed or replaced.")}</DialogContentText>}
       {preview && <DialogContentText>
-        Repository: {preview.repository.path}<br />
-        {sourcePrimary ? <>Source revision: {preview.sourceRevision}</> : <>Imported commit: {preview.importCommit}<br />Recipe version: {preview.version}</>}
+        {t("Repository:")}{' '}{preview.repository.path}<br />
+        {sourcePrimary ? <>{t("Source revision:")}{' '}{preview.sourceRevision}</> : <>{t("Imported commit:")}{' '}{preview.importCommit}<br />{t("Recipe version:")}{' '}{preview.version}</>}
       </DialogContentText>}
-      {build && <p role="status">{status}</p>}
-      {build?.message && <p>{build.message}</p>}
-      {sourcePrimary && repositoryUrl && <p><a href={repositoryUrl} target="_blank" rel="noopener noreferrer">Open source repository</a></p>}
-      {pipelineUrl && <p><a href={pipelineUrl} target="_blank" rel="noopener noreferrer">Open pipeline</a></p>}
+      {build && <p role="status">{t(status)}</p>}
+      {build?.message && <p>{t(build.message)}</p>}
+      {sourcePrimary && repositoryUrl && <p><a href={repositoryUrl} target="_blank" rel="noopener noreferrer">{t("Open source repository")}</a></p>}
+      {pipelineUrl && <p><a href={pipelineUrl} target="_blank" rel="noopener noreferrer">{t("Open pipeline")}</a></p>}
       {build?.checks && <ul>{Object.keys(build.checks).map(name => <li key={name}>
-        {name}: {build.checks[name]}
+        {name}: {t(build.checks[name])}
       </li>)}</ul>}
       {build?.phase === 'candidate-verified' && build.artifact?.imageRef && <p>
-        Verified candidate image: <code>{build.artifact.imageRef}</code>
+        {t("Verified candidate image:")}{' '}<code>{build.artifact.imageRef}</code>
       </p>}
-      {message && <p role="status">{message}</p>}
+      {message && <p role="status">{t(message)}</p>}
     </DialogContent>
     <DialogActions>
-      <Button disabled={operation === 'activate'} onClick={props.onClose}>Close</Button>
-      {preview && <Button disabled={busy} onClick={() => request('preview')}>Refresh preview</Button>}
-      {preview && <Button disabled={busy} onClick={() => request('status')}>Refresh status</Button>}
-      {preview && !sourcePrimary && (!build || resumable) && <Button color="primary" disabled={busy || !previewFresh} onClick={() => request('activate')}>{build ? 'Resume activation' : 'Enable build pipeline'}</Button>}
+      <Button disabled={operation === 'activate'} onClick={props.onClose}>{t("Close")}</Button>
+      {preview && <Button disabled={busy} onClick={() => request('preview')}>{t("Refresh preview")}</Button>}
+      {preview && <Button disabled={busy} onClick={() => request('status')}>{t("Refresh status")}</Button>}
+      {preview && !sourcePrimary && (!build || resumable) && <Button color="primary" disabled={busy || !previewFresh} onClick={() => request('activate')}>{build ? t("Resume activation") : t("Enable build pipeline")}</Button>}
     </DialogActions>
   </Dialog>;
 }

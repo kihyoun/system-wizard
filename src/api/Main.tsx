@@ -11,6 +11,7 @@ import SyncServer from './SyncServer';
 import { v4 as uuidv4 } from 'uuid';
 import md5 from 'md5';
 import {environment} from './Environment';
+import {recoveryMetadata, recoveryGuide, importedRecovery} from './Recovery';
 
 /**
  * General Configuration Object
@@ -20,6 +21,9 @@ export default class Main {
     private _config!: MainConfig;
     private _projects: Map<string, ProjectConfig>;
     private _syncServer!: SyncServer;
+    recoveryObservation: any = null;
+    importedRecovery: any = null;
+    private backupCreatedAt = new Date();
     init = true;
     uploadProgress = false;
     derivedFields: { [key: string]: string } = {};
@@ -40,6 +44,8 @@ export default class Main {
     }
 
     public generateConfig(_config: any | undefined): void {
+      this.recoveryObservation = null;
+      this.importedRecovery = null;
       this.derivedFields = {};
       this._config = new MainConfig(_config);
       this._syncServer = this._syncServer ? this._syncServer : new SyncServer(this);
@@ -120,11 +126,13 @@ export default class Main {
       return {
         main         : this._config.asJson,
         proxies      : proxies,
-        derivedFields: this.derivedFields
+        derivedFields: this.derivedFields,
+        recovery     : recoveryMetadata(this._config.content, this.recoveryObservation, this.backupCreatedAt, this.importedRecovery)
       }
     }
 
     public exportJson() {
+      this.backupCreatedAt = new Date();
       const file = new Blob([JSON.stringify(this.asJson, null, 4)],
         { type: 'text/plain;charset=utf-8' });
       FileSaver.saveAs(file, 'bootstrapper.json');
@@ -152,7 +160,9 @@ export default class Main {
       const config = JSON.parse(result);
       runInAction(() => this.uploadProgress = true);
       runInAction(() => {
+        this.recoveryObservation = null;
         this.generateConfig(config.main);
+        this.importedRecovery = importedRecovery(config.recovery);
         this.derivedFields = config.derivedFields || {};
 
         if (!this.sync.connected) {
@@ -182,6 +192,8 @@ export default class Main {
 
       const assignments = environment(data);
       runInAction(() => {
+        this.recoveryObservation = null;
+        this.importedRecovery = null;
         this.derivedFields = {};
         this.uploadProgress = true;
         this.init=false;
@@ -246,8 +258,12 @@ export default class Main {
     }
 
     public generateZip() {
+      this.backupCreatedAt = new Date();
       const zip = new JSZip();
-      zip.file('bootstrapper.json', JSON.stringify(this.asJson, null, 4));
+      const backup = this.asJson;
+      zip.file('bootstrapper.json', JSON.stringify(backup, null, 4));
+      zip.file('recovery.json', JSON.stringify(backup.recovery, null, 2));
+      zip.file('RECOVERY.md', recoveryGuide(backup.recovery));
       zip.file('.docker.env', this._config.content);
       const projects = zip.folder('.projects.env');
       this._projects.forEach(projectConfig => {

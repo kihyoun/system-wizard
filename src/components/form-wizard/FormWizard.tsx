@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
@@ -51,6 +52,7 @@ const useStyles = makeStyles<{
     downloadButtons: { textAlign: 'center' }
 }));
 const FormWizard = observer((props: any) => {
+    const { t } = useI18n();
     const [main, setMain] = useState(props.main);
     const [tab, setTab] = useState(0);
     const [downloadDocker, setDownloadDocker] = useState(false);
@@ -130,26 +132,22 @@ const FormWizard = observer((props: any) => {
         <Grid size={12}>
           <Paper className={classes.paper} elevation={0}>
             {Object.keys(main.derivedFields).length > 0 && (<Typography role="status" color="textSecondary">
-                * {derivedWarning} Unavailable values are left blank;
-                credentials and runner settings must be supplied manually.
-              </Typography>)}
+                * {t(derivedWarning)} {t("Unavailable values are left blank; credentials and runner settings must be supplied manually.")}</Typography>)}
             <Toolbar>
               <Tabs indicatorColor="primary" textColor="primary" value={tab} onChange={handleChange}>
-                <Tab label="General" {...a11yProps(0)}/>
-                <Tab label="Projects" {...a11yProps(1)}/>
+                <Tab label={t("General")} {...a11yProps(0)}/>
+                <Tab label={t("Projects")} {...a11yProps(1)}/>
               </Tabs>
 
               <div className={classes.divider}/>
 
-              <ButtonGroup disableElevation color="primary" className={classes.downloadButtons} aria-label="vertical contained primary button group" variant="text">
+              <ButtonGroup disableElevation color="primary" className={classes.downloadButtons} aria-label={t("vertical contained primary button group")} variant="text">
 
                 <Button htmlFor="contained-button-file" aria-haspopup="true" component="label" startIcon={<InsertDriveFileIcon />} color="primary">
-                Open
-                </Button>
+                {t("Open")}</Button>
                 <input accept="application/json, .env" className={classes.input} id="contained-button-file" multiple value={files} type="file" onChange={onChangeHandler}/>
                 <Button aria-controls="simple-menu" aria-haspopup="true" color="primary" startIcon={<CloudDownloadIcon />} onClick={handleClick}>
-                Backup
-                </Button>
+                {t("Backup")}</Button>
 
               </ButtonGroup>
 
@@ -177,7 +175,7 @@ const FormWizard = observer((props: any) => {
                   <ListItemIcon>
                     <LaunchIcon fontSize="small"/>
                   </ListItemIcon>
-                  <Typography variant="inherit">Proxies</Typography>
+                  <Typography variant="inherit">{t("Proxies")}</Typography>
                 </MenuItem>
               </Menu>
             </Toolbar>

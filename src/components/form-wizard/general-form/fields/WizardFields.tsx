@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -14,6 +15,7 @@ const useStyles = makeStyles()(theme => ({
     positionStart: { marginRight: 0 }
 }));
 const WizardFields = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [init, setInit] = useState(props.main.init);
     useEffect(() => {
@@ -32,7 +34,7 @@ const WizardFields = observer((props: any) => {
     return (<>
       <FormControlLabel control={<Switch checked={props.main.config.wizardEnable === 'true'} onChange={event => {
                 runInAction(() => props.main.config.wizardEnable = event.target.checked ? 'true' : 'false');
-            }} color="primary"/>} label="Enable Wizard"/>
+            }} color="primary"/>} label={t("Enable Wizard")}/>
       <FormControl className={classes.formControl} disabled={props.main.config.wizardEnable === 'false'}>
         <InputLabel htmlFor="wizarddomainmode-native-helper">
           <DerivedLabel label="WIZARD_DOMAIN_MODE" source={props.main.derivedFields.wizardDomainMode}/>
@@ -43,10 +45,9 @@ const WizardFields = observer((props: any) => {
             name: 'wizardDomainMode',
             id: 'wizardDomainMode-native-helper'
         }}>
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={2}>SSL encrypted</option>
+          <option aria-label={t("Default (unencrypted)")} value={0}>
+                {t("Default, HTTP")}</option>
+          <option value={2}>{t("SSL encrypted")}</option>
         </NativeSelect>
         <FormHelperText>{props.main.config.wizardHostInfo.url}</FormHelperText>
       </FormControl>
@@ -57,7 +58,7 @@ const WizardFields = observer((props: any) => {
     }}/>
       <TextField label={<DerivedLabel label="WIZARD_SSL" source={props.main.derivedFields.wizardSSL}/>} disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2} value={props.main.config.wizardSSL} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.main.config.wizardSSL = event.target.value));
-        }} helperText="Path to SSL Certificate" slotProps={{
+        }} helperText={t("Path to SSL Certificate")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">
@@ -66,7 +67,7 @@ const WizardFields = observer((props: any) => {
     }}/>
       <TextField label={<DerivedLabel label="WIZARD_SSL_KEY" source={props.main.derivedFields.wizardSSLKey}/>} disabled={props.main.config.wizardEnable === 'false' || props.main.config.wizardDomainMode < 2} value={props.main.config.wizardSSLKey} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => props.main.config.wizardSSLKey = event.target.value);
-        }} helperText="Path to SSL Key" slotProps={{
+        }} helperText={t("Path to SSL Key")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">

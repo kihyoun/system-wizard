@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -13,6 +14,7 @@ const useStyles = makeStyles()(theme => ({
     positionStart: { marginRight: 0 }
 }));
 const ReviewFields = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [init, setInit] = useState(props.init);
     useEffect(() => {
@@ -26,7 +28,7 @@ const ReviewFields = observer((props: any) => {
     return (<>
       <FormControlLabel control={<Switch checked={props.config.useReviewHost === 'true'} onChange={event => {
                 runInAction(() => props.config.useReviewHost = event.target.checked ? 'true' : 'false');
-            }} name="reviewCfg" color="primary"/>} label="Enable Review Environment"/>
+            }} name="reviewCfg" color="primary"/>} label={t("Enable Review Environment")}/>
       <TextField disabled={props.config.useReviewHost === 'false'} label="REVIEW_HOST" style={{ margin: 8 }} value={props.config.reviewHost} fullWidth margin="normal" onChange={event => {
             runInAction(() => (props.config.reviewHost = event.target.value));
         }} slotProps={{
@@ -34,16 +36,15 @@ const ReviewFields = observer((props: any) => {
     }}/>
       <FormControl className={classes.formControl} disabled={props.config.useReviewHost === 'false'}>
         <InputLabel htmlFor="reviewdeploymode-native-helper">
-              Deployment
-        </InputLabel>
+              {t("Deployment")}</InputLabel>
         <NativeSelect value={props.config.reviewDeployMode} onChange={(event: any) => {
             runInAction(() => (props.config.reviewDeployMode = event.target.value));
         }} inputProps={{
             name: 'reviewDeployMode',
             id: 'reviewDeployMode-native-helper'
         }}>
-          <option value={0}>Manual</option>
-          <option value={1}>Auto</option>
+          <option value={0}>{t("Manual")}</option>
+          <option value={1}>{t("Auto")}</option>
         </NativeSelect>
       </FormControl>
 
@@ -57,14 +58,14 @@ const ReviewFields = observer((props: any) => {
             name: 'reviewDomainMode',
             id: 'reviewDomainMode-native-helper'
         }}>
-          <option value={1}>Wildcard HTTP</option>
-          <option value={3}>Wildcard SSL encrypted</option>
+          <option value={1}>{t("Wildcard HTTP")}</option>
+          <option value={3}>{t("Wildcard SSL encrypted")}</option>
         </NativeSelect>
         <FormHelperText>{props.config.reviewHostInfo.url}</FormHelperText>
       </FormControl>
       <TextField label="REVIEW_SSL" disabled={props.config.useReviewHost === 'false' || props.config.reviewDomainMode < 2} value={props.config.reviewSSL} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.config.reviewSSL = event.target.value));
-        }} helperText="Path to Registry SSL Certificate" slotProps={{
+        }} helperText={t("Path to Registry SSL Certificate")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">
@@ -73,7 +74,7 @@ const ReviewFields = observer((props: any) => {
     }}/>
       <TextField label="REVIEW_SSL_KEY" disabled={props.config.useReviewHost === 'false' || props.config.reviewDomainMode < 2} value={props.config.reviewSSLKey} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.config.reviewSSLKey = event.target.value));
-        }} helperText="Path to SSL Key" slotProps={{
+        }} helperText={t("Path to SSL Key")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">

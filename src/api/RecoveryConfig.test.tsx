@@ -176,3 +176,72 @@ test('explicit empty credentials and project tokens are retained instead of inve
   expect(restored.config!.syncPass).toBe('');
   expect(restored.projects.get('emptytoken')!.gitlabRunnerToken).toBe('');
 });
+
+test('recovery evidence distinguishes saved settings from timestamped running images and never pairs a Seed', async () => {
+  const main = new Main();
+  const saved = 'example/wizard@sha256:' + 'a'.repeat(64);
+  main.importEnvData(signed(`WIZARD_IMAGE='${saved}'\nGITLAB_RUNNER_SCALE='0'\nFUTURE_OPTION='preserved'\n`));
+  const observation = {format: 'system-runtime-observation-v1', status: 'partial', observedAt: '2026-01-01T00:00:00.000Z',
+    system: {sourceRevision: 'b'.repeat(40), release: null}, wizard: null,
+    images: {wizard: {reference: 'different/wizard@sha256:' + 'c'.repeat(64), imageId: 'sha256:' + 'd'.repeat(64)}}};
+  main.recoveryObservation = observation;
+  const zip = await JSZip.loadAsync(await main.generateZip());
+  const exported = JSON.parse(await zip.file('bootstrapper.json')!.async('string'));
+  const recovery = JSON.parse(await zip.file('recovery.json')!.async('string'));
+  expect(exported.recovery).toEqual(recovery);
+  expect(recovery.createdAt).toMatch(/^\d{4}-\d\d-\d\dT/);
+  expect(recovery.savedImages.wizard.reference).toBe(saved);
+  expect(recovery.savedImages.controller).toEqual({setting: 'BOOTSTRAPPER_IMAGE', reference: null, status: 'unspecified'});
+  expect(recovery.observedRuntime).toEqual(observation);
+  expect(recovery.seed).toMatchObject({status: 'matching-completed-seed-required', generation: null, manifest: null, verified: false});
+  const guide = await zip.file('RECOVERY.md')!.async('string');
+  expect(guide).toContain('bootstrapper/seed-operation.sh restore');
+  expect(guide).toContain('A reference does not preserve an image payload');
+  expect(guide).toContain('No matching Seed has been inferred or verified');
+  const reopened = new Main();
+  exported.recovery.savedImages.wizard.reference = 'untrusted/metadata:latest';
+  exported.recovery.seed = {verified: true, generation: 'invented'};
+  reopened.importJson(new File([], 'bootstrapper.json'), JSON.stringify(exported));
+  expect(assignments(reopened.config!.content).WIZARD_IMAGE).toBe(saved);
+  expect(assignments(reopened.config!.content).FUTURE_OPTION).toBe('preserved');
+  expect(reopened.asJson.recovery.observedRuntime.status).toBe('unavailable');
+  expect(reopened.asJson.recovery.importedBackup.status).toBe('imported-unverified');
+  expect(reopened.asJson.recovery.importedBackup.observedRuntime).toEqual(observation);
+  expect(reopened.asJson.recovery.importedBackup.seed).toBeUndefined();
+  expect(reopened.asJson.recovery.seed.verified).toBe(false);
+  assertSignature(reopened.config!.content);
+});
+
+test('old JSON backups and metadata-free offline imports remain usable with honestly unknown runtime', () => {
+  const main = new Main();
+  const old = {main: {gitlabRunnerScale: 0, runtimeOptions: {GITLAB_SSH_BIND: '127.0.0.1:2222'}}, proxies: []};
+  main.importJson(new File([], 'old.json'), JSON.stringify(old));
+  expect(main.config!.gitlabRunnerScale).toBe(0);
+  expect(assignments(main.config!.content).GITLAB_SSH_BIND).toBe('127.0.0.1:2222');
+  expect(main.asJson.recovery.observedRuntime).toMatchObject({status: 'unavailable', observedAt: null, system: null, wizard: null});
+  main.recoveryObservation = {format: 'system-runtime-observation-v1', status: 'partial'};
+  main.importEnvData(signed("GITLAB_RUNNER_SCALE='0'\n"));
+  expect(main.asJson.recovery.observedRuntime.status).toBe('unavailable');
+});
+
+test('saved empty image selection remains distinct from an absent setting', () => {
+  const main = new Main();
+  main.importEnvData(signed("BOOTSTRAPPER_IMAGE=''\nGITLAB_RUNNER_SCALE='0'\n"));
+  expect(main.asJson.recovery.savedImages.controller).toEqual({setting: 'BOOTSTRAPPER_IMAGE', reference: '', status: 'empty'});
+  expect(main.asJson.recovery.savedImages.wizard.status).toBe('unspecified');
+});
+
+test('imported descriptive history is bounded and cannot grow recursively or authorize a Seed', () => {
+  const main = new Main();
+  const original = JSON.parse(JSON.stringify(main.asJson));
+  original.recovery.importedBackup = {arbitrary: 'older record'};
+  original.recovery.seed = {verified: true, generation: 'unverified-claim'};
+  main.importJson(new File([], 'bootstrapper.json'), JSON.stringify(original));
+  expect(main.asJson.recovery.importedBackup.importedBackup).toBeUndefined();
+  expect(main.asJson.recovery.importedBackup.seed).toBeUndefined();
+  original.recovery.observedRuntime = {format: 'system-runtime-observation-v1', payload: 'x'.repeat(1024 * 1024)};
+  main.importJson(new File([], 'bootstrapper.json'), JSON.stringify(original));
+  expect(main.asJson.recovery.importedBackup).toBeNull();
+  expect(main.asJson.recovery.observedRuntime.status).toBe('unavailable');
+  expect(main.asJson.recovery.seed.verified).toBe(false);
+});

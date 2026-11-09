@@ -191,7 +191,7 @@ test('workspace connection, draft configuration and selected tab survive Overvie
   await page.getByRole('tab', { name: 'Website', exact: true }).click();
   await page.getByLabel('Operator name', { exact: true }).fill('Unsaved Operator');
   await page.getByRole('tab', { name: 'Overview', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'How it works', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeHidden();
   await expect(page.locator('#main-panel-overview')).not.toContainText('gitlab.unsaved.test');
 

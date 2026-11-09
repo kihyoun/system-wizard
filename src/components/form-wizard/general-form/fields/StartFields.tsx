@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import { runInAction } from 'mobx';
@@ -6,6 +7,7 @@ import DerivedLabel from '../../../DerivedLabel';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 const StartFields = observer((props: any) => {
+    const { t } = useI18n();
     const [init, setInit] = useState(props.main.init);
     const [showToken, setShowToken] = useState(false);
     useEffect(() => {
@@ -36,7 +38,7 @@ const StartFields = observer((props: any) => {
         }
     };
     return (<>
-      <TextField label={<DerivedLabel label="SEED_DIR" source={props.main.derivedFields.seedDir}/>} value={props.main.config.seedDir} style={{ margin: 8 }} helperText="Location for persistent Data, will be synced with rsync" fullWidth margin="normal" onChange={event => {
+      <TextField label={<DerivedLabel label="SEED_DIR" source={props.main.derivedFields.seedDir}/>} value={props.main.config.seedDir} style={{ margin: 8 }} helperText={t("Location for persistent Data, will be synced with rsync")} fullWidth margin="normal" onChange={event => {
             runInAction(() => props.main.config.seedDir = event.target.value);
         }} slotProps={{
         inputLabel: { shrink: true }
@@ -55,7 +57,7 @@ const StartFields = observer((props: any) => {
         }} slotProps={{
         inputLabel: { shrink: true }
     }}/>
-      <TextField label="Gitlab Runners" helperText="Docker containers in one shared instance runner pool. Push and Restart apply the count." fullWidth margin="normal" style={{ margin: 8 }} value={props.main.config.gitlabRunnerScale} onChange={e => handleInputChange(e)} onBlur={() => handleBlur()} slotProps={{
+      <TextField label={t("Gitlab Runners")} helperText={t("Docker containers in one shared instance runner pool. Push and Restart apply the count.")} fullWidth margin="normal" style={{ margin: 8 }} value={props.main.config.gitlabRunnerScale} onChange={e => handleInputChange(e)} onBlur={() => handleBlur()} slotProps={{
         inputLabel: { shrink: true },
         htmlInput: {
             step: 1,
@@ -65,13 +67,12 @@ const StartFields = observer((props: any) => {
             'aria-labelledby': 'input-slider'
         }
     }}/>
-      <TextField label="Runner authentication token" type={showToken ? 'text' : 'password'} helperText={'Leave empty for automatic setup on this GitLab instance. '
-            + 'Fetch after setup; Backup includes this secret.'} style={{ margin: 8 }} value={props.main.config.gitlabRunnerToken} fullWidth margin="normal" onChange={event => {
+      <TextField label={t("Runner authentication token")} type={showToken ? 'text' : 'password'} helperText={t("Leave empty for automatic setup on this GitLab instance. Fetch after setup; Backup includes this secret.")} style={{ margin: 8 }} value={props.main.config.gitlabRunnerToken} fullWidth margin="normal" onChange={event => {
             runInAction(() => (props.main.config.gitlabRunnerToken = event.target.value));
         }} slotProps={{
         input: {
             endAdornment: <InputAdornment position="end">
-            <Button onClick={() => setShowToken(!showToken)}>{showToken ? 'Hide' : 'Show'}</Button>
+            <Button onClick={() => setShowToken(!showToken)}>{showToken ? t("Hide") : t("Show")}</Button>
           </InputAdornment>
         },
         inputLabel: { shrink: true }

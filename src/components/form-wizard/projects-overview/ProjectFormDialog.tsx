@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Snackbar, Step, StepButton, StepContent, Stepper } from '@mui/material';
@@ -24,6 +25,7 @@ const useStyles = makeStyles()(theme => ({
     }
 }));
 const ProjectFormDialog = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [projectConfig, setProjectConfig] = useState(new ProjectConfig(props.main));
     const [projectPlaceholderConfig, setProjectPlaceholderConfig] = useState(new ProjectConfig(props.main));
@@ -167,37 +169,31 @@ const ProjectFormDialog = observer((props: any) => {
         });
     };
     return (<>
-      <Snackbar open={openAlert.length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')} message={(<>{openAlert}</>)}/>
-      <Snackbar open={openSuccess} autoHideDuration={6000} onClose={() => setOpenSuccess(false)} message={'Project successfully added.'}/>
-      <Snackbar open={openEditSuccess} autoHideDuration={6000} onClose={() => setOpenEditSuccess(false)} message={'Changes successfully saved.'}/>
+      <Snackbar open={t(openAlert).length > 0} autoHideDuration={6000} onClose={() => setOpenAlert('')} message={(<>{t(openAlert)}</>)}/>
+      <Snackbar open={openSuccess} autoHideDuration={6000} onClose={() => setOpenSuccess(false)} message={t("Project successfully added.")}/>
+      <Snackbar open={openEditSuccess} autoHideDuration={6000} onClose={() => setOpenEditSuccess(false)} message={t("Changes successfully saved.")}/>
       <Dialog transitionDuration={0} fullWidth={true} maxWidth={'lg'} open={props.open} onClose={() => { if (!busy)
         props.handleClose(); }} aria-labelledby="form-dialog-title">
-        {props.activeProject === '' && <DialogTitle id="form-dialog-title">Create Project Configuration</DialogTitle>
-            || <DialogTitle id="form-dialog-title">Edit {projectPlaceholderConfig.projectKey}</DialogTitle>}
+        {props.activeProject === '' && <DialogTitle id="form-dialog-title">{t("Create Project Configuration")}</DialogTitle>
+            || <DialogTitle id="form-dialog-title">{t("Edit")}{' '}{projectPlaceholderConfig.projectKey}</DialogTitle>}
         <DialogContent>
           <DialogContentText>
-            Configure an application&apos;s Production, Beta and Review App environments.
-            NGINX proxies route requests to the application containers.
-            Save creates a private GitLab repository and installs the generated CI configuration.
-            React, Angular and general web templates include source and Dockerfile; Save starts their first pipeline.
-            Empty repositories wait for your application source.
-          </DialogContentText>
-          {busy && <p role="status">Creating application, installing CI, configuring routing and starting the pipeline…
-            You can continue when setup completes.</p>}
+            {t("Configure an application's Production, Beta and Review App environments. NGINX proxies route requests to the application containers. Save creates a private GitLab repository and installs the generated CI configuration. React, Angular and general web templates include source and Dockerfile; Save starts their first pipeline. Empty repositories wait for your application source.")}</DialogContentText>
+          {busy && <p role="status">{t("Creating application, installing CI, configuring routing and starting the pipeline… You can continue when setup completes.")}</p>}
           <fieldset disabled={busy} style={{ border: 0 }}><Grid container>
             <Grid size={{ xs: 12, md: 3 }}>
               <Stepper activeStep={activeStep} nonLinear orientation="vertical">
                 {steps.map((step, index) => (<Step key={step.label}>
                     <StepButton onClick={handleStep(index)}>
-                      {step.label}
+                      {t(step.label)}
                     </StepButton>
 
                     <StepContent>
                       <div className={classes.actionsContainer}>
                         <div>
-                          <Button disableElevation disabled={activeStep === 0} onClick={handleStep(index - 1)} className={classes.button}>Back</Button>
+                          <Button disableElevation disabled={activeStep === 0} onClick={handleStep(index - 1)} className={classes.button}>{t("Back")}</Button>
                           <Button disableElevation variant="contained" onClick={handleStep(index + 1)} color="primary" className={classes.button}>
-                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                            {activeStep === steps.length - 1 ? t("Finish") : t("Next")}
                           </Button>
                         </div>
                       </div>
@@ -216,11 +212,9 @@ const ProjectFormDialog = observer((props: any) => {
         </DialogContent>
         <DialogActions>
           <Button disabled={busy} onClick={props.handleClose} color="primary">
-            Cancel
-          </Button>
+            {t("Cancel")}</Button>
           <Button disabled={busy || (!editing && availability !== 'available')} onClick={handleSave} color="primary">
-            Save
-          </Button>
+            {t("Save")}</Button>
         </DialogActions>
       </Dialog>
     </>);

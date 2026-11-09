@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
@@ -39,6 +40,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     }
 }));
 export default function DownloadProjectsDialog(props: any) {
+    const { t } = useI18n();
     const [open, setOpen] = useState(true);
     const theme = useTheme();
     const [clipboard, setClipboard] = useState([...props.main.projects.values()].map(value => {
@@ -82,7 +84,7 @@ export default function DownloadProjectsDialog(props: any) {
     return (<div>
       <Dialog transitionDuration={0} fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose} aria-labelledby="responsive-dialog-title">
 
-        <DialogTitle id="responsive-dialog-title">Save Project Configurations</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{t("Save Project Configurations")}</DialogTitle>
         <DialogContent>
 
           {[...props.main.projects.values()].map(projectConfig => {
@@ -99,7 +101,7 @@ export default function DownloadProjectsDialog(props: any) {
                             transitionDelay: `${clipboard?.find(el => el.key === projectConfig.projectKey)?.value
                                 === Boolean(index) ? transitionDuration.exit : 0}ms`
                         }} unmountOnExit>
-                          <Tooltip title={tooltip} aria-label={tooltip}>
+                          <Tooltip title={t(tooltip)} aria-label={t(tooltip)}>
                             <Button size="small" onClick={() => {
                             /* Copy the text inside the text field */
                             const conf = clipboard?.find(el => el.key === projectConfig.projectKey);
@@ -117,7 +119,7 @@ export default function DownloadProjectsDialog(props: any) {
                                     setClipboard(clipboard.map(e => e));
                                 });
                             }
-                        }} aria-label={tooltip} className={fab.className} color={fab.color} startIcon={fab.icon}>{index === 0 && 'Copy & Paste' || 'Done'}
+                        }} aria-label={t(tooltip)} className={fab.className} color={fab.color} startIcon={fab.icon}>{index === 0 && t("Copy & Paste") || t("Done")}
                             </Button>
                           </Tooltip>
                         </Zoom>);
@@ -139,11 +141,9 @@ export default function DownloadProjectsDialog(props: any) {
 
         <DialogActions>
           <Button autoFocus onClick={() => props.main.exportProjectConfigs()} color="primary" startIcon={<GetAppIcon />}>
-            Download
-          </Button>
+            {t("Download")}</Button>
           <Button onClick={handleClose} color="primary" autoFocus>
-            Close
-          </Button>
+            {t("Close")}</Button>
         </DialogActions>
       </Dialog>
     </div>);

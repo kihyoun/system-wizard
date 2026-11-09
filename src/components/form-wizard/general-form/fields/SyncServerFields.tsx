@@ -1,3 +1,4 @@
+import { useI18n } from '../../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -14,6 +15,7 @@ const useStyles = makeStyles()(theme => ({
     positionStart: { marginRight: 0 }
 }));
 const SyncServerFields = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [init, setInit] = useState(props.main.init);
     useEffect(() => {
@@ -32,7 +34,7 @@ const SyncServerFields = observer((props: any) => {
     return (<>
       <FormControlLabel control={<Switch checked={props.main.config.syncEnable === 'true'} onChange={event => {
                 runInAction(() => props.main.config.syncEnable = event.target.checked ? 'true' : 'false');
-            }} color="primary"/>} label="Enable Synchronization Server"/>
+            }} color="primary"/>} label={t("Enable Synchronization Server")}/>
       <FormControl className={classes.formControl} disabled={props.main.config.syncEnable === 'false'}>
         <InputLabel htmlFor="syncdomainmode-native-helper">
           <DerivedLabel label="SYNC_DOMAIN_MODE" source={props.main.derivedFields.syncDomainMode}/>
@@ -43,10 +45,9 @@ const SyncServerFields = observer((props: any) => {
             name: 'syncDomainMode',
             id: 'syncDomainMode-native-helper'
         }}>
-          <option aria-label="Default (unencrypted)" value={0}>
-                Default, HTTP
-          </option>
-          <option value={2}>SSL encrypted</option>
+          <option aria-label={t("Default (unencrypted)")} value={0}>
+                {t("Default, HTTP")}</option>
+          <option value={2}>{t("SSL encrypted")}</option>
         </NativeSelect>
         <FormHelperText>{props.main.config.syncHostInfo.url}</FormHelperText>
       </FormControl>
@@ -67,7 +68,7 @@ const SyncServerFields = observer((props: any) => {
     }}/>
       <TextField label={<DerivedLabel label="SYNC_SSL" source={props.main.derivedFields.syncSSL}/>} disabled={props.main.config.syncEnable === 'false' || props.main.config.syncDomainMode < 2} value={props.main.config.syncSSL} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.main.config.syncSSL = event.target.value));
-        }} helperText="Path to SSL Certificate" slotProps={{
+        }} helperText={t("Path to SSL Certificate")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">
@@ -76,7 +77,7 @@ const SyncServerFields = observer((props: any) => {
     }}/>
       <TextField label={<DerivedLabel label="SYNC_SSL_KEY" source={props.main.derivedFields.syncSSLKey}/>} disabled={props.main.config.syncEnable === 'false' || props.main.config.syncDomainMode < 2} value={props.main.config.syncSSLKey} style={{ margin: 8 }} fullWidth margin="normal" onChange={(event: any) => {
             runInAction(() => (props.main.config.syncSSLKey = event.target.value));
-        }} helperText="Path to SSL Key" slotProps={{
+        }} helperText={t("Path to SSL Key")} slotProps={{
         inputLabel: { shrink: true },
         input: {
             startAdornment: <InputAdornment classes={{ positionStart: classes.positionStart }} position="start">

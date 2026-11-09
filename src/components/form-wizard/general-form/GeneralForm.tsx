@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import { Button, Grid, Paper, Step, StepButton, StepContent, Stepper } from '@mui/material';
@@ -23,6 +24,7 @@ const useStyles = makeStyles()(theme => ({
     }
 }));
 const GeneralForm = observer((props: any) => {
+    const { t } = useI18n();
     const { classes } = useStyles();
     const [startInit, setStartInit] = useState(props.main.init);
     const [sslInit, setSSLInit] = useState(props.main.init);
@@ -86,14 +88,14 @@ const GeneralForm = observer((props: any) => {
           <Stepper activeStep={activeStep} nonLinear orientation="vertical">
             {steps.map((step, index) => (<Step key={step.label}>
                 <StepButton onClick={handleStep(index)}>
-                  {step.label}
+                  {t(step.label)}
                 </StepButton>
                 <StepContent>
                   <div className={classes.actionsContainer}>
                     <div>
-                      <Button disableElevation disabled={activeStep === 0} onClick={handleStep(index - 1)} className={classes.button}>Back</Button>
+                      <Button disableElevation disabled={activeStep === 0} onClick={handleStep(index - 1)} className={classes.button}>{t("Back")}</Button>
                       <Button disableElevation variant="contained" onClick={handleStep(index + 1)} color="primary" className={classes.button}>
-                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                        {activeStep === steps.length - 1 ? t("Finish") : t("Next")}
                       </Button>
                     </div>
                   </div>

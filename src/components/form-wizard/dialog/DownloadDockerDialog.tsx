@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { makeStyles } from 'tss-react/mui';
 import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
@@ -33,6 +34,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
     }
 }));
 export default function DownloadDockerDialog(props: any) {
+    const { t } = useI18n();
     const [open, setOpen] = useState(true);
     const theme = useTheme();
     const [clipboard, setClipboard] = useState(false);
@@ -76,16 +78,16 @@ export default function DownloadDockerDialog(props: any) {
     return (<div>
       <Dialog transitionDuration={0} fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose} aria-labelledby="responsive-dialog-title">
         {fabs.map((fab, index) => (<Zoom key={fab.color} in={clipboard === Boolean(index)} timeout={transitionDuration} style={{ transitionDelay: `${clipboard === Boolean(index) ? transitionDuration.exit : 0}ms` }} unmountOnExit>
-            <Tooltip title={fab.tooltip} aria-label={fab.tooltip}>
+            <Tooltip title={t(fab.tooltip)} aria-label={t(fab.tooltip)}>
               <Button onClick={() => {
                 /* Copy the text inside the text field */
                 document.execCommand('copy');
                 setClipboard(true);
-            }} aria-label={fab.label} className={fab.className} color={fab.color} startIcon={fab.icon}>{fab.label}
+            }} aria-label={t(fab.label)} className={fab.className} color={fab.color} startIcon={fab.icon}>{t(fab.label)}
               </Button>
             </Tooltip>
           </Zoom>))}
-        <DialogTitle id="responsive-dialog-title">Save Main Configuration</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{t("Save Main Configuration")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             <SyntaxHighlighter language="bash" style={duotoneLight}>
@@ -95,11 +97,9 @@ export default function DownloadDockerDialog(props: any) {
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => props.main.config.exportConfig()} color="primary" startIcon={<GetAppIcon />}>
-            Download
-          </Button>
+            {t("Download")}</Button>
           <Button onClick={handleClose} color="primary" autoFocus>
-            Close
-          </Button>
+            {t("Close")}</Button>
         </DialogActions>
       </Dialog>
     </div>);
