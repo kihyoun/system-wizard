@@ -4,7 +4,7 @@ import { I18nextProvider, initReactI18next, useTranslation } from 'react-i18next
 import shell from './shell';
 import wizard from './wizard';
 import docs from './docs';
-import credentials from './credentials';
+import credentials from './credentialStatus';
 import diagnostics from './diagnostics';
 import previewSetup from './previewSetup';
 import operationsDocs from './operationsDocs';
