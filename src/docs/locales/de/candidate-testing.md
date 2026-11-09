@@ -34,6 +34,17 @@ dieses Treibers vor dessen Aufruf erfolgen. Ein internes äußeres Netzwerk verh
 Abhängigkeitsdownloads; Dienst-Images müssen vorgeladen sein. Das vollständige Runner-/Registry-
 Szenario benötigt außerdem seine deklarierten Helfer- und Build-Image-Parameter.
 
+Verwerfbare GitLab-Instanzen verwenden `puma['worker_processes'] = 2` über die
+offizielle Umgebungsvariable `GITLAB_OMNIBUS_CONFIG`. Verschachtelte Container können
+die Ressourcen des äußeren Hosts statt der Grenzen des privaten Daemons erkennen.
+Der ursprüngliche und der wiederhergestellte Controller übergeben dieselbe Einstellung;
+der native GitLab-Start reicht sie bei der ersten Erstellung, beim Upgrade und beim Rollback weiter.
+Dabei werden die deklarierten unveränderten GitLab-Images verwendet. Der gewöhnliche Start
+bleibt unverändert, wenn die Variable nicht gesetzt oder leer ist. Die Einstellung wird vor
+`gitlab.rb` ausgewertet und nicht in diese Datei geschrieben. Deshalb muss sie bei jeder
+Controller-Erstellung übergeben werden. Siehe GitLabs [Docker-Konfiguration](https://docs.gitlab.com/install/docker/configuration/#pre-configure-docker-container)
+und [Puma-Dimensionierung](https://docs.gitlab.com/administration/operations/puma/).
+
 ## Ausdrückliche Parameter
 
 Erstellen Sie eine öffentliche JSON-Spezifikation mit `daemonImage` als exaktem Docker-DinD-

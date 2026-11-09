@@ -32,6 +32,17 @@ Docker 볼륨은 디스크 할당량을 강제하지 않습니다.
 내부 외부 네트워크는 외부 의존성 다운로드를 막으므로 서비스 이미지를 미리 로드해야 합니다.
 전체 Runner/레지스트리 시나리오에는 명시된 도우미와 빌드 이미지 입력값도 필요합니다.
 
+일회용 GitLab 인스턴스는 `puma['worker_processes'] = 2` 설정을
+공식 `GITLAB_OMNIBUS_CONFIG` 환경 변수를 통해 사용합니다. 중첩된 컨테이너는 비공개 데몬의 제한 대신
+외부 호스트의 자원을 감지할 수 있습니다.
+원본 컨트롤러와 복원된 컨트롤러는 같은 설정을 전달하며, 네이티브 GitLab 시작 절차는
+최초 생성, 업그레이드 및 롤백 시 이 설정을 전달합니다.
+명시된 GitLab 이미지는 수정 없이 사용하며, 변수가 설정되지 않았거나 비어 있으면 일반 시작 동작은 그대로 유지됩니다.
+이 설정은 `gitlab.rb`보다 먼저 평가되고 해당 파일에는 기록되지 않으므로
+컨트롤러를 생성할 때마다 전달해야 합니다.
+GitLab의 [Docker 설정](https://docs.gitlab.com/install/docker/configuration/#pre-configure-docker-container)과
+[Puma 크기 설정](https://docs.gitlab.com/administration/operations/puma/)을 참고하세요.
+
 ## 명시적 입력값
 
 정확한 Docker DinD 릴리스와 **검증된 sha256 다이제스트**를 `daemonImage`로 지정한 공개 JSON 명세를 만드세요.
