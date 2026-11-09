@@ -147,6 +147,16 @@ folgt der Quellcode-/Werkzeugkettenmigration zum unterstützten modernen Profil.
 Legacy-Projekte benötigen weiterhin das separat geprüfte Quellcode-/Werkzeugketten-
 Upgrade. Historische Rezept-Hashes und bestehende Prüfpunkte bleiben verifizierbar.
 
+Wähle für Quellcode mit **So funktioniert’s**, **Schnellinstallation** und integrierten
+Docs ausdrücklich `"buildProfile": "node24-vite8-quickstart-v5"`. Es behält alle CA-v4-
+Dateien und Prüfungen bei und aktualisiert den Browservertrag einschließlich Scroll-/
+Fokusaktion für die Installation, Docs-Navigation und erhaltener Arbeitsbereichsauswahl.
+Liefere den passenden Oberflächenquellcode aus, bevor die vorgelagerte Browserprüfung
+läuft. Dieses Ziel akzeptiert frühere moderne Profile und sich selbst; anschließende
+Downgrades auf ältere Browserprofile werden abgelehnt. Quellcodeführende Projekte
+verwenden ihren [nativen Quellcode-Merge und die Bindungsaktualisierung](../wizard-source-primary/README.md#refresh-an-existing-source-primary-build-recipe)
+anstelle dieser Migrationsaktionen für bisherige Importe.
+
 ```sh
 node project-bootstrap/wizard-upgrade/run.js build-plan /state/upgrade-options.json
 # Review scope=build-environment, exact head, managed paths and preservedTreeHash.

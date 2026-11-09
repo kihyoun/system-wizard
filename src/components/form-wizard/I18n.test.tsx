@@ -12,9 +12,11 @@ function LanguageSwitch() {
     return <button onClick={() => setLocale(locale === 'en' ? 'de' : 'en')}>EN / DE</button>;
 }
 beforeEach(() => { localStorage.clear(); });
-afterEach(() => { localStorage.clear(); });
+afterEach(() => { vi.useRealTimers(); localStorage.clear(); });
 
 test('language changes preserve edited configuration, token visibility and generated output', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-09T12:00:00Z'));
     const main = new Main();
     main.init = false;
     render(<I18nProvider><LanguageSwitch /><StartFields main={main} /></I18nProvider>);

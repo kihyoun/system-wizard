@@ -112,27 +112,32 @@ als aktuell darzustellen.
 
 ## Ein bestehendes quellcodeführendes Build-Rezept aktualisieren
 
-Eine Controller-Aktualisierung bewahrt die bestehende Build-Reservierung.
-Wähle für einen bereits übernommenen modernen Wizard in einer neuen
-Übernahmeeingabe ausdrücklich `"buildProfile": "node24-vite8-ca-v4"`, um diese
-Reservierung zu aktualisieren. Akzeptierte Ausgangsprofile sind `node24-vite8`,
-seine Cleanup-v2- und Overview-v3-Profile sowie CA-v4 selbst. Legacy-Rezepte und
-die erste Übernahme können dieses Upgrade nicht auswählen. Fehlt `buildProfile`,
-bleiben das exakte bestehende Rezept und historische Eingabe-Hashes erhalten.
+Eine Controller-Aktualisierung bewahrt die bestehende Build-Reservierung. Wähle für
+einen bereits übernommenen modernen Wizard in einer neuen Übernahmeeingabe ausdrücklich
+`"buildProfile": "node24-vite8-quickstart-v5"`, um die aktuelle Oberfläche mit Übersicht,
+Schnellinstallation und integrierten Docs auszuliefern. Das frühere CA-Aktualisierungsziel
+`node24-vite8-ca-v4` bleibt akzeptiert. Ausgangsprofile sind `node24-vite8`, seine
+Cleanup-v2-, Overview-v3- und CA-v4-Profile sowie Quickstart-v5 selbst. Ein Downgrade
+von Quickstart-v5 auf CA-v4 wird abgelehnt. Legacy-Rezepte und die erste Übernahme können
+dieses Upgrade nicht auswählen. Fehlt `buildProfile`, bleiben das exakte bestehende
+Rezept und historische Eingabe-Hashes erhalten.
 
 Öffne zuerst einen normalen Merge Request im kanonischen Wizard-Quellcodeprojekt.
-Verwende das Ergebnis von `wizard-build/recipe.js` aus dem geprüften Controller
-mit `generate(cube,
-'node24-vite8-ca-v4')`, um jeden zurückgegebenen Eintrag `files` einschließlich
-des öffentlichen CA-Pakets und Aktualisierungsskripts zu installieren. Bewahre
-Anwendungsquellcode und aktualisiere die bestehende `.gitlab/primary.yml`, statt
-sie durch das separate CI-Dokument des verwalteten Rezepts zu ersetzen.
-Aktualisiere die Eltern der Quellcode- und Auslieferungsjobs, installiere das
-eingecheckte öffentliche Paket vor Netzwerkvorgängen und setze
-`NODE_OPTIONS=--use-openssl-ca` für Node-Jobs. Behalte erforderliche Quellcode-,
-Browser- und Auslieferungsprüfungen, den öffentlichen Spiegel und Umgebungsjobs.
-Baue und prüfe sowohl das Auslieferungsimage als auch Browser-/Job-Images neu;
-eine alte erfolgreiche Pipeline ist kein Nachweis für die neuen Vertrauenseingaben.
+Verwende das Ergebnis von `wizard-build/recipe.js` aus dem geprüften Controller mit
+`generate(cube,
+'node24-vite8-quickstart-v5')`, um jeden zurückgegebenen Eintrag `files` zusammen mit
+dem passenden Oberflächenquellcode zu installieren. Beim Wechsel von CA-v4 ändert sich
+nur `.system-bootstrapper/build-v1/smoke/check.js`; die bestehende native
+`.gitlab/primary.yml` und ihre Prüfbedingungen bleiben identisch. Ersetze die native
+CI niemals durch das separate CI-Dokument des verwalteten Rezepts.
+
+Aktualisiere beim Wechsel von einem früheren Profil ohne CA-v4-Vertrauensvorbereitung
+auch die bestehenden Eltern der nativen Quellcode- und Auslieferungsjobs, installiere
+das eingecheckte öffentliche Paket vor Netzwerkvorgängen und setze
+`NODE_OPTIONS=--use-openssl-ca` für Node-Jobs. Behalte erforderliche Quellcode-, Browser-
+und Auslieferungsprüfungen, den öffentlichen Spiegel und Umgebungsjobs. Baue und prüfe
+sowohl das Auslieferungsimage als auch Browser-/Job-Images neu; eine alte erfolgreiche
+Pipeline ist kein Nachweis für die neuen Vertrauenseingaben.
 
 Merge nach dem Review und prüfe die exakte Push-Pipeline des Standardbranches.
 Bereite das neue vollständige Manifest `ciFiles` aus diesem Commit, seinen
@@ -145,6 +150,52 @@ privaten Archiv und erhält kanonische Identität sowie Umgebungs-Generationsunt
 Eine geänderte oder fehlende CA-Datei, ein fremdes Rezept oder ein erforderlicher
 CI-Fehler verweigern die Bindung. Die Production-Image-Freigabe bleibt der separate
 Schritt unten.
+
+Eine geänderte Smoke-Datei ändert das freigegebene Manifest `ciFiles`, auch wenn der
+native CI-Einstiegspunkt unverändert ist. Bewahre die kanonische Projekt-/Namespace-/
+Pfad-/Standardbranch-Identität in der neuen privaten Eingabe, wähle das ausdrückliche
+Zielprofil und ersetze Quellcode-Commit, Push-Pipeline-ID, Image-Digest und das vollständige
+Manifest eingecheckter Dateien durch die neu geprüften Werte. Behalte das geprüfte
+unveränderliche Hilfs-Image. Führe `plan` und `apply` aus einem geprüften Controller/
+Hilfsprogramm aus, das das neue Profil erkennt. Bearbeite den gespeicherten Beleg oder
+seine Hashes nicht manuell. Bis diese abgesicherte Bindungsaktualisierung abgeschlossen
+ist, lehnt die Verifizierung über die alte Bindung die geänderten verwalteten Smoke-Bytes ab.
+
+Füge für ein bereits übernommenes quellcodeführendes Projekt
+`"action": "refresh-binding"` zu dieser privaten Eingabe hinzu, um ausschließlich
+Rezeptmetadaten zu aktualisieren. Ein ausdrückliches unterstütztes `buildProfile` ist
+erforderlich. Diese Aktion erhält die exakte kanonische Projektidentität, jede freigegebene
+native CI-Datei außerhalb des generischen Rezepts, Repository-Metadaten und Aliasse für
+Wiederherstellungsimages. Sie prüft unabhängig die neuen Rezeptbytes, das vollständige
+CI-Manifest, erforderliche Merge-Prüfbedingungen sowie die exakte Push-Pipeline des
+Standardbranches und unveränderliche Kandidatenartefakte. Review/Beta müssen gestoppt
+und abgeglichen sein. Das bestehende private Archiv, der Bestätigungshash, der atomare
+Konfigurationsvergleich und -austausch sowie die Umgebungssperre gelten weiterhin;
+eine veraltete Haupt- oder Projektkonfiguration führt zur Ablehnung der Aktualisierung.
+
+Die Aktion lässt die vollständige Hauptkonfiguration und ihre Production-Image-Fixierung
+unverändert, auch wenn Production mit einem separat akzeptierten öffentlichen Release-Paar
+läuft. Diese Fixierung bleibt als archivierte Konfiguration erhalten; sie wird niemals
+als Kandidatennachweis behandelt oder als Wiederherstellungsalias einer privaten Registry
+hinzugefügt. Die Prüfung des öffentlichen Paars und die Production-Freigabe behalten ihre
+getrennten Release-/Update-Prüfbedingungen. Die erste Übernahme und eine Neuzuordnung
+benötigen weiterhin das exakte vorherige Image aus der privaten Registry;
+`refresh-binding` kann weder ein Repository übernehmen noch auf ein anderes umleiten.
+
+Führe normalerweise die vorhandenen Befehle `plan`/`apply` im geprüften Controller aus.
+Wenn der laufende Controller diese Aktion noch nicht kennt, kann ein Betreiber das
+passende akzeptierte unveränderliche Hilfs-Image verwenden und dieselbe persistente
+Konfiguration unter `/state` einbinden, ohne einen Controller zu starten oder einen
+Docker-Socket einzubinden:
+
+```sh
+docker run --rm --network host --mount type=bind,src=/operator/configuration,dst=/state --entrypoint node sha256:REPLACE_WITH_ACCEPTED_HELPER_IMAGE_ID /system/project-bootstrap/wizard-source-primary/run.js plan /state/adoption-input.json /state/adoption-credential.json
+docker run --rm --network host --mount type=bind,src=/operator/configuration,dst=/state --entrypoint node sha256:REPLACE_WITH_ACCEPTED_HELPER_IMAGE_ID /system/project-bootstrap/wizard-source-primary/run.js apply /state/adoption-input.json /state/adoption-credential.json PLAN_HASH
+```
+
+Ersetze Konfigurationseinbindung und Image-ID durch unabhängig geprüfte Betreibereingaben.
+Behalte dieselbe Eingabe und dasselbe Hilfs-Image für Apply und Wiederholungen. Dies führt
+den eingecheckten Einstiegspunkt direkt aus, startet keine Dienste und gibt keine Images frei.
 
 ## Freigeben und das Duplikat entfernen
 

@@ -89,7 +89,7 @@ privat auf und prüfe vor einer Kandidatenfreigabe die native Job-Bereinigung.
 Das bisherige Rezept `build-v1` bleibt für seine aufgezeichneten Hashes und
 historischen GitLab-Nachweise bytegetreu erhalten. Neue Quellcodeimporte,
 deren verifizierter Schnappschuss Vite verwendet, wählen die Familie Node 24 /
-Vite 8 (`node24-vite8-ca-v4` für neue Reservierungen): Node 24.22.0/npm 11.19.1,
+Vite 8 (`node24-vite8-quickstart-v5` für neue Reservierungen): Node 24.22.0/npm 11.19.1,
 Installation anhand der Lockdatei, Lint, Vitest, TypeScript-/Vite-Build und
 Playwright-1.64.1-Browserprüfungen. Beide Profile verwenden dieselben begrenzten
 Jobnamen und denselben Artefakt-/Digest-Vertrag; moderne Artefakte melden
@@ -115,7 +115,7 @@ als `:latest` aufgezeichnet, und der ältere Bereinigungsvergleich kann dessen
 Job-Tag zurücklassen, obwohl Erfolg gemeldet wird.
 
 Aktuelle nicht reservierte Builds verwenden `legacy-ca-v4` oder
-`node24-vite8-ca-v4`. Diese übernehmen die korrigierte Bereinigungsimplementierung
+`node24-vite8-quickstart-v5`. Diese übernehmen die korrigierte Bereinigungsimplementierung
 aus den versionierten Cleanup-v2-Profilen; das moderne Profil übernimmt außerdem
 die unten beschriebenen Navigationsprüfungen. Die Bereinigung ergänzt `:latest`
 nur, wenn die letzte Komponente des Repository-Pfads kein Tag hat; ein
@@ -152,7 +152,7 @@ exakten reservierten Hashes auswählbar. Ein neuer Controller ersetzt kein
 installiertes Rezept und schreibt seinen Beleg nicht um. Führe vor der
 Auslieferung von Quellcode, der die standardmäßige Übersicht ergänzt, die
 abgesicherte Migration nur für Build/Umgebungen mit einem ausdrücklichen
-`buildProfile` von `node24-vite8-ca-v4` und passendem unveränderlichem Hilfs-Image
+`buildProfile` von `node24-vite8-overview-v3` oder `node24-vite8-ca-v4` und passendem unveränderlichem Hilfs-Image
 aus. Behalte das gewählte Profil in den privaten Betreiberoptionen für eine
 spätere Übernahme oder Wiederholung; die Production-Freigabe bleibt ein eigener
 bewusster Vorgang.
@@ -176,3 +176,26 @@ prüfe danach die Job-Images neu. Ein Controller-Austausch allein aktualisiert
 das Rezept eines reservierten Projekts nicht. Diese Aktualisierung gilt für
 erzeugte Images und CI-Jobs; sie ist kein Wartungsbefehl für den
 Host-Vertrauensspeicher. Prüfe installationsspezifische eigene CAs separat.
+
+## Schnellinstallation und integrierte Docs
+
+Das Profil `node24-vite8-quickstart-v5` übernimmt die exakte CA-v4-Werkzeugkette,
+CI-Prüfungen, Bereinigung und öffentlichen Vertrauensdateien. Nur sein Browserskript
+ändert sich passend zur aktuellen Oberfläche: **So funktioniert’s**, die drei Übersichtskarten,
+die Scroll-/Fokusaktion **System Bootstrapper installieren**, der exakte Befehl zur
+**Schnellinstallation** und die integrierte Handbuchnavigation. Es bewahrt die Projekte-
+Auswahl beim Wechsel zwischen Übersicht, Docs und Wizard, prüft Konfigurations-ZIP und
+exakten Cube sowie die verschachtelte SPA-Ausweichroute und den direkten Einstieg
+`/configuration`. Bildschirmfotos von Übersicht, Docs und Wizard bleiben als Browsernachweise verfügbar.
+
+Dieses Profil setzt die aktuelle Quellcodeoberfläche voraus; es interpretiert frühere
+reservierte Rezepte nicht neu. Liefere seine verwalteten Dateien zusammen mit dem
+passenden Quellcode aus und übernimm dann ausdrücklich
+`"buildProfile": "node24-vite8-quickstart-v5"` über den passenden Ablauf für verwaltete
+Importe oder quellcodeführende Projekte. Abgesicherte Upgrades lehnen ein Downgrade
+dieses Profils auf ältere Browserprüfungen ab.
+
+Um das exakte Smoke-Skript gegen einen isolierten lokalen Build auszuführen, setze
+`WIZARD_BASE_URL` auf dessen HTTP-Ursprung und `WIZARD_EVIDENCE_DIR` auf ein privates
+Ausgabeverzeichnis. Die Standardwerte im verwalteten Container bleiben `http://wizard-candidate`
+und `/evidence`; alle Anfragen außerhalb des gewählten Ursprungs werden blockiert.

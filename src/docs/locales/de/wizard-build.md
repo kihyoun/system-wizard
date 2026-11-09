@@ -107,30 +107,35 @@ Eine Statusaktualisierung installiert keine Dateien und erzeugt keine Pipelines.
 
 ## Werkzeugkettenprofile
 
-Neue Quellcodeimporte mit Vite wählen das Profil `node24-vite8-ca-v4`: die
+Neue Quellcodeimporte mit Vite wählen das Profil `node24-vite8-quickstart-v5`: die
 festgelegte Node-24-/npm-Werkzeugkette, Installation per Lockdatei, Lint, Vitest,
 TypeScript-/Vite-Build, Konfigurationsexportprüfungen und Playwright-Browserprüfungen.
 Browsernachweise enthalten die dargestellte Oberfläche, Projekte, SPA-Navigation,
 eine Konfigurations-ZIP und die exakte Cube-Prüfung. Die genau festgelegten Versionen
 stehen in `wizard/package.json` und im verwalteten Rezept.
 
-Dieses Profil behält die Overview-Browserprüfungen und die Bereinigung exakter
-Tags bei und aktualisiert den öffentlichen CA-Vertrauensspeicher der Build-/Browser-
-Images aus dem geprüften Mozilla-Paket mit Prüfsumme, das mit dem System-Quellcode
-geliefert wird. Node verwendet diesen aktualisierten OpenSSL-Vertrauensspeicher.
-Die Aktualisierung läuft beim Bauen oder Vorbereiten von Job-Images, ohne zur
-Laufzeit ein neues Vertrauenspaket herunterzuladen oder den Vertrauensspeicher
+Dieses Profil behält die Bereinigung exakter Tags und das öffentliche CA-Vertrauen
+der Build-/Browser-Images aus dem geprüften Mozilla-Paket mit Prüfsumme bei, das mit
+dem System-Quellcode geliefert wird. Node verwendet diesen aktualisierten OpenSSL-
+Vertrauensspeicher. Die Aktualisierung läuft beim Bauen oder Vorbereiten von Job-Images,
+ohne zur Laufzeit ein neues Vertrauenspaket herunterzuladen oder den Vertrauensspeicher
 des Hosts zu verändern.
 
-Die übernommenen Übersichtsprüfungen kontrollieren **Erste Schritte**, den Wechsel
-Übersicht/Wizard, die erhaltene Arbeitsbereichsauswahl und die Aktion **Wizard
-öffnen**, wenn diese Bedienelemente vorhanden sind; früherer moderner Quellcode
-behält seine direkten Arbeitsbereichsprüfungen. Um die neue Navigation aus einem
-bestehenden verwalteten Projekt auszuliefern, führe zuerst dessen abgesichertes
-Upgrade nur für Build/Umgebungen mit der ausdrücklichen privaten Option
-`"buildProfile": "node24-vite8-ca-v4"` aus. Bestehende Overview-, Cleanup-v2- und
-frühere Profile behalten ihre exakten historischen Hashes. Das entsprechende
-aktuelle Legacy-Profil ist `legacy-ca-v4`.
+Die Browserprüfungen kontrollieren **So funktioniert’s**, die drei Übersichtskarten,
+die Scroll-/Fokusaktion **System Bootstrapper installieren** und den exakten Befehl
+zur **Schnellinstallation**. Sie öffnen das integrierte Handbuch, bewahren den ausgewählten
+Projekte-Arbeitsbereich beim Wechsel zwischen Übersicht, Docs und Wizard, validieren
+Konfigurations-ZIP/Cube und prüfen verschachtelte SPA-Routen sowie direkte
+`/configuration`-Routen. Dieses Profil setzt die aktuelle Oberfläche voraus. Bestehende
+Overview-v3- und CA-v4-Reservierungen behalten ihre historischen Prüfungen für
+**Erste Schritte** / **Wizard öffnen**.
+
+Verwende für einen vorhandenen verwalteten Import das abgesicherte Upgrade nur für
+Build/Umgebungen mit `"buildProfile": "node24-vite8-quickstart-v5"` zusammen mit dem
+passenden Quellcode. Ein übernommenes quellcodeführendes Projekt verwendet stattdessen
+seinen [nativen Quellcode-Merge und die Bindungsaktualisierung](../project-bootstrap/wizard-source-primary/README.md#refresh-an-existing-source-primary-build-recipe).
+Jedes frühere Profil behält seinen exakten historischen Hash. Das entsprechende aktuelle
+Legacy-Profil ist `legacy-ca-v4`.
 
 Reservierte historische Rezepte bleiben anhand ihres exakten Hashs verifizierbar,
 einschließlich älterer Node-13-/CRA-/Jest-Rezepte. Historische Kompatibilität macht
