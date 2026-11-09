@@ -393,3 +393,14 @@ innerhalb eines 70-minütigen Job-Limits und lässt Zeit für Vorbereitung, Ver�
 sammlung. Normale Smoke- und reine ACME-Lebenszyklusbudgets bleiben unverändert. Ein
 erfolgreicher nachgebildeter Adaptervertrag ist keine erfolgreiche echte Migration; verwenden Sie die
 vollständige Plattform-CI-Schranke für diesen Nachweis.
+
+## Geführte Vorschau-Abnahme nach dem Deployment
+
+Das [native Werkzeug zur geführten Vorschau-Abnahme](GUIDED_PREVIEW_ACCEPTANCE.md)
+prüft den frischen Quellimport, die tatsächlich erforderlichen Wizard-Push-/MR-Pipelines,
+die Source-Primary-Übernahme und Review-Deploy/Stop nach dem bewussten Deployment
+eines akzeptierten Controllers. Es verwendet ausdrücklich bereitgestellte private
+Betreibereingaben und den nativen lokalen Docker-Socket. Weder die Spezifikation
+der isolierten Testplattform noch eine zusätzliche CI-Pipeline aktiviert es.
+Ein reiner Prüfplan oder ein erfolgreicher Offline-Fixture-Test belegt nicht,
+dass die echte Betreiberabnahme durchgeführt wurde.

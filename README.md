@@ -25,7 +25,7 @@ Select **Wizard** in the main navigation to configure an instance. `/configurati
 Switching between Overview, Wizard, Docs and the footer's Privacy/Imprint views preserves the
 current connection, configuration and in-progress form state in the browser.
 
-The toolbar's **EN | DE** switch selects English or German for the interface and
+The toolbar's **EN | DE | 한국어** switch selects English, German or Korean for the interface and
 all handbook chapters. The preference is stored only in this browser; changing
 it preserves the current configuration, connection and chapter. Commands,
 configuration keys, file paths, code examples and operator-supplied information
@@ -34,15 +34,16 @@ the Wizard, with a wider chapter list.
 
 Application text uses stable, pinned `i18next` and `react-i18next` releases with
 local translation resources. Material UI's built-in component text uses its
-documented `deDE` / `enUS` theme locales. Translation lookup, interpolation and
+documented `deDE` / `enUS` / `koKR` theme locales. Translation lookup, interpolation and
 plural selection stay in i18next; the original guide files remain the English
 documentation source.
 
-The original repository guides remain English. German reader translations live
-in `src/docs/locales/de/`; their `sources.json` records the reviewed English
+The original repository guides and GitHub READMEs remain English. German and
+Korean reader translations live in `src/docs/locales/de/` and
+`src/docs/locales/ko/`; each `sources.json` records the reviewed English
 chapter hashes. After editing a guide, regenerate the English reader from the
-System checkout, review the corresponding German translation and update its
-source hash. Run `npm run docs:compile` to update the bundled German catalog.
+System checkout, review both corresponding translations and update their
+source hashes. Run `npm run docs:compile` to update both bundled locale catalogs.
 `npm run docs:check` rejects missing or stale translations and changes to commands,
 inline code, link destinations, heading structure or table structure. The normal
 production build runs this check.

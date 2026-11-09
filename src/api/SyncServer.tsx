@@ -145,6 +145,22 @@ export default class SyncServer {
     return axios.post(this.serverAddress + '/config/zip', formData, this.getFileHeaders());
   }
 
+  async diagnosticRequest(route: string, data?: any): Promise<any> {
+    await this.token();
+    const config = {headers: {Authorization: `Bearer ${this.accessToken}`, 'Content-Type': 'application/json'}};
+    const response = data === undefined ? await axios.get(this.serverAddress + route, config) :
+      await axios.post(this.serverAddress + route, data, config);
+    return response.data;
+  }
+
+  async downloadBackup(id: string): Promise<Blob> {
+    if (!/^[a-f0-9]{32}$/.test(id)) throw new Error('Invalid backup operation.');
+    await this.token();
+    const response = await axios.get(this.serverAddress + '/backup/' + id + '/download',
+      {headers: {Authorization: `Bearer ${this.accessToken}`}, responseType: 'blob'});
+    return response.data;
+  }
+
   async pushMain() {
     const raw = this.main.config?.content || '';
     const file = new File([raw], '.docker.env');

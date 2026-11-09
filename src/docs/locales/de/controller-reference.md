@@ -407,6 +407,24 @@ Ein unbeteiligtes Wizard-Image, nicht verfügbares aufbewahrtes Image, geändert
 unklare Containersuche blockiert Rollback. Eine nachgewiesene unterbrochene Entfernung des
 Controllers oder Wizards wird durch native Neuerstellung unter der zugehörigen Lease behandelt.
 
+Übergeben Sie für ein versioniertes öffentliches Release außerdem
+`--release-metadata /root/accepted-release/system-release-vX.Y.Z.json` sowohl an
+Vorprüfung als auch Aktualisierung. Beziehen Sie Metadaten und Prüfsumme aus dem ausgewählten
+[public release](../docs/RELEASES.md). Diese Option verlangt `--wizard` und bindet
+Produktversion, Quellbaum, Wizard-Gitlink, beide Images, Kandidatenjob und
+Nachweishash an den unabhängig geprüften freigegebenen Versuch. Sie aktualisiert die
+private Auswahl in `.release-images.json` und `.release-images.env`, die bei der ersten
+Einrichtung von Entwicklungsvorschauen verwendet wird. Sie führt das Neuinstallationsprogramm
+nicht auf vorhandenen Daten aus. Ohne diese Option bleiben die vorhandenen Release-Auswahldateien unverändert.
+
+Derselbe Aktualisierungscheckpoint erhält die exakten vorherigen Auswahlbytes und Datei-
+Metadaten, die geprüften öffentlichen Metadaten und die neue Auswahl. Jede Auswahldatei
+wird unter der Wartungslease atomar ersetzt. Rollback stellt die
+vorherigen Dateien einschließlich ihrer ursprünglichen Abwesenheit wieder her und akzeptiert eine unterbrochene
+Ersetzung, die nur die exakt bekannten alten/neuen Dateien enthält. Unbeteiligte Auswahl-
+änderungen oder geänderte Checkpoint-Inhalte blockieren Rollback, bevor Dienste gestoppt werden.
+Bewahren Sie diese Belege zusammen mit Checkpoint und beiden Images auf.
+
 Wählen Sie für unabhängige Laufzeitprüfungen dieses Installationstyps den ausdrücklichen
 Modus für öffentliche Images sowohl für Ausgangszustand als auch Prüfung:
 
