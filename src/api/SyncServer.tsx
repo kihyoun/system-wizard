@@ -112,6 +112,7 @@ export default class SyncServer {
       return 0;
     }
     this.main.importEnvData(res.data.data);
+    this.main.recoveryObservation = res.data.recoveryObservation || null;
     const projects = await axios.get(this.serverAddress + '/config/projects', this.getHeaders());
     let skipCount = 0;
     this.main.projects.clear();

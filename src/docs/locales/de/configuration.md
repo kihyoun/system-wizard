@@ -6,7 +6,7 @@
 | Übernehmen / Verbinden | Meldet den Wizard beim Sync-Dienst an |
 | Trennen | Trennt die Verbindung des Wizards |
 | Öffnen | Lädt eine Konfigurationsdatei von deinem Computer in den Wizard |
-| Sichern | Lädt die Konfiguration als JSON oder als ZIP mit JSON und erzeugten Umgebungsdateien herunter |
+| Sichern | Lädt Konfiguration als JSON oder als ZIP mit JSON, erzeugten Umgebungsdateien, `recovery.json` und `RECOVERY.md` herunter |
 | Abrufen | Ruft gespeicherte Instanzeinstellungen ab; ohne Konfiguration lädt die aktuelle Version gekennzeichnete Vorschläge |
 | Übertragen | Überträgt die Wizard-Konfiguration und startet die Instanz automatisch neu |
 | Neustarten | Startet die Dienste mit der übertragenen Konfiguration neu |
@@ -20,6 +20,17 @@
 und Übertragen/Abrufen verwalten die Konfiguration. Harvest/Seed verarbeiten Dienstdaten.
 Keiner der Konfigurationsdownloads enthält den Seed, Datenbanken oder Registry-Inhalte.
 Harvest und Seed werden nicht benötigt, um eine Konfiguration mit Abrufen anzuzeigen.
+
+Eine neue Konfigurations-ZIP enthält `recovery.json` und `RECOVERY.md`. Diese halten
+verfügbare gespeicherte und beobachtete Release-/Quellcode-/Image-Identitäten fest
+und erklären ihre Vollständigkeit. Eine exportierte Referenz bewahrt kein Image:
+Halte zugängliche Images, passende private Konfiguration und einen getrennten
+vollständigen Seed vor, bevor du auf Wiederherstellung vertraust. Ältere Konfigurations-
+sicherungen lassen sich weiterhin öffnen; fehlende Wiederherstellungsmetadaten belegen
+keinen geprüften Wiederherstellungssatz. Erweiterte ZIPs verlangen kompatible akzeptierte
+Wiederherstellungswerkzeuge ab 1.0.0; das aktualisiert nicht die gespeicherten
+Laufzeit-Images. Folge dem
+[Leitfaden für Wiederherstellungseingaben](RECOVERY_CONTRACT.md), um alle passenden Eingaben zu prüfen.
 
 Detail der aktuellen Implementierung: Die bestehende Wizard-Aktion **Seed**
 überträgt vor der Datenwiederherstellung auch die Hauptkonfiguration aus dem Formular.

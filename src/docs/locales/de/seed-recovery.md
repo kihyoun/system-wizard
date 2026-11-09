@@ -16,6 +16,60 @@ benötigen, werden abgewiesen; übergeben Sie stattdessen ihre wörtlichen,
 aufgelösten Werte. Der ursprüngliche Cube-Kopf und seine strenge Formatprüfung
 bleiben unverändert.
 
+## Wiederherstellungsmetadaten begleiten die Konfiguration
+
+Eine gewöhnliche JSON-Sicherung enthält `recovery`; ZIP enthält dasselbe Objekt in
+`bootstrapper.json` und `recovery.json` sowie eine kurze Anleitung `RECOVERY.md`.
+Das versionierte Format lautet `system-configuration-recovery-v1`. Das repositoryeigene
+`wizard/scripts/export-configuration.ts` führt dasselbe Wizard-Modell wie Fetch/Backup aus,
+einschließlich der `recoveryObservation` einer authentifizierten Fetch-Antwort, sofern
+verfügbar. Vorhandene JSON-/ZIP-Sicherungen ohne diese Einträge bleiben nutzbar.
+
+Die Metadaten halten einen neuen Sicherungszeitpunkt sowie die exakt gespeicherten
+Image-Einstellungen für Controller, Wizard, GitLab und Runner fest, einschließlich explizit
+nicht festgelegter Werte. Davon getrennt stehen zeitgestempelte authentifizierte
+Laufzeitbeobachtungen laufender Container mit unveränderlichen Image-IDs, Repository-
+Digests und Quellcodelabels. Ein getrennter/Offline-Export ohne begleitende Beobachtung
+meldet unbekannte Laufzeitidentität; er ersetzt nichts durch `latest`, erfindet keinen
+Quellcodestand und behauptet nicht, gespeicherte Einstellungen laufend beobachtet zu haben.
+In Image-Labels/akzeptierter Auswahl fehlende Quellcode-/Release-Identitäten bleiben
+unbekannt. Eine zuvor abgerufene Beobachtung behält ihren eigenen Zeitpunkt und kann
+älter als die bearbeitete Konfiguration sein.
+
+Metadaten sind nur Daten. Öffnen wendet ihre Image-, Quellcode-, Seed- oder Speicherfelder
+nicht auf die Betriebskonfiguration an. Push importiert vorhandene ENV-Einstellungen und
+Projektdateien; beschreibende Metadaten starten keine Migration und wählen keine andere
+Laufzeit. Der exakte Cube und alle Laufzeitoptionen bleiben beim Hin- und Rückweg erhalten.
+Ein erneuter Export nach Öffnen behält einen Datensatz `importedBackup` bei, der als
+`imported-unverified` gekennzeichnet ist und den ursprünglichen Sicherungszeitpunkt sowie
+beschreibende Versionsnachweise enthält. Dies sind historische Daten, keine neue Beobachtung. Sie können
+weder eine Laufzeit auswählen noch eine behauptete Seed-Übereinstimmung beibehalten.
+
+`recoveryTools.minimumSystemProductVersion` ist `1.0.0`: Verwenden Sie einen akzeptierten
+Controller für Wiederherstellungswerkzeuge mit ausdrücklicher Unterstützung für dieses
+erweiterte ZIP-Format und den ausgewählten Seed. Ältere Controller können `recovery.json` /
+`RECOVERY.md` bei nativer Wiederherstellung zurückweisen. Diese Anforderung ist von den
+gespeicherten Laufzeitfestlegungen getrennt: Der Import alter Konfiguration und Export
+eines neuen Pakets aktualisieren deren Laufzeit nicht. Beziehen Sie kompatiblen Werkzeug-
+Checkout und Controller unabhängig; verwenden Sie nicht blind einen alten gespeicherten
+Controller als Wiederherstellungshelfer und ersetzen Sie keine Images in der Konfiguration.
+
+Aus dem konfigurierten Backupverzeichnis wird weder Seed-Generation noch Manifest abgeleitet.
+Jeder reine Konfigurationsexport verlangt ausdrücklich einen passenden vollständigen Seed:
+Prüfen Sie vor der Wiederherstellung Generation, Manifest, Zeitstempel und genaues
+geharvestetes GitLab-Image. Ein älterer Seed und neuere Konfiguration können inkompatibel sein.
+Bewahren Sie Paket und Seed unabhängig auf; keines belegt das Vorhandensein oder die Prüfung des anderen.
+
+Für ein dokumentiertes akzeptiertes Produkt-Release rufen Sie dessen
+[öffentliche Release-Metadaten](RELEASES.md) ab und laden den exakten Quellcode-Commit mit
+festgelegtem Wizard-Submodul. Für eine aus Quellcode gebaute/private Laufzeit bewahren Sie
+Quellcode und geprüfte Image-Inhalte unabhängig auf. Laden Sie vor der Wiederherstellung
+exakte unveränderliche Referenzen oder geprüfte Archive; eine Referenz ist kein gesichertes
+Image. Der nachfolgende native Wiederherstellungsweg für private Wizard-Images kann ein
+passendes Image aus der restaurierten Registry laden, dessen Inhalt im passenden Seed
+liegen muss. Bauen Sie ein fehlendes unveränderliches privates Image nicht neu und
+bezeichnen Sie es anschließend als dasselbe geprüfte Image.
+
 ## Arbeitsverzeichnis und Sicherungsziel auswählen
 
 Produktive Arbeitsdaten und Seed-Sicherungsspeicher sind unabhängig. Neue
@@ -148,13 +202,14 @@ Datenverzeichnis ist keine Eingabe.
    Er muss auf einem frischen Ziel vor `--check-only` ausgeführt werden: Diese
    Vorprüfung legt keine Pfade an.
 2. Stellen Sie das freigegebene vollständige Controller-Image und das exakte bei
-   Harvest aufgezeichnete GitLab-Image bereit. Bauen Sie aus Quellcode erstellte
-   Images aus ihrem aufgezeichneten Quellcode neu und rufen Sie öffentliche
-   Images an ihren aufgezeichneten Referenzen ab. Ein eigenes veränderliches
-   Tag ist kein wiederherstellbares Artefakt. Behalten Sie unveränderliche
+   Harvest aufgezeichnete GitLab-Image bereit. Laden Sie exakte unveränderliche
+   Referenzen oder gesondert aufbewahrte geprüfte Image-Archive. Der Neubau aus
+   Quellcode ist ein neuer Versuch und kein Ersatz für die aufgezeichneten geprüften
+   Image-Inhalte. Ein eigenes veränderliches Tag ist kein wiederherstellbares Artefakt. Behalten Sie unveränderliche
    private Wizard-Registry-Festlegungen bei: Deren Nutzdaten müssen im Seed
    enthalten sein, statt durch einen anderen Build ersetzt zu werden.
-3. Bewahren Sie das Konfigurations-ZIP unter einem privaten absoluten Pfad auf
+3. Wählen Sie wie oben beschrieben einen kompatiblen akzeptierten Controller für Wiederherstellungswerkzeuge;
+   er darf vom erhaltenen gespeicherten Laufzeitcontroller abweichen. Bewahren Sie das Konfigurations-ZIP unter einem privaten absoluten Pfad auf
    dem neuen Host auf. Führen Sie den repositoryeigenen
    Host-Wiederherstellungseinstieg mit dem freigegebenen Image aus:
 

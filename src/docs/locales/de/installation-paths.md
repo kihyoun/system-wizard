@@ -2,6 +2,9 @@
 
 Wählen Sie den vollständigen Installationsweg für Ihre Umgebung:
 
+- [Schnellinstallation](QUICKSTART.md): ein Befehl auf einem frischen unterstützten Ubuntu-Host,
+  anschließend Konfiguration im Browser.
+
 - [Lokales Ubuntu / WSL2 mit HTTP](#0-getting-started): Erproben Sie die Plattform auf Ihrem
   eigenen Rechner, ohne öffentliches DNS oder Zertifikat.
 - [Öffentlicher Ubuntu-Server mit Ihrer Domain und HTTPS](#public-server-own-domain-and-https):

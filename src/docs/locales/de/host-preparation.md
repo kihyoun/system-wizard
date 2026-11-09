@@ -1,5 +1,10 @@
 # Einen Ubuntu-Host vorbereiten
 
+Für einen frischen Ubuntu-24.04- oder 26.04-LTS-amd64-Host wählt die [Schnellinstallation mit einem Befehl](docs/QUICKSTART.md)
+ein akzeptiertes öffentliches Release und übergibt an diese nativen Werkzeuge. Sie benötigt
+8 GiB RAM, 40 GiB freien Speicher, curl, standardmäßiges Python 3 und Administratorzugriff.
+Vorhandene Installationen, DNS/HTTPS und Wiederherstellung nutzen die folgenden expliziten Wege.
+
 ## Ein getestetes öffentliches Release installieren
 
 Verwenden Sie für eine Endbenutzerinstallation ein geprüftes **vollständiges Controller**-Image und
@@ -11,8 +16,8 @@ Controller und darf nicht an dessen Stelle verwendet werden.
 Wählen Sie die exakte System-Quellcodeversion eines Releases und beide unveränderlichen Image-
 Referenzen, die jeweils mit `@sha256:...` enden. Die Release-Nachweise des Herausgebers verknüpfen
 Quellcodeversion/-baum, festgelegte Wizard-Version und beide Image-IDs mit diesen
-Referenzen. Beziehen Sie sie aus einer vertrauenswürdigen Release-Ankündigung oder Ihrer eigenen erfolgreichen Veröffentlichungs-
-ausgabe. Ein CI-Job-Artefakt ist nicht automatisch ein öffentlich
+Referenzen. Beziehen Sie sie aus den versionierten öffentlichen Metadaten in [GitHub Releases](https://github.com/kihyoun/system/releases),
+folgen Sie dem [Release-Prüfverfahren](docs/RELEASES.md), oder verwenden Sie Ihre eigene erfolgreiche Veröffentlichungsausgabe. Ein CI-Job-Artefakt ist nicht automatisch ein öffentlich
 zugänglicher Download; machen Sie den ersten Start nicht vom Zugriff auf eine private
 GitLab-Instanz abhängig.
 

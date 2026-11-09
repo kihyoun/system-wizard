@@ -1,5 +1,27 @@
 ## 0. Erste Schritte
 
+### Schnellinstallation auf einem frischen Ubuntu-Host
+
+Führen Sie auf Ubuntu 24.04 / 26.04 LTS x86_64 mit sudo-Zugriff, curl, Python 3, Internet,
+mindestens 8 GiB RAM, 40 GiB freiem Speicher für Daten plus 1 GiB für Quellcode und
+freien Ports 80/443 diesen Befehl im Terminal des Hosts aus:
+
+```bash
+curl -fsSL https://github.com/kihyoun/system/releases/latest/download/quickstart.sh | sudo bash
+```
+
+Das schlanke Installationsprogramm lädt das getestete öffentliche Release,
+bereitet den Host vor und startet den ersten Wizard. Folgen Sie seinen lokalen
+Anweisungen für den ersten Zugriff; verwenden Sie bei einem entfernten Host einen
+SSH-Tunnel und setzen Sie die Konfiguration anschließend im Browser fort.
+Downloads und Dienststart benötigen Zeit. Der Befehl richtet weder öffentliches
+DNS/HTTPS ein noch restauriert er einen Seed oder migriert eine vorhandene Installation.
+Die [Schnellinstallation](QUICKSTART.md) beschreibt Voraussetzungen, Release-Auswahl
+und Fehlerbehandlung, die [öffentlichen Releases](RELEASES.md) die Quellcode-/Image-Prüfung.
+
+Die folgende manuelle lokale Installation bleibt für Ubuntu/WSL2 verfügbar.
+Für einen öffentlichen Dienst verwenden Sie den [Domain-und-HTTPS-Weg](#public-server-own-domain-and-https).
+
 Dies ist die Installation mit **lokalem Ubuntu / WSL2 und HTTP**. Betreiben Sie sie auf einem vertrauenswürdigen lokalen
 Rechner; stellen Sie diesen unverschlüsselten Aufbau nicht als öffentlichen Dienst bereit. Kubernetes-Erfahrung ist nicht
 nötig. Führen Sie Befehle in Ubuntu aus und konfigurieren Sie die Plattform anschließend
@@ -183,13 +205,14 @@ Die folgenden Bildschirmfotos zeigen die englische Oberfläche. Die Bedienpfade 
 
 Öffnen Sie [http://localhost/](http://localhost/).
 
-Die **Übersicht** öffnet sich mit der Projektvorstellung, **Erste Schritte**-
-Anweisungen und Links zum Handbuch. Wählen Sie **Wizard öffnen** oder oben den Reiter **Wizard**, um den
-unten gezeigten Konfigurationsbereich zu erreichen. Der Wechsel zwischen Übersicht, Wizard und
+Die **Übersicht** öffnet sich mit einer kurzen Projektvorstellung, den Karten
+**So funktioniert’s** und der **Schnellinstallation**. Die Installationsschaltfläche
+führt zu einem Befehl für das Terminal des Hosts. Wählen Sie oben den Reiter **Wizard**,
+um den unten gezeigten Konfigurationsbereich zu erreichen. Der Wechsel zwischen Übersicht, Wizard und
 den rechtlichen Seiten im Fußbereich erhält Ihre Verbindung und nicht gesendete Formularwerte;
 ein Neuladen des Browsers setzt diesen lokalen Zustand zurück.
 
-![Einstiegsübersicht mit Zugängen zum Wizard und Handbuch](images/getting-started/00-overview.png)
+![Übersicht mit Plattformvorstellung und Schnellinstallation](images/getting-started/00-overview.png)
 
 Falls bereits eine ältere Version geöffnet ist, laden Sie die Seite neu. Nutzen Sie **Ctrl+F5**, wenn die
 Oberfläche veraltet aussieht; der Browsercache kann noch die vorherige Version enthalten.

@@ -111,6 +111,8 @@ const AppContent = observer(() => {
     const [view, setView] = useState<MainView>(viewFromLocation);
     const [docsNavigationVersion, setDocsNavigationVersion] = useState(0);
     const headerRef = useRef<HTMLElement>(null);
+    const drawerOpener = useRef<HTMLButtonElement>(null);
+    const restoreDrawerFocus = useRef(false);
     const [headerHeight, setHeaderHeight] = useState(112);
     useEffect(() => {
         const syncView = () => setView(viewFromLocation());
@@ -167,6 +169,7 @@ const AppContent = observer(() => {
         setOpen(true);
     };
     const handleDrawerClose = () => {
+        restoreDrawerFocus.current = true;
         setOpen(false);
     };
     const theme = createTheme({
@@ -187,6 +190,12 @@ const AppContent = observer(() => {
     }, locale === 'de' ? deDE : enUS);
     const compact = useMediaQuery(theme.breakpoints.down('md'));
     const [open, setOpen] = React.useState(() => !compact);
+    useEffect(() => {
+        if (!open && restoreDrawerFocus.current) {
+            restoreDrawerFocus.current = false;
+            drawerOpener.current?.focus();
+        }
+    }, [open]);
     const barSurface = { bgcolor: dark ? 'background.paper' : 'primary.main', backgroundImage: 'none', color: '#fff' };
     const wizardActive = view === 'wizard';
     const docsActive = view === 'docs';
@@ -265,7 +274,7 @@ const AppContent = observer(() => {
               <AppBar ref={headerRef} elevation={0} position="fixed" sx={{ ...barSurface, containerType: 'inline-size', width: desktopDrawerOpen ? `calc(100% - ${activeDrawerWidth}px)` : '100%', ml: desktopDrawerOpen ? `${activeDrawerWidth}px` : 0 }} className={drawerClasses.appBar}>
                 <Toolbar sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 1, py: 1, '@container (min-width: 1200px)': { gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)' } }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
-                    {drawerActive && <IconButton color="inherit" aria-label={t(docsActive ? 'Open docs drawer' : 'open drawer')} aria-controls={open ? (docsActive ? 'docs-drawer' : 'server-drawer') : undefined} aria-expanded={open} onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
+                    {drawerActive && <IconButton ref={drawerOpener} color="inherit" aria-label={t(docsActive ? 'Open docs drawer' : 'open drawer')} aria-controls={open ? (docsActive ? 'docs-drawer' : 'server-drawer') : undefined} aria-expanded={open} onClick={handleDrawerOpen} edge="start" className={clsx(drawerClasses.menuButton, open && drawerClasses.hide)}>
                       <MenuIcon />
                     </IconButton>}
                     <Typography variant="h6" sx={{ minWidth: 0, overflowWrap: 'anywhere', fontSize: { xs: '1rem', sm: '1.25rem' } }}>
@@ -319,7 +328,7 @@ const AppContent = observer(() => {
               <main className={drawerClasses.content}>
                 <Box aria-hidden="true" sx={{ height: `${headerHeight}px`, flexShrink: 0, mb: 2 }} />
                 <div role="tabpanel" hidden={view !== 'overview'} id="main-panel-overview" aria-labelledby="main-tab-overview">
-                  <Overview onOpenWizard={() => showView('wizard', true)} />
+                  <Overview />
                 </div>
                 <div role="tabpanel" hidden={!wizardActive} inert={!wizardActive} id="main-panel-wizard" aria-labelledby="main-tab-wizard">
                 <Paper elevation={0} className={classes.paper}>

@@ -1,5 +1,12 @@
 ## 5. Ein laufendes System weiterentwickeln
 
+[Architektur, Ursprung und Vision](ARCHITECTURE.md) erläutert das Generationenmodell,
+den Repository-Wegweiser, das historische Diagramm und die Grenze zwischen heutigen
+Werkzeugen und künftiger autonomer Erneuerung.
+[Abhängigkeitsaktualisierungen im Betrieb](DEPENDENCY_UPDATES.md) erläutern Erkennung,
+ausdrückliche Freigabe, gruppierte Vorschläge und Wiederherstellung des dedizierten Bots.
+Der [Sicherheitsleitfaden für Abhängigkeiten](DEPENDENCY_SECURITY.md) erläutert Lockfile-Prüfungen und kompatible Korrekturen.
+
 Systementwicklung verwendet die Entwicklungsplattform, um den Quellcode zu ändern,
 aus dem ihr Nachfolger erstellt wird. Generation **A** beherbergt Quellcode,
 Anforderungen, Merge Request, Runner und Image-Registry. Ihre Pipeline erstellt

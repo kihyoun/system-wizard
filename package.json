@@ -2,6 +2,7 @@
   "name": "@systembootstrapper/wizard",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=24.22.0 <25",
@@ -67,5 +68,16 @@
     "typescript-eslint": "8.71.2",
     "vite": "8.3.4",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "eslint": {
+      "minimatch": "11.0.5"
+    },
+    "@eslint/config-array": {
+      "minimatch": "11.0.5"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.5"
+    }
   }
 }

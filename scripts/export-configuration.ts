@@ -9,6 +9,7 @@ export async function exportConfiguration(inputPath: string, outputPath: string)
   }
   const main = new Main();
   main.importEnvData(input.main.data);
+  main.recoveryObservation = input.main.recoveryObservation || null;
   for (const fileinfo of input.projects) {
     if (typeof fileinfo.data !== 'string') throw new Error('Invalid project Fetch response');
     main.importProjectEnvData(fileinfo.data);

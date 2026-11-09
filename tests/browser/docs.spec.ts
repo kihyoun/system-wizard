@@ -47,7 +47,7 @@ test('clipboard rejection explains manual copying and permits another attempt', 
 test('installation screenshots, code highlighting and detailed links work offline', async ({ page, context }) => {
   await page.goto('/docs#docs/installation');
   await context.setOffline(true);
-  const screenshot = page.getByRole('img', { name: 'Getting Started overview with entry points to the Wizard and handbook' });
+  const screenshot = page.getByRole('img', { name: 'Overview with the platform introduction and Quick Install' });
   await screenshot.scrollIntoViewIfNeeded();
   await expect(screenshot).toBeVisible();
   expect(await screenshot.evaluate(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0)).toBe(true);

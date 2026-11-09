@@ -7,7 +7,7 @@ test('configuration UI survives navigation and produces an importable signed bac
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Getting Started', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'How it works', exact: true })).toBeVisible();
   await page.getByRole('tablist', { name: 'Main navigation' }).getByRole('tab', { name: 'Wizard', exact: true }).click();
   await expect(page.getByText('System Bootstrapper Control Panel')).toBeVisible();
   await page.getByRole('tab', { name: 'Projects', exact: true }).click();

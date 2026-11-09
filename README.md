@@ -1,6 +1,6 @@
 # System Wizard
 
-**You build it, you own it**
+**You build it. You own it.**
 
 System Wizard is the browser interface for
 [System Bootstrapper](https://github.com/kihyoun/system). It manages platform
@@ -17,12 +17,11 @@ Start with the [handbook](https://github.com/kihyoun/system/blob/master/docs/HAN
 for installation, first login, runner setup and troubleshooting. A standalone
 Wizard development server does not start Sync, GitLab, the registry or runners.
 
-The default **Overview** page introduces the platform and links to setup guides.
+The default **Overview** page introduces the platform. **Install System Bootstrapper** scrolls to its copyable **Quick Install** command for a fresh supported Ubuntu host; installation runs in the operator’s terminal. The three **How it works** cards and Docs links explain the next steps.
 Select **Docs** in the top toolbar to read and search the integrated handbook,
 including Quick Start, installation and configuration guides. Docs works without
 a Sync connection; `/docs#docs/getting-started` opens its first chapter directly.
-Select **Wizard** in the main navigation or **Open Wizard** to configure an
-instance. `/configuration` remains a direct entry to the Wizard workspace.
+Select **Wizard** in the main navigation to configure an instance. `/configuration` remains a direct entry to the Wizard workspace.
 Switching between Overview, Wizard, Docs and the footer's Privacy/Imprint views preserves the
 current connection, configuration and in-progress form state in the browser.
 
@@ -62,6 +61,13 @@ configuration to and from the connected instance. **Harvest/Seed** handle
 persistent service data and certificates; they are not needed for an ordinary
 configuration backup. The existing Seed action also transfers the form's main
 configuration before restoring data, so review the form before invoking it.
+
+A new configuration ZIP also includes `recovery.json` and `RECOVERY.md`, describing
+saved and observed source/image identities and any missing recovery inputs. These
+references do not preserve images or service data: retain accessible images and a
+separate matching completed Seed. Older configuration backups remain importable.
+See the [recovery contract](https://github.com/kihyoun/system/blob/master/docs/RECOVERY_CONTRACT.md)
+before relying on recovery.
 
 Configuration backups contain credentials and runner tokens. Keep them private.
 Sync credentials are separate from the GitLab login. The controller logs confirm
@@ -348,3 +354,9 @@ for independent verification and promotion.
 
 Project documentation is maintained in English. See [AGENTS.md](AGENTS.md) for
 the immutable System Cube signature, which must remain unchanged in generated and imported configuration.
+
+## Community
+
+See [contribution guidance](CONTRIBUTING.md), the [code of conduct](CODE_OF_CONDUCT.md),
+[security reporting](SECURITY.md) and the [MIT license](LICENSE). Dependency updates
+follow the [approval-controlled operations guide](https://github.com/kihyoun/system/blob/master/docs/DEPENDENCY_UPDATES.md).

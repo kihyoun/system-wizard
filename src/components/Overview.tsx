@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import QuickInstall from './QuickInstall';
 import { useI18n } from '../i18n';
 import { Box, Button, Grid, Link, Paper, Stack, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -25,7 +27,14 @@ const steps = [
     }
 ];
 
-export default function Overview({ onOpenWizard }: { onOpenWizard: () => void }) {
+export default function Overview() {
+    const quickInstall = useRef<HTMLElement>(null);
+    const showInstall = () => {
+        const section = quickInstall.current;
+        if (!section) return;
+        section.focus({ preventScroll: true });
+        section.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    };
     const { t } = useI18n();
     return (<Stack spacing={3} sx={{ maxWidth: 1200, mx: 'auto' }}>
       <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 5 }, borderTop: 4, borderColor: 'secondary.main' }}>
@@ -33,12 +42,12 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
         <Grid size={{ xs: 12, md: 7 }}>
         <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '0.14em' }}>{t("System Bootstrapper · Open source")}</Typography>
         <Typography component="h1" variant="h3" sx={{ mt: 1, mb: 2, fontWeight: 700, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: '-0.04em' }}>
-          You build it, you own it
+          You build it. You own it.
         </Typography>
         <Typography variant="h6" component="p" sx={{ mb: 2, maxWidth: 760 }}>{t("Build your web projects. Bring your development tools together.")}</Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 850, lineHeight: 1.75 }}>{t("System Bootstrapper brings GitLab, runners, a container registry and deployment routing onto infrastructure you control. This Wizard helps you configure that platform and turn an application idea into a project with source, CI and environments.")}</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 850, lineHeight: 1.75 }}>{t("System Bootstrapper brings your development platform to your own server. Build, test and publish your web projects — with your tools and data under your control.")}</Typography>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3, alignItems: { sm: 'center' } }}>
-          <Button variant="contained" color="secondary" disableElevation endIcon={<ArrowForwardIcon />} onClick={onOpenWizard}>{t("Open Wizard")}</Button>
+          <Button variant="contained" color="secondary" disableElevation endIcon={<ArrowForwardIcon />} onClick={showInstall}>{t("Install System Bootstrapper")}</Button>
           <Button component="a" href="#docs/getting-started" startIcon={<MenuBookIcon />} sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Read the handbook")}</Button>
         </Stack>
         </Grid>
@@ -63,7 +72,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
       </Paper>
 
       <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 } }} aria-labelledby="overview-steps-heading">
-        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>{t("Getting Started")}</Typography>
+        <Typography component="h2" variant="h5" id="overview-steps-heading" sx={{ mb: 3 }}>{t("How it works")}</Typography>
         <Grid component="ol" container spacing={3} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {steps.map((step, index) => (<Grid component="li" key={step.title} size={{ xs: 12, md: 4 }}>
             <Box aria-hidden="true" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1 }}>0{index + 1}</Box>
@@ -73,6 +82,8 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
           </Grid>))}
         </Grid>
       </Paper>
+
+      <QuickInstall sectionRef={quickInstall} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 7 }}>
@@ -90,7 +101,7 @@ export default function Overview({ onOpenWizard }: { onOpenWizard: () => void })
           <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 }, height: '100%' }} aria-labelledby="overview-vision-heading">
             <Typography component="h2" variant="h5" id="overview-vision-heading" sx={{ mb: 2 }}>{t("Built to evolve")}</Typography>
             <Typography color="text.secondary" sx={{ lineHeight: 1.75, mb: 2 }}>{t("The long-term goal is a platform that can build and validate its next generation. Today’s explicit Wizard source, build and promotion steps provide a foundation; complete autonomous renewal remains a vision.")}</Typography>
-            <Link href={`${documentation}README.md`} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Explore the project and architecture")}</Link>
+            <Link href={`${documentation}docs/ARCHITECTURE.md`} underline="hover" sx={{ color: theme => theme.palette.mode === 'dark' ? 'primary.light' : 'primary.dark' }}>{t("Explore the project and architecture")}</Link>
           </Paper>
         </Grid>
       </Grid>
