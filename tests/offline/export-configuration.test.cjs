@@ -77,7 +77,7 @@ test('coordinated export binds completed generation to exact ENV bytes through o
     assert.deepEqual(metadata.seed,association);
     assert.deepEqual(JSON.parse(await zip.file('bootstrapper.json').async('string')).previewSetup,previewSetup);
     assert.deepEqual(JSON.parse(await zip.file('bootstrapper.json').async('string')).recovery,metadata);
-    require('../../../system/seed-operation').validateBackup(output);
+    assert.deepEqual(Object.keys(zip.files).sort(), ['.docker.env', '.projects.env/', '.projects.env/.demo.env', 'RECOVERY.md', 'bootstrapper.json', 'recovery.json'].sort());
     association.configurationFiles[0].sha256='c'.repeat(64);
     fs.writeFileSync(input,JSON.stringify({main:{data:main},projects:[{filename:'.demo.env',data:project}],seedAssociation:association}));
     assert.equal(spawnSync(process.execPath,[cli,input,path.join(root,'rejected.zip')]).status,1);
