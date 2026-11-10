@@ -8,12 +8,9 @@ for (const width of [900, 1024, 1440]) {
       const header = page.getByRole('banner');
       const theme = header.getByRole('switch');
       await header.locator(`#main-tab-${view}`).click();
-      // Wait for the persistent drawer's width transition before measuring.
-      await expect.poll(() => header.locator('nav').evaluate(element => {
-        const nav = element.getBoundingClientRect();
-        const bar = element.closest('header')!.getBoundingClientRect();
-        return Math.abs((nav.left + nav.right) / 2 - (bar.left + bar.right) / 2);
-      })).toBeLessThan(2);
+      // Navigation stays centered during the drawer transition, so wait for the final header width.
+      const drawerWidth = view === 'overview' ? 0 : (await page.locator(view === 'docs' ? '#docs-drawer' : '#server-drawer').boundingBox())!.width;
+      await expect.poll(async () => (await header.boundingBox())!.width).toBeCloseTo(width - drawerWidth, 0);
       for (const dark of [false, true]) {
         await theme.setChecked(dark);
         await header.locator('button[lang="en"]').click();
