@@ -3,8 +3,10 @@
 `candidate.js` führt ein ausdrückliches Smoke- oder vollständiges Plattformszenario mit privatem Daemon aus.
 Es ist vom isolierten Manifest getrennt; Offline-Transporte prüfen seinen
 Lebenszyklusvertrag, ohne Docker zu starten. Die erforderliche Root-CI-Plattformschranke
-führt das vollständige Szenario aus, einschließlich Konfigurations-plus-Seed-Wiederherstellung, ungecachter
-Beschaffung privater Wizard-Images und lokaler ACME-Erneuerung.
+führt das vollständige Szenario aus, einschließlich nativer geführter
+Quelleinrichtung/Übernahme und Review-/Beta-Lebenszyklen,
+Konfigurations-plus-Seed-Wiederherstellung, ungecachter Beschaffung privater
+Wizard-Images und lokaler ACME-Erneuerung.
 
 ## Grenze und Voraussetzungen
 
@@ -17,7 +19,7 @@ Loopback des CI-Containers. Auf dem äußeren Daemon wird kein Port veröffentli
 des zugehörigen Kandidaten über dessen privates Bridge-Gateway und privates NGINX.
 
 Der Treiber erstellt einen zufällig benannten, mit Eigentumslabel versehenen **privilegierten DinD**-
-Container, ein internes Netzwerk und ein Docker-Datenvolume. DinD hat seinen eigenen Unix-
+Container, ein zugehöriges Netzwerk und ein Docker-Datenvolume. DinD hat seinen eigenen Unix-
 Socket; der Host-Socket wird niemals hinein eingebunden. Feste `system_*`-Namen, innere
 Docker-Netzwerke, Ports 80/8071/5050 und Dienst-Volumes bleiben auf diesen Daemon beschränkt.
 Der innere Bootstrapper erhält diesen **inneren** Socket, weil der normale System-
@@ -30,9 +32,33 @@ Ressourcen-Lease des Koordinators und vereinbaren Sie ein Testfenster. Der DinD-
 auf vier CPUs und 12 GiB RAM begrenzt. Planen Sie zusätzliche Reserve auf dem äußeren
 Host, für Image-Archive, Image-Entpackung und GitLabs Datenvolume ein; Dockers Volume
 erzwingt keine Speicherplatzquote. Speicherplatz-/RAM-Prüfungen und eine Lease müssen außerhalb
-dieses Treibers vor dessen Aufruf erfolgen. Ein internes äußeres Netzwerk verhindert externe
-Abhängigkeitsdownloads; Dienst-Images müssen vorgeladen sein. Das vollständige Runner-/Registry-
-Szenario benötigt außerdem seine deklarierten Helfer- und Build-Image-Parameter.
+dieses Treibers vor dessen Aufruf erfolgen. Smoke-Szenarien verwenden ein internes
+äußeres Netzwerk. Das vollständige geführte Szenario erlaubt ausdrücklich ausgehenden
+Zugriff auf seiner eigenen Bridge für den öffentlichen HTTPS-Git-Ursprung sowie native
+Paket-, Browser- und Image-Downloads; es veröffentlicht weiterhin keine äußeren Ports.
+Dienst-Images bleiben deklariert und vorgeladen. Das vollständige Runner-/Registry-
+Szenario benötigt außerdem seine deklarierten Helfer- und Build-Eingaben.
+
+Das geführte Szenario verwendet den öffentlichen Ursprung des festgelegten
+Submoduls aus `.gitmodules`; ein Betreiber-Fork kann `SYSTEM_TEST_WIZARD_ORIGIN`
+auf seine öffentliche HTTPS-Git-URL setzen. Die nativen Prüfungen öffentlicher
+Adressen und freigegebener Erzeuger bleiben aktiv. Ein geänderter Upstream-Erzeuger
+ist eine fehlerhafte Eingabe und keine Erlaubnis, andere CI in das Quellprojekt zu
+kopieren. Private Ursprünge werden für diese Importabnahme nicht unterstützt.
+GitLab, Sync, Wizard, Review und Beta verwenden TLS für exakte Hosts über die
+vorhandene lokale ACME-Stelle. Die Registry bleibt der vorhandene private
+HTTP-Endpunkt auf Port 5050; dieses Szenario behauptet keine HTTPS-Registry-Prüfung.
+
+Die vollständige Prüfschranke führt die geführte Einrichtung einmal auf ihrer
+frischen ursprünglichen Plattform aus und nutzt dann deren normale Pipelines
+für den importierten Standardbranch, den Merge-Request und den Standardbranch
+nach dem Merge. Sie startet die echten manuellen Review-/Beta-Deploy- und Stop-Jobs
+und erhält die ursprüngliche Hauptkonfiguration und das laufende Wizard-Image
+während der gesamten Einrichtung. Die Veröffentlichungsschranke verlangt diese
+nativen Phasen und Identitäten; bestandene Offline-Testfälle können sie nicht
+ersetzen. Der vorhandene Kandidatenjob und die Gesamtfrist bleiben unverändert.
+Die Phasenlaufzeiten enthalten die neue Arbeit, und eine Zeitüberschreitung bleibt
+ein Fehler statt eines Grundes, die Frist automatisch zu verlängern.
 
 Verwerfbare GitLab-Instanzen verwenden `puma['worker_processes'] = 2` über die
 offizielle Umgebungsvariable `GITLAB_OMNIBUS_CONFIG`. Verschachtelte Container können
@@ -291,14 +317,19 @@ Ohne das ausdrückliche Szenario `privateWizardRecovery` scheitert eine wiederhe
 Registry-Festlegung mit `wizard-pin-recovery-artifact-not-declared`; sie wird niemals
 still auf das lokale Test-Image geändert.
 
-Das private Image-Szenario veröffentlicht über einen echten CI-Job auf einem separaten Branch des verwalteten Wizard-
-Projekts ein Derivat des deklarierten aus Quellcode gebauten
-Wizard-Images. Eine eindeutige Markerschicht unterscheidet seine Image-ID von jedem vorbereiteten
-Archiv. Die tatsächlich exportierte Konfiguration legt diesen per CI veröffentlichten Registry-Digest fest.
+Im vollständigen geführten Szenario verwendet die Wiederherstellung privater Images
+das tatsächliche Wizard-Artefakt aus der geprüften Standardbranch-Pipeline nach dem
+Merge erneut. Sie prüft unabhängig den kanonischen Quellbeleg, native Pflichtjobs
+und Artefakte, Registry-Digest, Image-ID und Quelllabel. Ein zusätzlicher Build für
+ein privates Image ist nicht nötig. Sein Image darf in keinem vorbereiteten Archiv
+vorhanden sein. Der nicht geführte Testfall veröffentlicht stattdessen ein Derivat
+über seinen bestehenden eigenen CI-Branch und eine eindeutige Markerschicht.
+Die tatsächlich exportierte Konfiguration legt den per CI veröffentlichten Registry-Digest fest.
 Der neue Daemon darf vor dem Start weder dessen Digest-Referenz noch dessen private Image-ID
 besitzen. Nach der Seed-Wiederherstellung beschafft der Starthelfer aus neuem Quellcode
 das exakte Image mit einem temporären projektbegrenzten `read_registry`-Deploy-Token.
-Der Adapter prüft Image-ID und Marker des laufenden Wizards und bestätigt, dass
+Der Adapter prüft die exakte Image-ID und Quellrevision des laufenden Wizards
+(oder den Marker des älteren Testfalls) und bestätigt, dass
 kein aktives reserviertes Wiederherstellungs-Token verbleibt. Erst dann darf der Bericht
 `privateWizardPinVerified: true` melden. Die Testumgebung liefert weder eine alte Docker-Anmeldung
 noch ein privates Image-Archiv oder Ersatz-Image. Dieses Szenario erfordert tatsächlich erfolgreiche

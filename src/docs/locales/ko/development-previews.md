@@ -62,10 +62,50 @@ Review는 기존 단일 병합 요청 임대를 사용하는 공유 호스트 �
 네이티브 [소스 기준 검증기](../project-bootstrap/wizard-source-primary/README.md)가
 정확한 커밋, 파이프라인, 승인된 생성 파일 및 다이제스트를 다시 확인합니다.
 
-초기 설정은 수정되지 않은 관리형 등록과 보존된 승인 공개 컨트롤러/Wizard 설치 기록만 수락합니다.
+초기 설정에는 수정되지 않은 관리형 등록과 보존된 설치 식별 정보가 필요합니다.
+공개 설치는 승인된 컨트롤러/Wizard 릴리스 기록을 보존합니다.
 이전 설정을 보관하고 주 설정이나 운영 이미지 선택을 변경하지 않은 채 비공개 미리보기를 연결합니다.
 기존 관리형 소스 이력은 네이티브 연결/업그레이드 경로를 사용해야 합니다.
 운영 환경 승격은 별도로 유지됩니다.
+
+증거 조회는 각 검증 단계 안에서 크기가 제한된 묶음으로 처리됩니다.
+프로젝트, 파이프라인, 아티팩트 및 생성 파일에 대한 동일한 검사를 유지하며,
+계획을 적용할 때 캐시된 미리보기를 신뢰하는 대신 변경 가능한 증거를 새로 가져옵니다.
+이렇게 하면 Rails를 개별적으로 시작하는 횟수가 줄어듭니다.
+다운로드, 네이티브 빌드 및 브라우저 검사는 여전히 실제 실행 시간이 필요하며,
+설정에 걸리는 시간을 고정된 값으로 약속하지 않습니다.
+
+### 소스에서 빌드한 설치의 식별 정보 보존
+
+소스에서 빌드한 설치는 승인된 공개 릴리스라고 주장하지 않고도 실제 실행 중인 이미지 쌍을 보존할 수 있습니다.
+설정된 두 이미지 선택자는 모두 변경 불가능한 `sha256:` 이미지 ID여야 합니다.
+컨트롤러와 Wizard에는 서로 일치하는 `org.system-bootstrapper.test-job` 및
+`org.system-bootstrapper.source-tree` 라벨, 각자의 `org.opencontainers.image.revision` 라벨,
+그리고 Wizard에는 일치하는 `org.system-bootstrapper.source-revision` 라벨이 있어야 합니다.
+패키지에 포함된 Wizard 스냅샷은 제공된 Wizard 리비전과 일치해야 합니다.
+네이티브 System 후보 준비 절차는 커밋된 체크아웃에서 이 쌍의 출처 증거를 생성합니다.
+
+예상 이미지 ID, System 커밋/트리 및 Wizard gitlink는 검토된 소스/빌드 기록에서 독립적으로 확보하세요.
+커밋된 컨트롤러 진입점을 통해 이미 실행 중인 쌍을 기록하세요.
+
+```sh
+docker exec system_bootstrapper_1 node /system/bootstrapper/record-source-installation.js \
+  --controller sha256:REPLACE_WITH_CONTROLLER_IMAGE_ID \
+  --wizard sha256:REPLACE_WITH_WIZARD_IMAGE_ID \
+  --source-revision REPLACE_WITH_SYSTEM_COMMIT \
+  --source-tree REPLACE_WITH_SYSTEM_TREE \
+  --wizard-revision REPLACE_WITH_WIZARD_GITLINK
+```
+
+이 명령은 실제 실행 중인 컨테이너와 정확한 이미지 출처를 검사한 뒤,
+root 소유의 0600 권한 파일 `/state/.source-installation.json`을 생성합니다.
+이미지를 설치, 시작, 승격 또는 승인하거나, 주 설정을 변경하거나,
+릴리스 기록을 생성하거나, 테스트가 통과했다고 주장하지 않습니다.
+이후 설정에서는 실행 중인 식별 정보를 다시 확인합니다.
+기존 공개 릴리스 선택이 잘못되었거나 불완전하면 이 소스 기록으로 대체할 수 없습니다.
+복구 후 새로운 초기 설정을 시작하기 전에 소스 출처를 보존하거나,
+독립적으로 보존한 빌드 입력값을 기준으로 명시적으로 다시 기록하세요.
+설정 메타데이터만으로는 이 작업을 허가할 수 없습니다.
 
 ## 배포, 중지 및 System 후보
 

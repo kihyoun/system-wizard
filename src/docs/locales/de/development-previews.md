@@ -76,12 +76,56 @@ abweichendes unveränderliches Image können keine akzeptierte Bindung erzeugen.
 Die native [Source-Primary-Prüfung](../project-bootstrap/wizard-source-primary/README.md)
 prüft exakten Commit, Pipeline, freigegebene Erzeugerdateien und Digest erneut.
 
-Die Ersteinrichtung akzeptiert nur eine unveränderte verwaltete Registrierung
-und den erhaltenen Installationsbeleg für das akzeptierte öffentliche
-Controller-/Wizard-Paar. Sie archiviert die alte Konfiguration und bindet private
-Vorschauen, ohne die Hauptkonfiguration oder die Production-Imageauswahl zu
-ändern. Vorhandene verwaltete Quellhistorie muss ihren nativen Übernahme- oder
-Upgrade-Pfad verwenden. Die Freigabe für Production bleibt separat.
+Die Ersteinrichtung erfordert eine unveränderte verwaltete Registrierung und eine
+aufbewahrte Installationsidentität. Eine öffentliche Installation bewahrt den
+akzeptierten Release-Beleg für das Controller-/Wizard-Paar auf. Sie archiviert die
+alte Konfiguration und bindet private Vorschauen, ohne die Hauptkonfiguration oder
+die Production-Imageauswahl zu ändern. Vorhandene verwaltete Quellhistorie muss ihren
+nativen Übernahme- oder Upgrade-Pfad verwenden. Die Freigabe für Production bleibt separat.
+
+Nachweisabfragen werden innerhalb jeder Prüfphase in begrenzten Gruppen gebündelt.
+Dabei bleiben dieselben Projekt-, Pipeline-, Artefakt- und Erzeugerprüfungen erhalten;
+das Anwenden eines Plans beschafft neue veränderliche Nachweise, statt einer
+zwischengespeicherten Vorschau zu vertrauen. Dadurch sind weniger einzelne
+Rails-Starts nötig. Downloads, native Builds und Browserprüfungen benötigen weiterhin
+ihre tatsächliche Ausführungszeit; eine feste Einrichtungsdauer wird nicht zugesagt.
+
+### Identität einer aus Quellcode gebauten Installation aufbewahren
+
+Eine aus Quellcode gebaute Installation kann ihr tatsächlich laufendes Image-Paar
+aufbewahren, ohne damit ein akzeptiertes öffentliches Release zu behaupten.
+Beide konfigurierten Image-Auswahlen müssen unveränderliche `sha256:`-Image-IDs sein.
+Controller und Wizard müssen übereinstimmende Labels
+`org.system-bootstrapper.test-job` und `org.system-bootstrapper.source-tree`,
+ihre jeweiligen Labels `org.opencontainers.image.revision` und beim Wizard das
+passende `org.system-bootstrapper.source-revision` tragen. Der paketierte
+Wizard-Snapshot muss zur angegebenen Wizard-Revision passen. Die native
+System-Kandidatenvorbereitung erzeugt diese zusammengehörigen Herkunftsnachweise
+aus dem eingecheckten Quellstand.
+
+Entnehmen Sie die erwarteten Image-IDs, den System-Commit und -Tree sowie den
+Wizard-Gitlink unabhängig den geprüften Quell-/Build-Aufzeichnungen. Erfassen Sie
+das bereits laufende Paar über den eingecheckten Controller-Einstiegspunkt:
+
+```sh
+docker exec system_bootstrapper_1 node /system/bootstrapper/record-source-installation.js \
+  --controller sha256:REPLACE_WITH_CONTROLLER_IMAGE_ID \
+  --wizard sha256:REPLACE_WITH_WIZARD_IMAGE_ID \
+  --source-revision REPLACE_WITH_SYSTEM_COMMIT \
+  --source-tree REPLACE_WITH_SYSTEM_TREE \
+  --wizard-revision REPLACE_WITH_WIZARD_GITLINK
+```
+
+Der Befehl prüft die tatsächlich laufenden Container und die exakte Image-Herkunft
+und erstellt dann die Root gehörende Datei `/state/.source-installation.json` mit
+Modus 0600. Er installiert, startet, befördert oder akzeptiert keine Images,
+ändert keine Hauptkonfiguration, erstellt keinen Release-Beleg und behauptet
+keine bestandenen Tests. Die spätere Einrichtung prüft die laufende Identität erneut.
+Eine vorhandene ungültige oder unvollständige öffentliche Release-Auswahl darf
+nicht auf diesen Quelldatensatz zurückfallen. Bewahren Sie nach einer
+Wiederherstellung die Quellherkunft auf oder erfassen Sie sie ausdrücklich erneut
+anhand unabhängig aufbewahrter Build-Eingaben, bevor Sie eine neue Ersteinrichtung
+starten; Konfigurationsmetadaten allein berechtigen nicht dazu.
 
 ## Bereitstellen, stoppen und System-Kandidaten
 
