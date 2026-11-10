@@ -1,5 +1,40 @@
 import {expect, test} from '@playwright/test';
 
+for (const width of [900, 1024, 1440]) {
+  for (const view of ['overview', 'wizard', 'docs']) {
+    test(`desktop language and theme controls stay on one row at ${width}px in ${view}`, async ({page}) => {
+      await page.setViewportSize({width, height: 1000});
+      await page.goto('/');
+      const header = page.getByRole('banner');
+      const theme = header.getByRole('switch');
+      await header.locator(`#main-tab-${view}`).click();
+      // Wait for the persistent drawer's width transition before measuring.
+      await expect.poll(() => header.locator('nav').evaluate(element => {
+        const nav = element.getBoundingClientRect();
+        const bar = element.closest('header')!.getBoundingClientRect();
+        return Math.abs((nav.left + nav.right) / 2 - (bar.left + bar.right) / 2);
+      })).toBeLessThan(2);
+      for (const dark of [false, true]) {
+        await theme.setChecked(dark);
+        await header.locator('button[lang="en"]').click();
+        const englishHeight = (await header.boundingBox())!.height;
+        for (const locale of ['ko', 'en'] as const) {
+          await header.locator(`button[lang="${locale}"]`).click();
+          await expect(page.locator('html')).toHaveAttribute('lang', locale);
+          await expect(theme).toHaveAccessibleName(locale === 'ko' ? (dark ? '라이트 모드' : '다크 모드') : (dark ? 'Light' : 'Dark'));
+          await expect.poll(() => header.evaluate(element => {
+            const language = element.querySelector('[role="group"]')!.getBoundingClientRect();
+            const theme = element.querySelector('input[role="switch"]')!.closest('label')!.getBoundingClientRect();
+            return Math.abs((language.top + language.bottom) / 2 - (theme.top + theme.bottom) / 2);
+          })).toBeLessThan(2);
+          expect((await header.boundingBox())!.height).toBeCloseTo(englishHeight, 0);
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+        }
+      }
+    });
+  }
+}
+
 for (const width of [320, 390, 1024, 1440]) {
   test(`Korean navigation, language selection and Docs fit at ${width}px`, async ({page}) => {
     await page.setViewportSize({width, height: 1000});
