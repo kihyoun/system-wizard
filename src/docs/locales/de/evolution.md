@@ -102,11 +102,26 @@ und die beiden Digest-Referenzen und verwendet `bootstrapper/install-release.py`
 ihre gespeicherten Auswahlwerte und benötigen stattdessen das passende geprüfte
 Freigabe-/Migrationsverfahren.
 
-Für die deklarierte GitLab-Migration besitzt der Wegwerfkandidat ein gemeinsames
-Ausführungsbudget von 40 Minuten; der CI-Job hat einschließlich
-Image-Vorbereitung, Veröffentlichung und Bereinigung ein Zeitlimit von 45
-Minuten. Dies sind Obergrenzen und keine Vorhersage, dass jede Änderung so lange
-dauert. Reine Dokumentationsänderungen behalten ihren kurzen Pfad. Kein früherer
+Für die Kombination aus geführten Vorschauen und GitLab-Migration wählen
+`guidedPreviewAcceptance === true` und `gitlabUpgradeAcceptance === true` ein
+festes gemeinsames Ausführungsbudget von 75 Minuten. Ein Upgrade ohne geführte
+Vorschauen behält 60 Minuten; ACME ohne Upgrade behält 25 Minuten; normale
+Smoke-Tests behalten 20 Minuten. Der ursprüngliche Kandidat, der wiederhergestellte
+Kandidat, die ACME-Stelle und alle weiteren Ressourceneigentümer teilen die
+ursprüngliche absolute Frist. Weder eine neue Phase noch ein Hostwechsel setzt
+sie zurück; eine Zeitüberschreitung lässt die Abnahme ohne automatische Verlängerung scheitern.
+
+Der vollständige Plattform-CI-Job erlaubt ein 80-minütiges Runner-Skript, ein
+separates zweiminütiges `after_script` und ein Job-Limit von 85 Minuten für
+Vorbereitung, Ausführung, Veröffentlichung und Artefaktsammlung. Die Grenze von
+75 Minuten umfasst drei echte native Wizard-Pipelines für den importierten
+Standardbranch, den Merge Request und den gemergten Standardbranch mit jeweils
+vier erforderlichen Jobs sowie manuelles Review/Beta Deploy und Stop. Diese Grenze
+ist eine Obergrenze, keine Laufzeitgarantie. Der Kandidat bleibt auf 12 GiB RAM
+und vier CPUs begrenzt. Nur der einzelne verwaltete Docker-Runner der ursprünglichen
+geführten Plattform erlaubt zwei gleichzeitige Jobs mit jeweils höchstens 2 GiB
+RAM und einer CPU; alle verschachtelten Vorgänge teilen die Kandidatengrenze.
+Reine Dokumentationsänderungen behalten ihren kurzen Pfad. Kein früherer
 erfolgreicher Fixture- oder MR-Lauf ersetzt die erforderliche Abnahme des exakten
 gemergten Quellcodes, der freigegeben wird.
 

@@ -56,9 +56,21 @@ nach dem Merge. Sie startet die echten manuellen Review-/Beta-Deploy- und Stop-J
 und erhält die ursprüngliche Hauptkonfiguration und das laufende Wizard-Image
 während der gesamten Einrichtung. Die Veröffentlichungsschranke verlangt diese
 nativen Phasen und Identitäten; bestandene Offline-Testfälle können sie nicht
-ersetzen. Der vorhandene Kandidatenjob und die Gesamtfrist bleiben unverändert.
-Die Phasenlaufzeiten enthalten die neue Arbeit, und eine Zeitüberschreitung bleibt
-ein Fehler statt eines Grundes, die Frist automatisch zu verlängern.
+ersetzen. Diese Phasen teilen die unten beschriebene feste absolute Szenariofrist.
+Die Phasenlaufzeiten enthalten die Arbeit; eine Zeitüberschreitung lässt die
+Abnahme ohne automatische Verlängerung scheitern.
+
+Nur der einzelne verwaltete Docker-Runner der ursprünglichen geführten Testplattform
+erlaubt zwei gleichzeitige Jobs mit jeweils höchstens 2 GiB RAM und einer CPU.
+Dadurch kann die native Quellpipeline Browserprüfungen parallel zur Image-Auslieferung
+ausführen. Die Testumgebung lehnt widersprüchliche Runner-Einstellungen ab und erhält
+registrierte Identität, Endpunkte, öffentliches Vertrauen und Quell-CI-Bytes.
+Der bestehende Auslieferungs-Builder mit 4 GiB und zwei CPUs sowie der
+Verifier-Browser mit 1 GiB und einer CPU behalten ihre eigenen Grenzen; sämtliche
+verschachtelten Vorgänge teilen weiterhin die feste Kandidatengrenze von 12 GiB
+und vier CPUs. Dies sind Obergrenzen, keine Reservierungen. Nur der abschließende
+vollständige Plattform-CI-Lauf belegt Abnahme und tatsächliche Laufzeitverbesserungen;
+Offline-Verträge messen diese nicht.
 
 Verwerfbare GitLab-Instanzen verwenden `puma['worker_processes'] = 2` über die
 offizielle Umgebungsvariable `GITLAB_OMNIBUS_CONFIG`. Verschachtelte Container können
@@ -108,9 +120,12 @@ Beispielsweise hat eine Rolle diese Form:
 ```
 
 `readinessMilliseconds` ist optional: 1.000–1.200.000, Standard 1.200.000 pro Smoke-
-Bereitschaftsschranke. Der normale Lebenszyklus hat ein zwanzigminütiges Budget; vollständige ACME-
-Wiederherstellung teilt ein fünfundzwanzigminütiges Budget unter allen Eigentümern. Beide werden
-zwischen begrenzten Docker-/HTTP-Vorgängen geprüft. Jeder gestreamte Archivimport ist auf
+Bereitschaftsschranke. Normale Smoke-Tests haben ein zwanzigminütiges Budget;
+ACME ohne GitLab-Upgrade teilt ein fünfundzwanzigminütiges Budget unter allen
+Eigentümern. Ein GitLab-Upgrade ohne geführte Vorschauen hat sechzig Minuten.
+Nur `guidedPreviewAcceptance === true` und `gitlabUpgradeAcceptance === true`
+zusammen wählen fünfundsiebzig Minuten. Jedes Szenario verwendet eine absolute
+Frist, die zwischen begrenzten Docker-/HTTP-Vorgängen geprüft wird. Jeder gestreamte Archivimport ist auf
 zehn Minuten begrenzt;
 andere Docker-Vorgänge auf zwei Minuten und einzelne HTTP-Anfragen auf zehn
 Sekunden. Ein ausdrückliches Abgeben der Ereignisschleife vor jedem Docker-Vorgang liefert
@@ -210,9 +225,12 @@ müssen ausdrücklich an den zugehörigen privaten Daemon angepasst werden.
 bestehende Veröffentlichungsphase. Sein vertrauenswürdiger Node-24-/Alpine-Elternprozess installiert dieselben
 festgelegten CLI-Werkzeuge wie System, baut den vollständigen System-Kontext und den Wizard
 aus dem validierten festgelegten Snapshot und lädt die festgelegten Dienst-Images vor.
-Der Job wird mit einer GitLab-Ressourcengruppe serialisiert. Image-Vorbereitung hat ein
-separates begrenztes Budget; private Ausführung hat ein normales zwanzigminütiges Limit, erweitert auf ein gemeinsames
-fünfundzwanzigminütiges Limit für ACME-Wiederherstellung.
+Der Job wird mit einer GitLab-Ressourcengruppe serialisiert. Die Image-Vorbereitung
+hat ein separates begrenztes Budget. Die kombinierte Ausführung geführter Vorschauen
+und des GitLab-Upgrades hat ein festes gemeinsames Limit von fünfundsiebzig Minuten
+für ursprünglichen Host, wiederhergestellten Host, ACME-Stelle und weitere
+Ressourceneigentümer. Das Runner-Skript erlaubt achtzig Minuten, die separate
+Bereinigung zwei Minuten und der gesamte Job fünfundachtzig Minuten.
 Der Runner-Host benötigt zwölf GiB Kandidaten-RAM zusätzlich zu seiner bestehenden Plattform-/Job-
 Reserve und genügend freien Speicher für Image-Archive, Entpackung und GitLab-Zustand.
 
@@ -352,10 +370,13 @@ internen Docker-Bridge ohne veröffentlichten Port. Sie überstehen die Löschun
 Daemons. Jeder verwendet bestehendes Eigentumsjournal und geschützte Bereinigung
 mit höchstens einem Container/Netzwerk/Volume je Eigentümer. Ein kurzer Initialisierer läuft
 ohne Netzwerk und überschreibt im Image deklarierte Volumes mit tmpfs. Jeder Eigentümer
-erbt absolute Frist und Abbruch des ursprünglichen Kandidaten. Das erweiterte
-Szenario `acmeRenewalAcceptance: true` hat ein gemeinsames Lebenszyklus-
-budget von 1.500 Sekunden einschließlich beider Plattformhosts und dieser Testeigentümer. Normale
-Kandidaten behalten ihr Budget von 1.200 Sekunden; keine einzelne Phase setzt es zurück.
+erbt absolute Frist und Abbruch des ursprünglichen Kandidaten. Ein Szenario
+`acmeRenewalAcceptance: true` ohne GitLab-Upgrade hat ein gemeinsames
+Lebenszyklusbudget von 1.500 Sekunden einschließlich beider Plattformhosts und
+dieser Testeigentümer. GitLab-Upgrades verwenden das sechzigminütige Budget oder
+fünfundsiebzig Minuten, wenn geführte Vorschauen ebenfalls aktiviert sind.
+Normale Smoke-Tests behalten 1.200 Sekunden. Weder eine neue Phase noch ein
+Hostwechsel setzt die Frist zurück oder verlängert sie automatisch.
 Äußere Skript- und CI-Job-Limits müssen darüber hinaus Reserve für Vorbereitung, Veröffentlichung
 und unabhängige Bereinigung erhalten. Bereinigung nach erzwungenem Beenden
 muss schwere Plattformeigentümer vor diesen Testeigentümern entfernen.
@@ -423,15 +444,24 @@ Der äußere Beleg kopiert den begrenzten Migrationsnachweis; die detaillierten 
 phasen gehören zum Beleg des wiederhergestellten Kandidaten. Weder rohe private Checkpoints
 noch Konfiguration, Zugangsdaten oder Datenbankprotokolle werden jemals öffentliche CI-Artefakte.
 
-Das optionale Nachfolgerszenario teilt ein endliches Gesamt-Kandidatenbudget von 60 Minuten,
-einschließlich der vorherigen Kaltwiederherstellungsszenarien und beider Versions-
-übergänge. Native Upgrade- und Rollback-Bereitschaft erlauben jeweils 900 Sekunden innerhalb
+Das Nachfolgerszenario verwendet nur dann ein festes Gesamt-Kandidatenbudget von
+75 Minuten, wenn sowohl `guidedPreviewAcceptance === true` als auch
+`gitlabUpgradeAcceptance === true` gelten. Das Budget umfasst drei echte native
+Wizard-Push-/MR-/Push-Pipelines mit jeweils vier erforderlichen Jobs, manuelles
+Review/Beta Deploy und Stop, Kaltwiederherstellung und beide GitLab-Versionsübergänge.
+Es ist eine Obergrenze, keine Laufzeitgarantie. Ein Upgrade ohne geführte Vorschauen
+behält sein Budget von 60 Minuten. Ursprünglicher und wiederhergestellter Kandidat,
+ACME-Stelle und alle weiteren Ressourceneigentümer teilen die ursprüngliche absolute
+Frist; weder eine Phase noch ein Hostwechsel setzt sie zurück, und eine
+Zeitüberschreitung verlängert sie nicht automatisch. Native Upgrade- und
+Rollback-Bereitschaft erlauben jeweils 900 Sekunden innerhalb
 eines Aufruflimits von 1.200 Sekunden und derselben absoluten Kandidatenfrist. Bereitschaft
 verlangt weiterhin abgeschlossene Hintergrundmigrationen; ein erfolgreicher Migrationsbatch allein
 erfüllt diese Bedingung nicht. Das Szenario verwendet die bestehende serialisierte Ressourcen-
-gruppe und 12-GiB-Grenze des privaten Daemons; prüfen Sie die tatsächliche Host-Reserve vor dem
-Start. Der Plattformjob erlaubt ein 65-minütiges Skript und eine separate zweiminütige Bereinigung
-innerhalb eines 70-minütigen Job-Limits und lässt Zeit für Vorbereitung, Veröffentlichung und Artefakt-
+gruppe und Grenze des privaten Daemons von 12 GiB und vier CPUs; prüfen Sie vor
+dem Start die tatsächliche Host-Reserve. Der Plattformjob erlaubt ein 80-minütiges
+Skript und eine separate zweiminütige Bereinigung innerhalb eines 85-minütigen
+Job-Limits und lässt Zeit für Vorbereitung, Veröffentlichung und Artefakt-
 sammlung. Normale Smoke- und reine ACME-Lebenszyklusbudgets bleiben unverändert. Ein
 erfolgreicher nachgebildeter Adaptervertrag ist keine erfolgreiche echte Migration; verwenden Sie die
 vollständige Plattform-CI-Schranke für diesen Nachweis.
