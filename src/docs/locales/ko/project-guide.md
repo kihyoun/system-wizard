@@ -42,6 +42,178 @@ Angular는 CLI 빌드를 사용합니다. 둘 다 고정된 의존성과 잠금 
 이후에도 유지됩니다. 일반 환경 편집은 구성/보내기 흐름을 사용합니다. 저장소 이름을 바꾸거나
 커밋된 CI를 자동으로 다시 작성하지 않습니다. 파이프라인 변경은 저장소에서 명시적으로 검토하세요.
 
+## 애플리케이션에 신뢰할 수 있는 HTTPS 호스트 이름 설정하기
+
+Wizard는 선택한 호스트, 프로토콜 및 인증서 경로를 저장하지만 인증서를 요청하지는 않습니다.
+환경 URL이나 성공적인 HTTP 배포만으로는 HTTPS 인증서 체인을 신뢰할 수 있는지,
+인증서가 해당 호스트를 포함하는지 입증할 수 없습니다. 플랫폼 인증서를 재사용하려면
+인증서의 주체 대체 이름에 실제로 애플리케이션 호스트 이름이 포함되어야 합니다.
+
+이 절차는 정확히 지정한 애플리케이션 호스트 하나에 별도의 Certbot 계보를 사용합니다.
+운영 환경, Beta 또는 Review 호스트를 추가하려면 반복하세요. 와일드카드 HTTPS에는
+운영자가 구성한 DNS-01 인증서가 필요합니다. HTTP-01로는 와일드카드 인증서를
+발급할 수 없습니다. 관리형 시스템 Wizard 환경에는 별도의
+[활성화 절차](../project-bootstrap/wizard-environments/README.md)가 있습니다.
+
+운영자는 다음 입력값과 사전 조건을 준비하세요.
+
+- 검토된 릴리스로 실행 중인 플랫폼, 네이티브 HTTP-01 경로 및 외부에서 접근 가능한
+  TCP 80/443 포트가 필요합니다. 진입 프록시는 이미 구성된 HTTP 호스트를 포함하여
+  선택한 호스트 이름에 대해 공유 챌린지 웹 루트를 제공해야 합니다.
+  이전 릴리스에는 이 HTTP 호스트 경로가 없을 수 있으므로 발급 전에 아래 챌린지
+  검사가 통과해야 합니다. 지원되는 릴리스 절차로 업그레이드하거나 요청이 기본 ACME
+  경로에 도달하는 새 미할당 호스트 이름을 정확히 지정하여 사용하세요.
+- 애플리케이션의 공개 A/AAAA 레코드는 의도한 호스트만 가리켜야 합니다.
+  두 주소 계열을 모두 확인하세요. 오래된 AAAA 레코드는 검증을 실패하게 할 수 있습니다.
+- `/etc/system-bootstrapper/persistence.env`의 기존 라이브 저장소 선택 정보와
+  [공개 HTTPS 설정](HANDBOOK.md#public-2-select-working-storage-and-install-certificate-integration)을
+  통해 설치한 호스트 통합이 필요합니다. 이 설정은 `/usr/local/sbin/system-certbot`,
+  인증서 배포 훅 및 `certbot.timer`를 설치합니다. 저장된 저장소 선택을 재사용하세요.
+  안내서의 신규 설치 예시로 대체하지 마세요. Certbot은 `/usr/bin/certbot`에 있는
+  배포판 패키지를 사용합니다.
+- 실제 ACME 연락처 이메일과 사용하지 않는 계보 이름이 필요합니다. 여기서는 정확한
+  호스트 이름을 계보 이름으로도 사용합니다. 선택 전에 `sudo system-certbot certificates`를
+  확인하세요. 다른 애플리케이션의 인증서 상태를 덮어쓰지 마세요.
+
+서버에서 다음 값을 자신의 값으로 바꾸세요.
+
+```bash
+APP_HOST='app.example.com'
+ACME_EMAIL='you@example.com'
+dig +short A "$APP_HOST"
+dig +short AAAA "$APP_HOST"
+sudo env APP_HOST="$APP_HOST" bash -c '
+  set -euo pipefail
+  source /etc/system-bootstrapper/persistence.env
+  install -d -m 0755 "$PERSISTENT_DIR/ssl/acme-http01/.well-known/acme-challenge"
+  printf "%s\n" bootstrapper-application-acme-check > "$PERSISTENT_DIR/ssl/acme-http01/.well-known/acme-challenge/$APP_HOST-check"
+  chmod 0644 "$PERSISTENT_DIR/ssl/acme-http01/.well-known/acme-challenge/$APP_HOST-check"
+'
+```
+
+서버 외부에서 같은 애플리케이션 호스트 이름을 사용하세요.
+
+```bash
+APP_HOST='app.example.com'
+curl --fail --silent --show-error --include \
+  "http://$APP_HOST/.well-known/acme-challenge/$APP_HOST-check"
+```
+
+리디렉션 없이 HTTP **200**과 정확한 `bootstrapper-application-acme-check` 본문이
+반환되어야 합니다. 애플리케이션 페이지, 404 또는 리디렉션이 반환되면 챌린지가 공유
+웹 루트에 도달하지 않는 것입니다. 인증서를 요청하기 전에 DNS, 방화벽, 릴리스 또는
+라우팅 설정을 해결하세요. 발급을 반복해서 시도하는 것은 라우팅 진단 방법이 아닙니다.
+기본 ACME 경로는 미할당 호스트 이름을 지원하므로 인증서 파일이 없는 새 HTTPS 환경을
+먼저 활성화할 필요는 없습니다.
+
+검사를 통과하면 위에서 설정한 값으로 서버에서 실행하세요.
+
+```bash
+sudo env APP_HOST="$APP_HOST" ACME_EMAIL="$ACME_EMAIL" bash -c '
+  set -euo pipefail
+  source /etc/system-bootstrapper/persistence.env
+  /usr/local/sbin/system-certbot certonly --webroot \
+    --webroot-path "$PERSISTENT_DIR/ssl/acme-http01" \
+    --non-interactive --agree-tos --email "$ACME_EMAIL" \
+    --cert-name "$APP_HOST" -d "$APP_HOST"
+  RENEWED_LINEAGE="/etc/letsencrypt/live/$APP_HOST" /usr/local/sbin/system-install-certificate
+  cmp "/etc/letsencrypt/live/$APP_HOST/fullchain.pem" "$PERSISTENT_DIR/ssl/live/$APP_HOST/fullchain.pem"
+  cmp "/etc/letsencrypt/live/$APP_HOST/privkey.pem" "$PERSISTENT_DIR/ssl/live/$APP_HOST/privkey.pem"
+'
+```
+
+이 명령은 운영 CA 인증서를 요청합니다. 설치된 훅은 계보를 라이브 저장소에 복사하고
+NGINX를 검증한 뒤 실행 중인 진입 프록시의 설정을 다시 불러옵니다. 설치 프로그램을
+명시적으로 호출하여 해당 배포를 직접 검증합니다. 웹 루트 발급은 프록시를 계속 실행하며
+향후 갱신을 위해 웹 루트 인증 방식을 저장합니다. NGINX를 중지하거나 NGINX가 사용 중인
+포트 80에서 standalone 발급을 사용하지 마세요. 인증서 작업이나 배포 작업이 실패하면
+애플리케이션의 HTTPS 설정을 변경하기 전에 해결하세요.
+
+Wizard에서 저장된 구성을 가져오고 비공개 구성 백업을 보관하세요. 프로젝트 프로비저닝이
+아직 대기 중이면 일반 구성 변경 전에 동일한 **수정 → 저장** 작업을 완료하거나 재개하세요.
+서버 소유의 영수증을 유지하세요. 복구를 우회하려고 프로젝트를 삭제/재생성하거나 키를
+변경하거나 영수증을 편집하지 마세요. 완료된 애플리케이션은 실제 계보 이름을 사용하여
+대상 환경을 다음 값으로 편집하세요.
+
+| 설정 | 예시 |
+| --- | --- |
+| 활성화할 호스트 | `app.example.com` |
+| 도메인 모드 | 정확한 호스트의 HTTPS, 모드 `2` |
+| SSL 인증서 | `/ssl/live/app.example.com/fullchain.pem` |
+| SSL 비공개 키 | `/ssl/live/app.example.com/privkey.pem` |
+
+환경 편집 내용을 저장하고 **보내기**로 구성을 적용하세요. 플랫폼의 `/ssl` 마운트 내부에서
+보이는 경로를 사용하고 호스트의 `/etc/letsencrypt` 경로는 사용하지 마세요. 일반적인 서비스
+재시작 흐름을 따르므로 중단을 계획하고 이후 다시 연결하여 가져오기를 수행하세요.
+이 작업은 인증서를 발급하거나 저장소 이름을 바꾸거나 CI에 커밋된 환경 URL을 다시
+작성하지 않습니다. 프로토콜이 바뀌었다면 애플리케이션 저장소에서 해당 URL을 검토하세요.
+
+일반 CA 신뢰 저장소를 사용하는 외부 클라이언트에서 선택한 호스트 이름과 애플리케이션
+동작을 검증하세요. 배포된 애플리케이션에서 실제 클라이언트 측 경로와 16바이트보다 큰
+기존 정적 파일을 선택하세요.
+
+```bash
+APP_HOST='app.example.com'
+APP_ROUTE='/your/spa/deep-link'
+APP_FILE='/path/to/existing-file.ext'
+curl --fail --silent --show-error --dump-header - --output /dev/null "https://$APP_HOST/"
+curl --fail --silent --show-error --dump-header - --output /dev/null "https://$APP_HOST$APP_ROUTE"
+curl --fail --silent --show-error --range 0-15 --dump-header - --output /dev/null \
+  "https://$APP_HOST$APP_FILE"
+```
+
+이 요청은 일반 TLS 검증을 통해 서버 인증서 체인과 URL 호스트 이름을 검증합니다.
+인증서 검증을 비활성화하지 마세요. `/`에는 예상 애플리케이션 응답이, SPA 경로에는
+HTML과 HTTP 200이, 정적 파일에는 HTTP 206과
+`Content-Range: bytes 0-15/<file-size>`가 반환되어야 합니다. 브라우저에서 HTTPS URL과
+딥 링크를 열어 애플리케이션과 자산이 올바르게 표시되는지 검증하세요. SPA가 아닌
+애플리케이션에서는 HTML 폴백을 기대하는 대신 문서에 명시된 경로 동작을 확인하세요.
+
+마지막으로 서버에서 이 계보의 갱신과 배포 훅을 시험하세요.
+
+```bash
+sudo env APP_HOST="$APP_HOST" bash -c '
+  set -euo pipefail
+  source /etc/system-bootstrapper/persistence.env
+  /usr/local/sbin/system-certbot renew --cert-name "$APP_HOST" --dry-run --run-deploy-hooks
+  RENEWED_LINEAGE="/etc/letsencrypt/live/$APP_HOST" /usr/local/sbin/system-install-certificate
+  cmp "/etc/letsencrypt/live/$APP_HOST/fullchain.pem" "$PERSISTENT_DIR/ssl/live/$APP_HOST/fullchain.pem"
+  cmp "/etc/letsencrypt/live/$APP_HOST/privkey.pem" "$PERSISTENT_DIR/ssl/live/$APP_HOST/privkey.pem"
+  docker exec system_web_1 nginx -t
+'
+```
+
+모의 갱신이 성공하고 배포 훅 실패가 없어야 합니다. Certbot은 갱신 종료 상태가 성공이어도
+훅 실패를 보고할 수 있으므로 출력을 확인하세요. 시험 실행은 스테이징 인증서가 아니라
+현재 사용 중인 신뢰할 수 있는 인증서를 배포합니다. 이후 외부 HTTPS 검사를 반복하고
+공유 타이머를 활성화/확인한 다음 이 확인 파일만 제거하세요.
+
+```bash
+sudo systemctl enable --now certbot.timer
+systemctl list-timers certbot.timer
+sudo env APP_HOST="$APP_HOST" bash -c '
+  set -euo pipefail
+  source /etc/system-bootstrapper/persistence.env
+  rm -- "$PERSISTENT_DIR/ssl/acme-http01/.well-known/acme-challenge/$APP_HOST-check"
+'
+```
+
+갱신을 위해 DNS와 공개 TCP 80을 계속 작동 상태로 유지하세요. 일반적인
+[Harvest/Seed 복구 흐름](RECOVERY_CONTRACT.md)을 통해 계정, 아카이브 및 갱신 구성을
+포함한 전체 Certbot 트리를 보존하세요. 잠금 오류가 발생하면 실행 중이거나 중단된
+인증서/Harvest 작업을 해결해야 합니다. 강제로 발급하려고 잠금을 삭제하지 마세요.
+배포 훅 진단과 복구 시 웹 루트 재연결은
+[갱신 안내](HANDBOOK.md#public-6-switch-unattended-renewal-to-the-running-proxy)를 참조하세요.
+
+### HTTP에서 HTTPS로 변경할 때의 브라우저 데이터
+
+`http://app.example.com`과 `https://app.example.com`은 서로 다른 브라우저 출처입니다.
+호스트 이름과 애플리케이션 이미지가 같아도 localStorage 데이터는 자동으로 이전되지
+않습니다. 환경을 변경하기 전에 애플리케이션의 내보내기/백업 기능으로 필요한 브라우저
+데이터를 보관한 뒤 HTTPS 출처의 애플리케이션에서 가져오세요. 내보내기/가져오기 기능이
+없다면 해당 애플리케이션의 복구 절차를 따르세요. 플랫폼 구성 백업이나 Harvest/Seed는
+사용자의 브라우저 localStorage를 복사하지 않습니다.
+
 ## 시스템 Wizard 프로젝트 관리하기
 
 구성된 Wizard가 활성화된 상태에서 시작하면 첫 번째 시스템 프로젝트로 등록됩니다.
