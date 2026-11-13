@@ -447,6 +447,117 @@ wird für die Digest-Prüfung normalisiert; private Registry-Namen und Ports
 bleiben exakt. Dieser Modus macht weder Image-Archive, private Registry-Nutzdaten
 noch die passenden Konfigurations-plus-Seed-Wiederherstellungsdaten entbehrlich.
 
+### Einen bereits gestoppten Controller reparieren
+
+Verwenden Sie `--repair-stopped-controller` nur, wenn ein Fehler beim Start des
+Controllers die gewöhnliche Aktualisierung aus einem funktionsfähigen Zustand
+verhindert. Dieser ausdrückliche Modus erfordert dasselbe freigegebene
+Controller-/Wizard-Paar sowie `--wizard` und `--release-metadata`. Er lockert
+weder die Prüfung von Quellcode, CI, Veröffentlichung, Images oder Speicher noch
+migriert er GitLab, wendet einen Seed an oder verwirft ausstehende Projektbelege.
+
+Der exakte kanonische Controller muss mit seinem ausgewählten Image und seinen
+Einbindungen noch vorhanden sein. Er muss regulär mit einem Fehlerstatus ungleich
+null und unter 128 beendet worden sein, ohne aktive PID oder Exec-Sitzungen,
+ohne OOM und mit der Neustartrichtlinie `no`. Ein nie gestarteter Controller,
+der beim Rollback dieses Modus im gestoppten Zustand erhalten wurde, wird
+ebenfalls akzeptiert. Laufende, pausierte, neu startende oder fehlende Container
+sowie Container mit unklarer Eigentumszuordnung werden abgelehnt. GitLab, der
+Eingangsproxy, der aktivierte Wizard-Container und alle ausgewählten
+Runner-Manager müssen weiterhin mit den erwarteten Images und Einbindungen
+laufen. Die öffentlichen GitLab- und Registry-Routen müssen funktionieren.
+Nach der Reparatur müssen der öffentliche Wizard und Sync betriebsbereit sein.
+
+Verwenden Sie diese Option nicht, um einen funktionsfähigen Controller zu beenden
+oder die Sperren eines noch nicht abgeschlossenen Vorgangs zu entfernen. Prüfen
+Sie zuerst den fehlgeschlagenen Controller:
+
+```sh
+sudo docker inspect --format '{{json .State}} {{json .HostConfig.RestartPolicy}} {{json .Config.Labels}}' system_bootstrapper_1
+```
+
+Bei einer bestätigten fehlgeschlagenen Neustartschleife mit PID null deaktivieren
+Sie ausschließlich seine Neustartrichtlinie und stoppen Sie den bereits
+beendeten Container. Beenden Sie keinen aktiven Prozess gewaltsam. Klären Sie
+alle aktiven oder unterbrochenen Speicher-, Zertifikats-, Image-Wiederherstellungs-
+oder Upgrade-Vorgänge über deren jeweiliges Wiederherstellungsverfahren, bevor
+Sie fortfahren.
+
+```sh
+sudo docker update --restart=no system_bootstrapper_1
+sudo docker stop --timeout 30 system_bootstrapper_1
+```
+
+Falls der Eingangsproxy fehlt, prüfen Sie die erzeugten Vorlagen und eingebundenen
+Fragmente, bevor Sie das Routing wiederherstellen. Sie können neben GitLab und
+Registry auch Anwendungsrouten und Aliase enthalten. Verlangen Sie vollständige
+erwartete Routen sowie korrekte bestehende Dienstadressen und Zertifikate.
+Verwenden Sie das bestehende Live-Verzeichnis und das bereits ausgewählte
+NGINX-Image; ersetzen Sie die folgenden Beispiele durch die überprüften Werte.
+Validieren Sie die Konfiguration, ohne einen Listener zu starten, und starten
+Sie anschließend ausschließlich `web` über die eingecheckte Compose-Definition:
+
+```sh
+sudo env PERSISTENT_DIR=/var/lib/system-bootstrapper/platform \
+  NGINX_IMAGE=nginx@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  docker --host unix:///var/run/docker.sock compose --compatibility \
+  --env-file /dev/null -p system -f system/docker-compose.yml \
+  run --rm --no-deps --pull never web nginx -t
+sudo env PERSISTENT_DIR=/var/lib/system-bootstrapper/platform \
+  NGINX_IMAGE=nginx@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  docker --host unix:///var/run/docker.sock compose --compatibility \
+  --env-file /dev/null -p system -f system/docker-compose.yml \
+  up --no-deps --no-build --pull never -d web
+```
+
+Verwenden Sie für diesen Routing-Schritt weder `up` für das gesamte Projekt noch
+`down`, die Entfernung verwaister Container oder eine neue Image-Auswahl. Prüfen
+Sie GitLab-HTTPS und die Authentifizierungs-Challenge der Registry mit normaler
+Zertifikatsvalidierung. Damit werden nur die tatsächlich in den geprüften
+Vorlagen vorhandenen Routen wiederhergestellt; eine abgeschlossene
+Plattformwiederherstellung ist damit nicht belegt.
+
+Führen Sie anschließend die Vorabprüfung der freigegebenen Reparatur aus deren
+sauberem, geprüftem Checkout aus:
+
+```sh
+sudo python3 bootstrapper/update-controller.py \
+  --repair-stopped-controller \
+  --persistence-env /etc/system-bootstrapper/persistence.env \
+  --release /root/accepted-release/release.json \
+  --evidence /root/accepted-release/candidate-results.json \
+  --controller docker.io/your-namespace/system@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  --wizard docker.io/your-namespace/wizard@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  --release-metadata /root/accepted-release/system-release-vX.Y.Z.json \
+  --gitlab-url https://gitlab.example.com \
+  --token-file /root/private-gitlab-api-token \
+  --checkpoint-dir /var/lib/system-bootstrapper/platform/recovery/controller-updates/repair-example \
+  --check-only
+```
+
+Die Vorabprüfung prüft die verbliebenen Verwaltungsdienste und weist nach, dass
+der alte Controller nicht schreiben kann, statt seine nicht verfügbare Sync-API
+nach einer leeren Warteschlange zu fragen. Dieselben Schutzprüfungen für
+Identitäten, Vorgänge und Konfiguration werden unter der gemeinsamen
+Wartungssperre erneut ausgeführt. Passive Belege ausstehender Projekte bleiben
+für die spätere Wiederaufnahme über **Abrufen → Bearbeiten → Speichern** unverändert.
+
+Wiederholen Sie den Aufruf ohne `--check-only` mit denselben freigegebenen
+Eingaben. Nur die beiden Release-Image-Selektoren und ihre Release-Metadaten
+ändern sich. Der Abschluss erfordert weiterhin die gewöhnliche vollständige
+Laufzeitprüfung: authentifiziertes Sync-Abrufen, öffentlicher Wizard und
+konfigurierte Aliase, Speicher-/Image-Identitäten, Zertifikatsintegration und
+erneuter Kontakt durch jeden aktuellen Runner-Manager.
+
+Die üblichen Befehle `status` und `rollback` verwenden den aufbewahrten
+Reparatur-Checkpoint. Ein Reparatur-Rollback stellt die exakte vorherige
+Konfiguration und die Release-Selektoren wieder her und erstellt den vorherigen
+Controller erneut, **ohne seinen fehlerhaften Code zu starten**. Er meldet einen
+Rollback im gestoppten Zustand, keine funktionsfähige Plattform; Wizard/Sync
+können weiterhin nicht verfügbar sein. GitLab-Daten werden niemals zurückgesetzt.
+Bewahren Sie den Checkpoint, die vorherigen Images und die passende
+Seed-/Konfigurationssicherung auf, bis das reparierte Release freigegeben ist.
+
 ## Einen getesteten Nachfolger-Controller freigeben
 
 `promote-controller.py` verarbeitet die eingefrorenen Artefakte `release.json` und

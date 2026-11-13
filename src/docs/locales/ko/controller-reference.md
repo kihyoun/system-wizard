@@ -407,6 +407,100 @@ sudo python3 bootstrapper/verify-runtime.py check --public-images \
 비공개 레지스트리 이름과 포트는 정확히 유지합니다. 이 모드가 이미지 아카이브, 비공개
 레지스트리 페이로드 또는 일치하는 구성과 Seed 복구 입력을 불필요하게 만들지는 않습니다.
 
+### 이미 중지된 컨트롤러 복구하기
+
+컨트롤러 시작 실패로 정상 상태에서의 일반 업데이트를 수행할 수 없을 때만
+`--repair-stopped-controller`를 사용하세요. 이 명시적 모드에도 동일한 승인된
+컨트롤러/Wizard 조합과 `--wizard`, `--release-metadata`가 필요합니다.
+소스, CI, 게시, 이미지 또는 저장소 검증을 완화하거나 GitLab을 마이그레이션하거나
+Seed를 적용하거나 대기 중인 프로젝트 영수증을 폐기하지 않습니다.
+
+정확한 정식 컨트롤러가 선택된 이미지 및 마운트와 함께 여전히 존재해야 합니다.
+컨트롤러는 128 미만의 0이 아닌 상태 코드로 정상 종료되었고, 실행 중인 PID나 exec 세션이
+없으며, OOM이 발생하지 않았고, 재시작 정책이 `no`여야 합니다. 이 모드의 중지 상태
+롤백으로 보존된, 한 번도 시작하지 않은 컨트롤러도 허용됩니다. 실행 중, 일시 정지,
+재시작 중, 누락 또는 소유권이 불명확한 컨테이너는 거부됩니다. GitLab, 진입 프록시,
+활성화된 Wizard 컨테이너 및 선택된 모든 러너 관리자는 예상 이미지와 마운트로 계속
+실행 중이어야 합니다. 공개 GitLab 및 레지스트리 경로도 작동해야 합니다.
+복구 후에는 공개 Wizard/Sync의 준비 상태가 확인되어야 합니다.
+
+정상 컨트롤러를 강제 종료하거나 미완료 작업의 잠금을 제거하려고 이 옵션을 사용하지
+마세요. 먼저 실패한 컨트롤러를 점검하세요.
+
+```sh
+sudo docker inspect --format '{{json .State}} {{json .HostConfig.RestartPolicy}} {{json .Config.Labels}}' system_bootstrapper_1
+```
+
+PID가 0인 실패한 재시작 반복 상태가 확인되면 해당 컨트롤러의 재시작 정책만
+비활성화하고 이미 종료된 컨테이너를 중지하세요. 실행 중인 프로세스를 강제 종료하지
+마세요. 계속하기 전에 실행 중이거나 중단된 저장소, 인증서, 이미지 복구 또는
+업그레이드 작업을 해당 작업의 복구 절차로 해결하세요.
+
+```sh
+sudo docker update --restart=no system_bootstrapper_1
+sudo docker stop --timeout 30 system_bootstrapper_1
+```
+
+진입 프록시가 없으면 라우팅을 복원하기 전에 생성된 템플릿과 포함된 구성 조각을
+점검하세요. 여기에는 GitLab과 레지스트리뿐 아니라 애플리케이션 경로와 별칭도
+포함될 수 있습니다. 예상 경로가 모두 있고 기존 서비스 주소와 인증서가 올바른지
+확인하세요. 기존 라이브 디렉터리와 이미 선택된 NGINX 이미지를 사용하고 아래 예시를
+검증된 값으로 바꾸세요. 수신 포트를 열지 않고 구성을 검증한 다음 커밋된 Compose
+정의를 통해 `web`만 시작하세요.
+
+```sh
+sudo env PERSISTENT_DIR=/var/lib/system-bootstrapper/platform \
+  NGINX_IMAGE=nginx@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  docker --host unix:///var/run/docker.sock compose --compatibility \
+  --env-file /dev/null -p system -f system/docker-compose.yml \
+  run --rm --no-deps --pull never web nginx -t
+sudo env PERSISTENT_DIR=/var/lib/system-bootstrapper/platform \
+  NGINX_IMAGE=nginx@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  docker --host unix:///var/run/docker.sock compose --compatibility \
+  --env-file /dev/null -p system -f system/docker-compose.yml \
+  up --no-deps --no-build --pull never -d web
+```
+
+이 라우팅 단계에서는 전체 프로젝트의 `up`, `down`, 고아 컨테이너 제거 또는 새 이미지
+선택을 사용하지 마세요. 일반 인증서 검증으로 GitLab HTTPS와 레지스트리 인증 챌린지를
+검증하세요. 이 작업은 점검한 템플릿에 실제로 있는 경로만 복원합니다.
+플랫폼 복원이 완료되었음을 입증하지는 않습니다.
+
+그런 다음 변경 사항이 없는 검토된 체크아웃에서 승인된 복구를 사전 점검하세요.
+
+```sh
+sudo python3 bootstrapper/update-controller.py \
+  --repair-stopped-controller \
+  --persistence-env /etc/system-bootstrapper/persistence.env \
+  --release /root/accepted-release/release.json \
+  --evidence /root/accepted-release/candidate-results.json \
+  --controller docker.io/your-namespace/system@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  --wizard docker.io/your-namespace/wizard@sha256:REPLACE_WITH_64_HEX_DIGEST \
+  --release-metadata /root/accepted-release/system-release-vX.Y.Z.json \
+  --gitlab-url https://gitlab.example.com \
+  --token-file /root/private-gitlab-api-token \
+  --checkpoint-dir /var/lib/system-bootstrapper/platform/recovery/controller-updates/repair-example \
+  --check-only
+```
+
+사전 점검은 여전히 실행 중인 관리 서비스를 확인하며, 사용할 수 없는 기존 컨트롤러의
+Sync API에 유휴 대기열 확인을 요청하는 대신 기존 컨트롤러가 쓰기를 수행할 수 없음을
+입증합니다. 공유 유지 관리 임대를 획득한 상태에서 동일한 식별 정보, 작업 및 구성
+보호 조건을 다시 확인합니다. 현재 작업이 없는 대기 중 프로젝트 영수증은 이후
+**가져오기 → 수정 → 저장** 복구를 위해 그대로 유지됩니다.
+
+동일한 승인 입력값으로 `--check-only`를 제외하고 반복하세요. 두 릴리스 이미지 선택자와
+해당 릴리스 메타데이터만 변경됩니다. 완료하려면 여전히 일반적인 전체 런타임 검증이
+필요합니다. 인증된 Sync 가져오기, 공개 Wizard 및 구성된 별칭, 저장소/이미지 식별 정보,
+인증서 통합과 현재 모든 러너 관리자의 새로운 접속을 검증해야 합니다.
+
+일반적인 `status` 및 `rollback` 명령은 보존된 복구 체크포인트를 사용합니다.
+복구 롤백은 정확한 이전 구성과 릴리스 선택자를 복원하며, 이전 컨트롤러를
+**실패한 코드를 시작하지 않고** 다시 생성합니다. 정상 플랫폼이 아니라 중지 상태
+롤백으로 보고되며 Wizard/Sync는 계속 사용할 수 없을 수 있습니다. GitLab 데이터는
+절대 이전 시점으로 되돌리지 않습니다. 복구한 릴리스가 승인될 때까지 체크포인트,
+이전 이미지 및 서로 일치하는 Seed/구성 백업을 보관하세요.
+
 ## 검증된 후속 컨트롤러 승격하기
 
 `promote-controller.py`는 같은 성공한 전체 후보 작업이 게시한 고정된 `release.json` 및
